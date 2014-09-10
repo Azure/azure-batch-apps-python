@@ -215,3 +215,5 @@ pip-log.txt
 .mr.developer.cfg
 BatchApplications.Client/pylintrc
 BatchApplications.Client/MANIFEST
+MANIFEST
+pylintrc
