@@ -56,8 +56,7 @@ class JobSubmission(object):
     instances = 0
 
     def __init__(self, client, job_name, **job_settings):
-        """New job submission:
-
+        """
         :Args:
             - client (:py:class:`.BatchAppsApi`): A configured and
                 authenticated API instance.
@@ -367,16 +366,15 @@ class SubmittedJob(object):
     tasks = []
 
     def __init__(self, client, job_id, job_name, job_type, **job_settings):
-        """Create submitted job reference:
-
-        Args:
+        """
+        :Args:
             - client (:class:`.BatchAppsApi`): A configured and authenticated
                 Batch Apps Management API instance.
             - job_id (str): The ID of the job.
             - job_name (str): The name of the job.
             - job_type (str): The application and type of the job.
 
-        Kwargs:
+        :Kwargs:
             - job_settings (dict): Additional job submission settings.
                 Will vary depending on what stage during processing the job
                 is at when the data is collected.
@@ -393,7 +391,7 @@ class SubmittedJob(object):
     def __str__(self):
         """String representation of job.
 
-        Returns:
+        :Returns:
             - The dict of the job object.
         """
         return str(self.__dict__)
@@ -846,11 +844,20 @@ class Task(object):
     on the status of that task.
     To update a task object, it must be done from the job parent,
     :meth:`.SubmittedJob.get_tasks()`.
+
+    :Attributes:
+        - status (str)
+        - completion_time (str)
+        - instance (str)
+        - deployment (str)
+        - cores (str)
+        - charge_time (str)
+        - non_charge_time (str)
+        - outputs (list)
     """
 
     def __init__(self, client, job_id, **props):
-        """Create an active task reference:
-
+        """
         :Args:
             - client (:class:`.BatchAppsApi`): A configured and authenticated
                 Batch Apps Management API instance.

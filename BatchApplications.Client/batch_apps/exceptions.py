@@ -19,81 +19,69 @@ import logging
 LOG = logging.getLogger('batch_apps')
 
 class AuthenticationException(Exception):
-    """AuthenticationException
-
+    """
     Error relating to missing or invalid credentials.
     """
     def __init__(self, *args):
-        """Raise AuthenticationException
-
+        """
         Log the exception args as ERROR
         """
         LOG.error("AuthenticationException: {0}".format(*args))
         super(AuthenticationException, self).__init__(*args)
 
 class InvalidConfigException(Exception):
-    """InvalidConfigException
-
+    """
     Error thrown by an incorrect/incomplete config file.
     """
     def __init__(self, *args):
-        """Raise InvalidConfigException
-
+        """
         Log the exception args as ERROR
         """
         LOG.error("InvalidConfigException: {0}".format(*args))
         super(InvalidConfigException, self).__init__(*args)
 
 class FileDownloadException(Exception):
-    """FileDownloadException
-
+    """
     Error thrown during downloading outputs or files.
     """
     def __init__(self, *args):
-        """Raise FileDownloadException
-
+        """
         Log the exception args as ERROR
         """
         LOG.error("FileDownloadException: {0}".format(*args))
         super(FileDownloadException, self).__init__(*args)
 
 class FileMissingException(Exception):
-    """FileMissingException
-
+    """
     Error occured during userfile creation and gathering where file does not
     exist locally.
     """
     def __init__(self, *args):
-        """Raise FileMissingException
-
+        """
         Log the exception args as ERROR
         """
         LOG.error("FileMissingException: {0}".format(*args))
         super(FileMissingException, self).__init__(*args)
 
 class FileInvalidException(Exception):
-    """FileInvalidException
-
+    """
     Error occurred during the manipulation of a userfile.
     """
     def __init__(self, *args):
-        """Raise FileInvalidException
-
+        """
         Log the exception args as ERROR
         """
         LOG.error("FileInvalidException: {0}".format(*args))
         super(FileInvalidException, self).__init__(*args)
 
 class RestCallException(Exception):
-    """RestCallException
-
+    """
     Gather all exceptions thrown by the rest_client and during REST
     call preparation and interpretation in :class:`.BatchAppsApi`.
     """
 
     def __init__(self, exp_type, message, excep, silent=False):
-        """Raise RestCallException
-
+        """
         Will mostly be used to wrap an exception thrown during a REST call,
         then returned to the user as the ``result`` of a :class:`.Response`
         object.

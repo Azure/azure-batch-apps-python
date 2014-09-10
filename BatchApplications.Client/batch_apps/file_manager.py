@@ -30,8 +30,7 @@ class FileManager(object):
     """
 
     def __init__(self, credentials, cfg=None):
-        """Create a file manager:
-
+        """
         :Args:
             - credentials (:class:`.Credentials`): The Users authentication.
 

@@ -294,6 +294,8 @@ class Credentials(object):
         :Args:
             - config (:class:`.Configuration`): A configuration object to
                 define the client session.
+            - client_id (str): The client ID for the application as defined
+                in the Configuration.
 
         :Kwargs:
             - token (dict): An authentication token, if not provided will try
@@ -393,7 +395,7 @@ class Credentials(object):
     def store_auth(self, token):
         """Store an access token for refreshing future sessions.
 
-        Args:
+        :Args:
             - token (dict): The access token to be stored.
         """
         self.token = token
@@ -409,7 +411,7 @@ class Credentials(object):
         A password will need to be supplied for future sessions. This will not
         delete or un-authenticate the current :class:`.Credentials` object.
 
-        Raises:
+        :Raises:
             :class:`OSError` if the stored data cannot be cleared.
         """
         try:

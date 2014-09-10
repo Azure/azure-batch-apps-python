@@ -43,8 +43,7 @@ class FileCollection(object):
     """
 
     def __init__(self, client, *files):
-        """Create a file collection:
-
+        """
         :Args:
             - client (:class:`BatchAppsApi`): An authorized Batch Apps
                 Management API REST client.
@@ -455,8 +454,7 @@ class UserFile(object):
     """
 
     def __init__(self, client, file_def):
-        """Create a UserFile:
-
+        """
         :Args:
             - client (:class:`BatchAppsApi`): Authenticated and configured
                 REST API client.

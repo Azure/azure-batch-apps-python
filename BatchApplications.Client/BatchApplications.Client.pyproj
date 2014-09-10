@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>a80bf501-741e-451b-90a9-2c62a282446c</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>batch_apps\test\__init__.py</StartupFile>
+    <StartupFile>package.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>

@@ -28,14 +28,13 @@ class Response(object):
     """
     A simple container object for the response of the REST call.
 
-    Attributes:
+    :Attributes:
         - success (bool)
         - result
     """
 
     def __init__(self, success, output=None):
-        """Create Response:
-
+        """
         :Args:
             - success (bool): Whether the REST call completed successfully and
                 returned an applicable result.
@@ -55,13 +54,12 @@ class BatchAppsApi(object):
     This class should directly reflect the full functionality of the API,
     without adding any additional layers of data processing.
 
-    Attributes:
+    :Attributes:
         - headers (dict)
     """
 
     def __init__(self, credentials, config):
-        """Create Batch Apps API reference:
-
+        """
         :Args:
             - credentials (:class:`.Credentials`): Credentials with which all
                 API calls will be authenticated.

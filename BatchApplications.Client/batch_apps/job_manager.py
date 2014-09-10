@@ -30,8 +30,7 @@ class JobManager(object):
     """
 
     def __init__(self, credentials, cfg=None):
-        """Create job manager:
-
+        """
         :Args:
             - credentials (:class:`.Credentials`): User credentials for REST
                 API authentication.
