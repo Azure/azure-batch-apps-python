@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>a80bf501-741e-451b-90a9-2c62a282446c</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>batch_apps\test\__init__.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>BatchApplications.Client</Name>
+    <RootNamespace>BatchApplications.Client</RootNamespace>
+    <InterpreterId>
+    </InterpreterId>
+    <InterpreterVersion>
+    </InterpreterVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="batch_apps\api.py" />
+    <Compile Include="batch_apps\config.py" />
+    <Compile Include="batch_apps\credentials.py" />
+    <Compile Include="batch_apps\exceptions.py" />
+    <Compile Include="batch_apps\files.py" />
+    <Compile Include="batch_apps\file_manager.py" />
+    <Compile Include="batch_apps\job.py" />
+    <Compile Include="batch_apps\job_manager.py" />
+    <Compile Include="batch_apps\log.py" />
+    <Compile Include="batch_apps\rest_client.py" />
+    <Compile Include="batch_apps\test\unittest_api.py" />
+    <Compile Include="batch_apps\test\unittest_config.py" />
+    <Compile Include="batch_apps\test\unittest_credentials.py" />
+    <Compile Include="batch_apps\test\unittest_files.py" />
+    <Compile Include="batch_apps\test\unittest_file_manager.py" />
+    <Compile Include="batch_apps\test\unittest_job.py" />
+    <Compile Include="batch_apps\test\unittest_job_manager.py" />
+    <Compile Include="batch_apps\test\unittest_rest_client.py" />
+    <Compile Include="batch_apps\test\__init__.py" />
+    <Compile Include="batch_apps\utils.py" />
+    <Compile Include="batch_apps\__init__.py" />
+    <Compile Include="package.py" />
+    <Compile Include="setup.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="bin\" />
+    <Folder Include="batch_apps\" />
+    <Folder Include="batch_apps\test\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="CHANGES.txt" />
+    <Content Include="LICENSE.txt" />
+    <Content Include="MANIFEST.in" />
+    <Content Include="README.txt" />
+    <Content Include="requirements.txt" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
+  </PropertyGroup>
+  <Import Condition="Exists($(PtvsTargetsFile))" Project="$(PtvsTargetsFile)" />
+  <Import Condition="!Exists($(PtvsTargetsFile))" Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
+  <!-- Uncomment the CoreCompile target to enable the Build command in
+       Visual Studio and specify your pre- and post-build commands in
+       the BeforeBuild and AfterBuild targets below. -->
+  <!--<Target Name="CoreCompile" />-->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>

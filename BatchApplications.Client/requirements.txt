@@ -1,0 +1,15 @@
+astroid==1.2.1
+colorama==0.3.2
+logilab-common==0.62.1
+docutils==0.11
+Jinja2==2.7.3
+keyring==3.8
+MarkupSafe==0.23
+Pygments==1.6
+pylint==1.2.1
+requests==2.3.0
+sphinx==1.2.2
+mock==1.0.1
+oauthlib==0.6.3
+requests_oauthlib==0.4.1
+unittest2==0.5.1
