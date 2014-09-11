@@ -58,7 +58,7 @@ authenticate with this instead::
 
 	creds = AzureOAuth.get_authorization_token(redirect_url)
 
-Or alternatively, if you use a different AAD implementation:
+Or alternatively, if you use a different AAD implementation::
 
 	from batch_apps import Credentials
 	import my_oauth
@@ -143,7 +143,7 @@ Application Configuration
 To set up a new application type, and any custom parameters you want associated 
 with it, it can be added to the configuration file.
 You can edit the file directly, or via the Configuration class.
-By default the configuration file will be created in the user directory.
+By default the configuration file will be created in the user directory::
 
 	from batch_apps import Configuration
 
