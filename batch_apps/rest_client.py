@@ -113,14 +113,14 @@ def get(auth, url, headers, params=None):
 
     :Kwargs:
         - params (dict): Any additional parameters to be added to the uri as
-            required by the specified call.
+          required by the specified call.
 
     :Returns:
         - The data retrieved by the GET call, after json decoding.
 
     :Raises:
         - :exc:`.RestCallException` is the call failed,
-            or returned a non-200 status.
+          or returned a non-200 status.
     """
     LOG.debug("Get call url: {0}, headers: {1}, params: "
               "{2}".format(url, headers, params))
@@ -150,14 +150,14 @@ def head(auth, url, headers, filename=""):
 
     :Kwargs:
         - filename (str): Used to add a filename to the end of the url if
-            doesn't already have one. Default is an empty string.
+          doesn't already have one. Default is an empty string.
 
     :Returns:
         - The content-length header, as an integer.
 
     :Raises:
-        :exc:`.RestCallException` if the call failed, returned a non200 status,
-        or the content-length header was not present in the response object.
+        - :exc:`.RestCallException` if the call failed, returned a non200 status,
+          or the content-length header was not present in the response object.
     """
     try:
         url = url.format(name=url_from_filename(filename))
@@ -189,15 +189,15 @@ def post(auth, url, headers, message=None):
 
     :Kwargs:
         - message (dict): Data to be acted on e.g. job submission
-            specfication, file query parameters. Format and contents will
-            depend on the specific API call.
+          specfication, file query parameters. Format and contents will
+          depend on the specific API call.
 
     :Returns:
-        The data in the service response, after json decoding.
+        - The data in the service response, after json decoding.
 
     :Raises:
         - :exc:`.RestCallException` is the call failed, or returned a
-            non-200 status.
+          non-200 status.
     """
     try:
         if message:
@@ -231,18 +231,18 @@ def put(auth, url, headers, userfile, description, file_data):
         - url (str): The complete endpoint url.
         - headers (dict): The headers to be used in the request.
         - userfile (:class:`.UserFile`): The :class:`.UserFile`
-            reference of the file to be uploaded.
+          reference of the file to be uploaded.
         - description (dict): The file data
         - file_data (dict): A dictionary containing the open file handle
-            from which the data will be streamed.
-            Format: ``{'Filename': open(file_path, 'rb')}``
+          from which the data will be streamed.
+          Format: ``{'Filename': open(file_path, 'rb')}``
 
     :Returns:
         - The raw server response.
 
     :Raises:
         - :exc:`.RestCallException` if the call failed or returned a
-            non-200 status.
+          non-200 status.
     """
     try:
         url = url.format(name=url_from_filename(userfile.name))
@@ -285,24 +285,24 @@ def download(auth, url, headers, output_path, size, overwrite,
         - headers (dict): The headers to be used in the request.
         - output_path (str): Full file path to download the data to.
         - size (int): File size of the file to be downloaded as retrieved
-            by a HEAD request.
+          by a HEAD request.
         - overwrite (bool): If ``True``, download the new data over an
-            existing file.
+          existing file.
 
     :Kwargs:
         - f_name (str): Used to specify a filename if one is not already
-            included in the url. Default is ``None``.
+          included in the url. Default is ``None``.
         - ext (str): Used to specify a file extension if one is not already
-            included in the url. Default is ``None``.
+          included in the url. Default is ``None``.
         - block_size (int): Used to vary the upload chunk size.
-            Default is 1024 bytes.
+          Default is 1024 bytes.
 
     :Returns:
         - The raw server response.
 
     :Raises:
         - :exc:`.RestCallException` is the call failed, a file operation
-            failed, or returned a non-200 status.
+          failed, or returned a non-200 status.
     """
     filename = filename_from_url(url, ext) if not f_name else f_name
     downloadfile = os.path.join(output_path, filename)

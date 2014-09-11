@@ -25,7 +25,7 @@ from .exceptions import RestCallException
 class JobManager(object):
     """
     This is the only class that a user should need to import to access all
-    job manipulation. Contains only general functionality for the creation
+    job manipulation. Contains general functionality for the creation
     of new job submissions and retrieveing data on submitted jobs.
     """
 
@@ -33,11 +33,11 @@ class JobManager(object):
         """
         :Args:
             - credentials (:class:`.Credentials`): User credentials for REST
-                API authentication.
+              API authentication.
 
         :Kwargs:
             - cfg (:class:`.Configuration`): Configuration of the Batch Apps
-                client session. If not set, a default config will be used.
+              client session. If not set, a default config will be used.
        """
         self._log = logging.getLogger('batch_apps')
         self._client = BatchAppsApi(
@@ -48,8 +48,8 @@ class JobManager(object):
         """Return the number of cloud jobs available to the manager
 
         :Returns:
-            The number of jobs submitted to the cloud by the user. This value
-            will only be populated once :meth:`.get_jobs()` has been called.
+            - The number of jobs submitted to the cloud by the user. This value
+              will only be populated once :meth:`.get_jobs()` has been called.
         """
         return self.count
 
@@ -62,12 +62,12 @@ class JobManager(object):
         :Kwargs:
             - job (:class:`.SubmittedJob`): A job object to be updated.
             - url (str): The url to a the details of a job, as returned by
-                :meth:`.JobSubmission.submit()`.
+              :meth:`.JobSubmission.submit()`.
             - jobid (str): The ID of a submitted job, as retrieved from
-                Mission Control or returned by :meth:`.JobSubmission.submit()`.
+              Mission Control or returned by :meth:`.JobSubmission.submit()`.
 
         :Returns:
-            An updated or new :class:`.SubmittedJob` object.
+            - An updated or new :class:`.SubmittedJob` object.
 
         :Raises:
             - :exc:`AttributeError` if invalid parameters have been set.
@@ -100,21 +100,21 @@ class JobManager(object):
 
     def get_jobs(self, index=0, per_call=10, name=None):
         """
-        Get a list of the users jobs.
+        Get a list of the user's jobs.
         This call also sets the :attr:`.JobManager.count` attribute to reflect
         the total jobs submitted by the user.
 
         :Kwargs:
             - index (int): The start index of the list of jobs to be returned.
-                Default is 0, i.e. return all jobs from the beginning.
+              Default is 0, i.e. return all jobs from the beginning.
             - per_call (int): Number of jobs to be returned. Default is 10.
             - name (str): Only return jobs whose names contain this string.
 
         :Returns:
-            A list of :class:`.SubmittedJob` objects.
+            - A list of :class:`.SubmittedJob` objects.
 
         :Raises:
-            :exc:`.RestCallException` if an error occured during the request.
+            - :exc:`.RestCallException` if an error occured during the request.
         """
         resp = self._client.list_jobs(int(index),
                                       int(per_call),
@@ -150,21 +150,21 @@ class JobManager(object):
 
         :Kwargs:
             - jobdetails (dict): Additional job settings or parameters can be
-                added as keyword arguments. These include:
-                    - 'job_type': The type of processing to be executed.
-                        Default is "Animation".
-                    - 'params': A string dict of job parameters to add to the
-                        submission.
-                    - 'files': A :class:`.FileCollection` of required files to
-                        include with the job.
-                    - 'job_file': The name (str) of the source file that should
-                        be used to start the job. This filename should be
-                        included in the above ``files`` collection.
-                    - 'instances': The number (int) of instances to allocate
-                        to the job on submission.
+              added as keyword arguments. These include:
+                - 'job_type': The type of processing to be executed, as a
+                  job_type suffix. Default is empty.
+                - 'params': A string dict of job parameters to add to the
+                  submission.
+                - 'files': A :class:`.FileCollection` of required files to
+                  include with the job.
+                - 'job_file': The name (str) of the source file that should
+                  be used to start the job. This filename should be
+                  included in the above ``files`` collection.
+                - 'instances': The number (int) of instances to allocate
+                  to the job on submission.
 
         :Returns:
-            A new :class:`.JobSubmission` object.
+            - A new :class:`.JobSubmission` object.
         """
         return JobSubmission(self._client, str(name), **jobdetails)
 
@@ -172,15 +172,15 @@ class JobManager(object):
         """Submit a job, and upload all its assets
 
         :Args:
-            - jobs (:class:`.JobSubmission`): The job to be submitted.
+            - submitjob (:class:`.JobSubmission`): The job to be submitted.
 
         :Kwargs:
             - upload_threads (int): Number of concurrent asset uplaods.
-                Default is 1.
+              Default is 1.
 
         :Returns:
             - A job susbmission response dictionary in the format:
-                ``{'jobId': '', 'link': ''}``
+              ``{'jobId': '', 'link': ''}``
 
         :Raises:
             - :exc:`TypeError` if ``submitjob`` is not a JobSubmission.

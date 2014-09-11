@@ -87,18 +87,18 @@ class AzureOAuth(object):
 
         :Kwargs:
             - config (:class:`.Configuration`): A custom configuration
-                object. Default is `None` where a default
-                :class:`.Configuration` will be created.
+              object. Default is `None` where a default
+              :class:`.Configuration` will be created.
 
         :Returns:
-            An authenticated :class:`.Credentials` object.
+            - An authenticated :class:`.Credentials` object.
 
         :Raises:
             - A :class:`.InvalidConfigException` if the supplied,
-                or default configuration does not contain the necessary
-                authentication data.
+              or default configuration does not contain the necessary
+              authentication data.
             - A :class:`AuthenticationException` if there's not existing
-                stored session or the token is invalid.
+              stored session or the token is invalid.
         """
         AzureOAuth.config = config if config else Configuration()
         return Credentials(AzureOAuth.config,
@@ -113,20 +113,20 @@ class AzureOAuth(object):
 
         :Kwargs:
             - config (:class:`.Configuration`): A custom configuration object.
-                Default is `None` where a default :class:`.Configuration` will
-                be created.
+              Default is `None` where a default :class:`.Configuration` will
+              be created.
 
         :Returns:
             - A url (str) that can be used to direct the user to a login page.
             - A guid (str) for validating the state of the server
-                communication.
+              communication.
 
         :Raises:
             - A :class:`.InvalidConfigException` if the supplied, or default
-                configuration does not contain the necessary authentication
-                data.
+              configuration does not contain the necessary authentication
+              data.
             - A :class:`AuthenticationException` if there was an error
-                generating the url.
+              generating the url.
         """
 
         AzureOAuth.config = config if config else Configuration()
@@ -155,23 +155,23 @@ class AzureOAuth(object):
 
         :Args:
             - auth_url (str): The redirect URL generated from a successfull
-                browser sign-in.
+              browser sign-in.
 
         :Kwargs:
             - config (:class:`.Configuration`): A custom configuration object.
-                Default is `None` where a default :class:`.Configuration` will
-                be created.
+              Default is `None` where a default :class:`.Configuration` will
+              be created.
             - state (str): A state guid for auth server validation.
 
         :Returns:
-            An authenticated :class:`.Credentials` object.
+            - An authenticated :class:`.Credentials` object.
 
         :Raises:
             - A :class:`.InvalidConfigException` if the supplied, or default
-                configuration does not contain the necessary authentication
-                data.
+              configuration does not contain the necessary authentication
+              data.
             - A :class:`AuthenticationException` if the supplied ``auth_url``
-                is invalid (e.g. has expired).
+              is invalid (e.g. has expired).
         """
 
         AzureOAuth.config = config if config else Configuration()
@@ -218,18 +218,18 @@ class AzureOAuth(object):
 
         :Kwargs:
             - config (:class:`.Configuration`): A custom configuration object.
-                Default is `None` where a default :class:`.Configuration`
-                will be created.
+              Default is `None` where a default :class:`.Configuration`
+              will be created.
 
         :Returns:
-            An authenticated :class:`.Credentials` object.
+            - An authenticated :class:`.Credentials` object.
 
         :Raises:
             - A :class:`.InvalidConfigException` if the supplied, or default
-                configuration does not contain the necessary authentication
-                data.
+              configuration does not contain the necessary authentication
+              data.
             - A :class:`AuthenticationException` if the supplied credentials
-                are invalid (e.g. have expired).
+              are invalid (e.g. have expired).
         """
 
         AzureOAuth.config = config if config else Configuration()
@@ -293,18 +293,18 @@ class Credentials(object):
 
         :Args:
             - config (:class:`.Configuration`): A configuration object to
-                define the client session.
+              define the client session.
             - client_id (str): The client ID for the application as defined
-                in the Configuration.
+              in the Configuration.
 
         :Kwargs:
             - token (dict): An authentication token, if not provided will try
-                to retrieve from a previous session.
+              to retrieve from a previous session.
 
         :Raises:
             - :class:`.AuthenticationException` if provided token is formatted
-                incorrectly, or if none has been provided and no previously
-                stored token exists.
+              incorrectly, or if none has been provided and no previously
+              stored token exists.
         """
 
         self._log = logging.getLogger('batch_apps')
@@ -340,7 +340,7 @@ class Credentials(object):
 
         :Raises:
             - :class:`.AuthenticationException` if the token is invalid
-                or expired.
+              or expired.
         """
         resource = _https(self.cfg['resource'])
         refresh = _https(self.cfg['token_uri'])
@@ -412,7 +412,7 @@ class Credentials(object):
         delete or un-authenticate the current :class:`.Credentials` object.
 
         :Raises:
-            :class:`OSError` if the stored data cannot be cleared.
+            - :class:`OSError` if the stored data cannot be cleared.
         """
         try:
             keyring.delete_password(CRED_STORE, self._id)

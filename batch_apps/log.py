@@ -28,7 +28,7 @@ class PickleLog(logging.getLoggerClass()):
         Removes the stream logging handlers when pickling
 
         :Returns:
-            The Logger dict with the 'handlers' key removed.
+            - The Logger dict with the 'handlers' key removed.
         """
         pick = dict(self.__dict__)
         pick.pop('handlers')
@@ -40,13 +40,13 @@ class PickleLog(logging.getLoggerClass()):
         Reinstates the console stream handler, but the not file handler as
         the could create confilcts between subprocesses writing to the same
         file.
-        #TODO: Would be nice to fix this.
 
         :Args:
             - state (dict): The logger state as resolved from deserilization
-                from which the logger will be rebuilt. The 'handlers' key
-                will be re-added before setting to the Logger.
+              from which the logger will be rebuilt. The 'handlers' key
+              will be re-added before setting to the Logger.
         """
+        #TODO: Would be nice to fix this.
         state['handlers'] = []
 
         log_format = logging.Formatter(

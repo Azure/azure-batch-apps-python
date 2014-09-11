@@ -91,16 +91,16 @@ class RestCallException(Exception):
         :Args:
             - exp_type (type): The type of the root exception thrown.
             - message (str): The human readable text associated with the
-                error to be reported to the user.
+              error to be reported to the user.
             - excep (Exception, etc): The root exception object, for further
-                inspection if required by the user. This may not always be
-                set, or may contain a REST response object if a call failed
-                but no exception was thrown
-                (See: :func:`.rest_client._call()`).
+              inspection if required by the user. This may not always be
+              set, or may contain a REST response object if a call failed
+              but no exception was thrown
+              (See: :func:`.rest_client._call()`).
 
         :Kwargs:
             - silent (bool): If ``True``, the error will not be logged.
-                Default is ``False``.
+              Default is ``False``.
         """
         self.type = exp_type
         self.msg = message
@@ -126,7 +126,7 @@ class RestCallException(Exception):
     def __str__(self):
         """RestCallException as a string.
 
-        Returns:
-            The message string.
+        :Returns:
+            - The message string.
         """
         return self.msg

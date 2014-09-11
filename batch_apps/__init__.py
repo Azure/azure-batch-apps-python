@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-""" Batch Apps Python Client.
+"""
+Batch Apps Python Client.
 """
 
 import logging

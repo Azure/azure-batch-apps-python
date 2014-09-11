@@ -59,23 +59,23 @@ class JobSubmission(object):
         """
         :Args:
             - client (:py:class:`.BatchAppsApi`): A configured and
-                authenticated API instance.
+              authenticated API instance.
             - job_name (str): A name for the new job.
 
         :Kwargs:
             - job_settings (dict): *Optional* Additional job settings or
-                parameters can be added as keyword arguments. These include:
-                    - 'job_type': The type of processing to be executed.
-                        Default is "Animation".
-                    - 'params': A string dict of job parameters to add to the
-                        submission.
-                    - 'files': A :py:class:`.FileCollection` of required files
-                        to include with the job.
-                    - 'job_file': The name (str) of the file that should be
-                        used to start the job. This filename should be
-                        included in the above ``files`` collection.
-                    - 'instances': The number (int) of instances to allocate
-                        to the job on submission.
+              parameters can be added as keyword arguments. These include:
+                  - 'job_type': The type of processing to be executed.
+                    Default is "Animation".
+                  - 'params': A string dict of job parameters to add to the
+                    submission.
+                  - 'files': A :py:class:`.FileCollection` of required files
+                    to include with the job.
+                  - 'job_file': The name (str) of the file that should be
+                    used to start the job. This filename should be
+                    included in the above ``files`` collection.
+                  - 'instances': The number (int) of instances to allocate
+                    to the job on submission.
         """
         if not hasattr(client, 'send_job'):
             raise TypeError(
@@ -107,11 +107,11 @@ class JobSubmission(object):
         dictionary will be searched for a matching key.
 
         :Returns:
-            The value (str) of the parameter if it is found.
+            - The value (str) of the parameter if it is found.
 
         :Raises:
-            :py:exc:`AttributeError` if the requested attribute/parameter
-            does not exist.
+            - :py:exc:`AttributeError` if the requested attribute/parameter
+              does not exist.
         """
         #TODO: Make all parameters case-insensitive.
         try:
@@ -135,9 +135,9 @@ class JobSubmission(object):
             - value: The value of the attribute/parameter to set to.
 
         :Raises:
-            :py:exc:`AttributeError` if the requested attribute does not exist,
-            or the parameter cannot be set because the type of the supplied
-            value is not in ``[str, bool, int, float]``.
+            - :py:exc:`AttributeError` if the requested attribute does not exist,
+              or the parameter cannot be set because the type of the supplied
+              value is not in ``[str, bool, int, float]``.
         """
         if hasattr(JobSubmission, name):
             super(JobSubmission, self).__setattr__(name, value)
@@ -158,8 +158,8 @@ class JobSubmission(object):
             - name (str): The name of the attribute/parameter to wipe.
 
         :Raises:
-            :py:class:`AttributeError` if the :py:class:`.JobSubmission` object
-            has no attribute or parameter of that name.
+            - :py:class:`AttributeError` if the :py:class:`.JobSubmission` object
+              has no attribute or parameter of that name.
         """
         if hasattr(JobSubmission, name):
             super(JobSubmission, self).__delattr__(name)
@@ -180,8 +180,8 @@ class JobSubmission(object):
         :py:func:`batch_apps.utils.format_dictionary()`).
 
         :Returns:
-            Updated, formatted, parameters dictionary after cross-referencing
-            against defaults.
+            - Updated, formatted, parameters dictionary after cross-referencing
+              against defaults.
         """
         default_params = self.get_default_params()
         complete_params = dict(
@@ -195,7 +195,7 @@ class JobSubmission(object):
         Only used internally on job submission (see :py:meth:.submit()).
 
         :Returns:
-            Dictionary of the job submission formatted for the REST API.
+            - Dictionary of the job submission formatted for the REST API.
         """
         #TODO: Final check of source file, add xml settings, allow for user
         #      to set priority, verify all job data is correct format
@@ -227,12 +227,12 @@ class JobSubmission(object):
 
         :Kwargs:
             - file_collection (:py:class:`.FileCollection`): If set, this will
-                be assigned as the :py:class:`.FileCollection` of the job. If
-                not set, a new :py:class:`.FileCollection` will be created.
+              be assigned as the :py:class:`.FileCollection` of the job. If
+              not set, a new :py:class:`.FileCollection` will be created.
 
         :Raises:
-            :py:exc:`TypeError` if a non-:py:class:`.FileCollection` is
-            passed in.
+            - :py:exc:`TypeError` if a non-:py:class:`.FileCollection` is
+              passed in.
         """
         if file_collection is None:
             self._log.info("Assigning empty FileCollection to job")
@@ -255,7 +255,7 @@ class JobSubmission(object):
         current application.
 
         :Returns:
-            The parameters as a dictionary of strings.
+            - The parameters as a dictionary of strings.
         """
         return self._api.default_params()
 
@@ -267,7 +267,7 @@ class JobSubmission(object):
 
         :Args:
             - userfile (:class:`.UserFile`): The userfile to be added to
-            the job.
+              the job.
         """
         if self.required_files is None:
             self.required_files = FileCollection(self._api)
@@ -280,14 +280,14 @@ class JobSubmission(object):
 
         :Args:
             - jobfile (:class:`.UserFile`, int): The userfile to be used. This
-                can also be the index of a userfile in the collection, or it
-                can be an :class:`.UserFile` object.
-                If a new :class:`.UserFile` object is passed in, it will also
-                be added to the required files collection.
+              can also be the index of a userfile in the collection, or it
+              can be an :class:`.UserFile` object.
+              If a new :class:`.UserFile` object is passed in, it will also
+              be added to the required files collection.
 
         :Raises:
-            :exc:`ValueError` if ``jobfile`` is not an in-range index,
-            or of an invalid type.
+            - :exc:`ValueError` if ``jobfile`` is not an in-range index,
+              or of an invalid type.
         """
         if self.required_files is None:
             raise ValueError("This job has no associated FileCollection.")
@@ -316,11 +316,11 @@ class JobSubmission(object):
 
         :Returns:
             - If successful, a dictionary holding the new job's ID and a url
-                to get the job details (See: :meth:`.SubmittedJob.update()`).
-                Dictionary has the keys: ``['jobId', 'link']``
+              to get the job details (See: :meth:`.SubmittedJob.update()`).
+              Dictionary has the keys: ``['jobId', 'link']``
 
         :Raises:
-            :class:`.RestCallException` if job submission failed.
+            - :class:`.RestCallException` if job submission failed.
         """
         resp = self._api.send_job(self._create_job_message())
 
@@ -369,16 +369,16 @@ class SubmittedJob(object):
         """
         :Args:
             - client (:class:`.BatchAppsApi`): A configured and authenticated
-                Batch Apps Management API instance.
+              Batch Apps Management API instance.
             - job_id (str): The ID of the job.
             - job_name (str): The name of the job.
             - job_type (str): The application and type of the job.
 
         :Kwargs:
             - job_settings (dict): Additional job submission settings.
-                Will vary depending on what stage during processing the job
-                is at when the data is collected.
-                See :meth:`._format_submission()`
+              Will vary depending on what stage during processing the job
+              is at when the data is collected.
+              See :meth:`._format_submission()`
         """
         self._api = client
         self._log = logging.getLogger('batch_apps')
@@ -404,11 +404,11 @@ class SubmittedJob(object):
         dictionary will be searched for a matching key.
 
         :Returns:
-            The value (str) of the parameter if it is found.
+            - The value (str) of the parameter if it is found.
 
         :Raises:
-            :exc:`AttributeError` if the requested attribute/parameter does
-            not exist.
+            - :exc:`AttributeError` if the requested attribute/parameter does
+              not exist.
         """
         try:
             return super(
@@ -432,7 +432,7 @@ class SubmittedJob(object):
         :Raises:
             - :exc:`ValueError` if attempts to overwrite submission data.
             - :exc:`AttributeError` if attribute or submission key of that
-                name does not exist.
+              name does not exist.
         """
         if hasattr(SubmittedJob, name):
             super(SubmittedJob, self).__setattr__(name, value)
@@ -457,9 +457,9 @@ class SubmittedJob(object):
 
         :Raises:
             - :exc:`ValueError` if attribute exists, and deleting is not
-                allowed.
+              allowed.
             - :exc:`AttributeError` if attribute or submission data does
-                not exist.
+              not exist.
         """
         if hasattr(SubmittedJob, name) or name in self.submission:
             raise ValueError("Can't clear job submission data: "
@@ -477,12 +477,12 @@ class SubmittedJob(object):
         submission data up-to-date as the job progress in the cloud.
 
         :Args:
-            sub (dict): Submission dictionary retrieved from calling
-            :meth:`.update()` or :meth:`.JobManager.get_job()`.
+            - sub (dict): Submission dictionary retrieved from calling
+              :meth:`.update()` or :meth:`.JobManager.get_job()`.
 
         :Returns:
-            String dictionary. And values not present in ``sub`` are
-            set to None.
+            - String dictionary. And values not present in ``sub`` are
+              set to None.
         """
         #TODO: Format time strings to datetime objects
         formatted = {}
@@ -507,13 +507,13 @@ class SubmittedJob(object):
 
         :Args:
             - download_dir (str): The directory the output file will be
-                written to.
+              written to.
             - overwrite (bool): Whether to overwrite the file is it already
-                exists.
+              exists.
 
         :Returns:
-            :class:`.Response` object returned directly from
-                :class:`.BatchAppsApi`.
+            - :class:`.Response` object returned directly from
+              :class:`.BatchAppsApi`.
         """
         self._log.info(
             "About to check size of requested output file before downloading")
@@ -544,14 +544,14 @@ class SubmittedJob(object):
 
         :Args:
             - download_dir (str): The directory the output file will be
-                written to.
+              written to.
             - filename (str): The thumbnail filename to use.
             - overwrite (bool): Whether to overwrite the file is it already
-                exists.
+              exists.
 
         :Returns:
-            :class:`.Response` object returned directly from
-                :class:`.BatchAppsApi`.
+            - :class:`.Response` object returned directly from
+              :class:`.BatchAppsApi`.
         """
         return self._api.get_output(download_dir,
                                     None,
@@ -564,15 +564,15 @@ class SubmittedJob(object):
 
         :Args:
             - output (dict): The output specification dictonary as created
-                by :meth:`.list_all_outputs()`.
+              by :meth:`.list_all_outputs()`.
             - download_dir (str): The directory the output file will be
-                written to.
+              written to.
             - overwrite (bool): Whether to overwrite the file is it already
-                exists.
+              exists.
 
         :Returns:
-            :class:`.Response` object returned directly from
-                :class:`.BatchAppsApi`.
+            - :class:`.Response` object returned directly from
+              :class:`.BatchAppsApi`.
         """
         self._log.info(
             "About to check size of requested output file before downloading")
@@ -602,11 +602,11 @@ class SubmittedJob(object):
         This will only return those tasks that have been started so far.
 
         :Returns:
-            A list of :class:`.Task` objects.
+            - A list of :class:`.Task` objects.
 
         :Raises:
-            :exc:`.RestCallException` if an error occurred during call
-                to the service.
+            - :exc:`.RestCallException` if an error occurred during call
+              to the service.
         """
         if self.tasks_url:
             resp = self._api.list_tasks(url=self.tasks_url)
@@ -631,21 +631,21 @@ class SubmittedJob(object):
 
         :Args:
             - download_dir (str): Full path to the directory to download the
-                output to.
+              output to.
 
         :Kwargs:
             - output: An output dictionary (as created by
-                :meth:`.list_all_outputs()`). If specified, the specific output
-                will be downloaded, otheriwse the jobs final output will be
-                downloaded.
+              :meth:`.list_all_outputs()`). If specified, the specific output
+              will be downloaded, otheriwse the jobs final output will be
+              downloaded.
 
         :Returns:
             - The full path to the downloaded file (str).
 
         :Raises:
             - :exc:`.FileDownloadException` if the SubmittedJob has no url
-                to a final output yet. This may be because the job has not yet
-                finished, or has not been updated.
+              to a final output yet. This may be because the job has not yet
+              finished, or has not been updated.
             - :exc:`.RestCallException` if an error occured during the request.
         """
         if output:
@@ -675,11 +675,11 @@ class SubmittedJob(object):
         This includes processed outputs, intermediary outputs and log files.
 
         :Returns:
-            List of outputs as dictionaries with keys
-            ``['name', 'link', 'type']``.
+            - List of outputs as dictionaries with keys
+              ``['name', 'link', 'type']``.
 
         :Raises:
-            :exc:`.RestCallException` if error occured during request.
+            - :exc:`.RestCallException` if error occured during request.
         """
         all_outputs = self._api.list_output_files(self._id)
 
@@ -696,20 +696,20 @@ class SubmittedJob(object):
 
         :Kwargs:
             - download_dir (str): The full path to the directory to download
-                the thumbnail. If not specified, the OS temp directory will
-                be used.
+              the thumbnail. If not specified, the OS temp directory will
+              be used.
             - filename (str): A name to give the thumbnail file. If not
-                specified a randomly generated filename will be used.
+              specified a randomly generated filename will be used.
             - overwrite (bool): Whether an existing file will be overwritten.
-                Default is ``True``.
+              Default is ``True``.
 
         :Returns:
-            The full path to the downloaded file (str).
+            - The full path to the downloaded file (str).
 
         :Raises:
             - :exc:`.FileDownloadException` if the SubmittedJob has no
-                reference to a job thumbnail. This could mean that the job
-                has not yet completed or the object has not been updated.
+              reference to a job thumbnail. This could mean that the job
+              has not yet completed or the object has not been updated.
             - :exc:`.RestCallException` if an error occured during the request.
         """
         if not download_dir:
@@ -740,17 +740,17 @@ class SubmittedJob(object):
 
         :Kwargs:
             - start (str): The UTC time from which log messages will be
-                retrieved. If not set, will retrieve messages from the start
-                of the job. Default is ``None``.
+              retrieved. If not set, will retrieve messages from the start
+              of the job. Default is ``None``.
             - max_lines (int): The max number of log messages to be retrieved.
-                Default is 100.
+              Default is 100.
 
         :Returns:
             - If successful, a dict in the format:
-                ``{'upTo': '', 'messages': {'taskId', 'timestamp', 'text'}}``.
-                Where ``'upTo'`` will contain the timestamp of the last log
-                message retrieved, and ``'messages'`` will contain a list of
-                dictionaries with the details of each log message.
+              ``{'upTo': '', 'messages': {'taskId', 'timestamp', 'text'}}``.
+              Where ``'upTo'`` will contain the timestamp of the last log
+              message retrieved, and ``'messages'`` will contain a list of
+              dictionaries with the details of each log message.
             - If unsuccessful, returns ``None``.
         """
 
@@ -771,10 +771,10 @@ class SubmittedJob(object):
         on the cloud.
 
         :Returns:
-            ``True`` if the job has been successfully updated.
+            - ``True`` if the job has been successfully updated.
 
         :Raises:
-            :exc:`.RestCallException` if an error occured during the request.
+            - :exc:`.RestCallException` if an error occured during the request.
         """
         self._log.debug("About to update job {0}".format(self._id))
         resp = self._api.get_job(self._id)
@@ -794,10 +794,10 @@ class SubmittedJob(object):
         :Returns:
             - ``True`` if the job is successfully cancelled.
             - ``False`` if the job is unable to be cancelled,
-                e.g. it has completed.
+              e.g. it has completed.
 
         :Raises:
-            :exc:`.RestCallException` if the request failed.
+            - :exc:`.RestCallException` if the request failed.
         """
         self._log.debug("About to cancel job {0}".format(self._id))
         resp = self._api.cancel(self._id)
@@ -819,10 +819,10 @@ class SubmittedJob(object):
         :Returns:
             - ``True`` if the failed tasks have been successfully requeued.
             - ``False`` if the job is unable to be requeued,
-                e.g. it has already completed.
+              e.g. it has already completed.
 
         :Raises:
-            :exc:`.RestCallException` if the request failed.
+            - :exc:`.RestCallException` if the request failed.
         """
         self._log.debug("About to reprocess job {0}".format(self._id))
         resp = self._api.reprocess(self._id)
@@ -860,13 +860,13 @@ class Task(object):
         """
         :Args:
             - client (:class:`.BatchAppsApi`): A configured and authenticated
-                Batch Apps Management API instance.
+              Batch Apps Management API instance.
             - job_id (str): The ID of the parent job of the task.
 
         :Kwargs:
             - props (dict): All additional data related the to progress of the
-                task. What data is available will depend on the status.
-                Data that is not available will be set to ``None``.
+              task. What data is available will depend on the status.
+              Data that is not available will be set to ``None``.
         """
         if not hasattr(client, 'get_output_file'):
             raise TypeError(
@@ -900,15 +900,15 @@ class Task(object):
 
         :Args:
             - output (dict): An output specification such as created
-                by :meth:`.list_outputs()`.
+              by :meth:`.list_outputs()`.
             - download_dir (str): The directory the output file will be
-                written to.
+              written to.
             - overwrite (bool): Whether to overwrite the file is it already
-                exists.
+              exists.
 
         :Returns:
-            :class:`.Response` object returned directly from
-                :class:`.BatchAppsApi`.
+            - :class:`.Response` object returned directly from
+              :class:`.BatchAppsApi`.
         """
         if output.get('type') == 'TaskPreview':
             size = None
@@ -935,21 +935,21 @@ class Task(object):
 
         :Kwargs:
             - download_dir (str): The full path to the directory to download
-                the thumbnail. If not specified, the OS temp directory will
-                be used.
+              the thumbnail. If not specified, the OS temp directory will
+              be used.
             - filename (str): A name to give the thumbnail file. If not
-                specified and one has not been specified by the server, a
-                randomly generated filename will be used.
+              specified and one has not been specified by the server, a
+              randomly generated filename will be used.
             - overwrite (bool): Whether an existing file will be overwritten.
-                Default is ``True``.
+              Default is ``True``.
 
         :Returns:
-            The full path to the downloaded file (str).
+            - The full path to the downloaded file (str).
 
         :Raises:
             - :exc:`.FileDownloadException` if the Task has no reference to
-                a thumbnail. This could mean that the task has not yet
-                completed or the object has not been updated.
+              a thumbnail. This could mean that the task has not yet
+              completed or the object has not been updated.
             - :exc:`.RestCallException` if an error occured during the request.
         """
         if not download_dir:
@@ -989,11 +989,11 @@ class Task(object):
         This includes processed outputs, intermediary outputs and log files.
 
         :Returns:
-            List of outputs as dictionaries with keys
-            ``['name', 'link', 'type']``.
+            - List of outputs as dictionaries with keys
+              ``['name', 'link', 'type']``.
 
         :Raises:
-            :exc:`.RestCallException` if error occured during request.
+            - :exc:`.RestCallException` if error occured during request.
         """
         resp = self._api.list_task_outputs(self._job, self._id)
 
@@ -1009,13 +1009,13 @@ class Task(object):
 
         :Args:
             - output: An output dictionary (as created by
-                :meth:`.Task.list_outputs()`).
+              :meth:`.Task.list_outputs()`).
             - download_dir (str): Full path to the directory to download
-                the output to.
+              the output to.
 
         :Kwargs:
             - overwrite (bool): Whether to overwrite an existing file.
-                Default is ``False``.
+              Default is ``False``.
 
         :Returns:
             - The full path to the downloaded file (str).
@@ -1035,11 +1035,11 @@ class Task(object):
         This can only be called if the task is running.
 
         :Returns:
-            ``True`` if the task is successfully cancelled.
+            - ``True`` if the task is successfully cancelled.
 
         :Raises:
-            :exc:`.RestCallException` if the request failed or the task was
-                not able to be cancelled.
+            - :exc:`.RestCallException` if the request failed or the task was
+              not able to be cancelled.
         """
         resp = self._api.cancel_task(self._job, self._id)
 

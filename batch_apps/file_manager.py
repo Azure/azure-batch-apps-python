@@ -36,8 +36,8 @@ class FileManager(object):
 
         :Kwargs:
             - cfg (:class:`.Configuration`): Logging and application
-                configuration. Unless set this is None, in which case a default
-                configuration will be used.
+              configuration. Unless set this is None, in which case a default
+              configuration will be used.
         """
         if not cfg:
             cfg = Configuration()
@@ -52,8 +52,8 @@ class FileManager(object):
 
         :Returns:
             - :class:`.UserFile`: The file object reference for the
-                supplied file path. This will be returned regardless of
-                whether the file actually exists.
+              supplied file path. This will be returned regardless of
+              whether the file actually exists.
         """
         self._log.info("Creating new userfile at path: {0}".format(fullpath))
         return UserFile(self._client, str(fullpath))
@@ -63,17 +63,17 @@ class FileManager(object):
 
         :Args:
             - files (:class:`.UserFile`, list): *Optional*. Any files to be
-                included in the newly created set. This can be passed in a
-                individual :class:`.UserFile` objects or as a list of
-                :class:`.UserFile` objects.
+              included in the newly created set. This can be passed in a
+              individual :class:`.UserFile` objects or as a list of
+              :class:`.UserFile` objects.
 
         :Returns:
             - :class:`.FileCollection` The new FileCollection, containing any
-                specified userfiles.
+              specified userfiles.
 
         :Raises:
             - :exc:`.FileInvalidException` Raised by the FileCollection class
-                if ``files`` contains non-:class:`.UserFile` objects.
+              if ``files`` contains non-:class:`.UserFile` objects.
         """
         self._log.info("Creating new FileCollection with included "
                        "userfiles: {0}".format(len(files)))
@@ -94,22 +94,22 @@ class FileManager(object):
 
         :Args:
             - top_dir (str): The full path to the directory, the contents
-                of which will be added to the set.
+              of which will be added to the set.
 
         :Kwargs:
             - recursive (bool): Whether the set will include the contents of
-                subdirectories. Default is ``False``
+              subdirectories. Default is ``False``
             - pattern (str): The pattern to apply to filter director contents.
-                Default: ``"*"``, i.e. all files included.
+              Default: ``"*"``, i.e. all files included.
 
         :Returns:
             - :class:`.FileCollection` The new FileCollection containing an
-                :class:`.UserFile` object for each non-filtered file in the
-                specified directory.
+              :class:`.UserFile` object for each non-filtered file in the
+              specified directory.
 
         :Raises:
             - :class:`NotADirectoryError` if the supplied directory does not
-                exist.
+              exist.
         """
         top_dir = str(top_dir)
         if not os.path.isdir(top_dir):
@@ -157,8 +157,8 @@ class FileManager(object):
         """List all the files previously uploaded by the user.
 
         :Returns:
-            If successful, A list of :class:`.UserFile` objects,
-            else ``None``.
+            - If successful, A list of :class:`.UserFile` objects,
+              else ``None``.
         """
         all_files = self._client.list_files()
 
@@ -178,15 +178,15 @@ class FileManager(object):
         :Args:
             - name (str): The name of the file to be located in the cloud.
             - last_mod (datetime, str): The last modified timestamp of the
-                file.
+              file.
 
         :Kwargs:
             - full_path (str): The full path of the file to be found.
-                If omitted, and file path is a match.
+              If omitted, and file path is a match.
 
         :Returns:
             - A list of :class:`.UserFile` objects that are uploaded and
-                match the specified names.
+              match the specified names.
         """
         #TODO: Convert datetime to string
         spec = {'FileName':name, 'Timestamp':last_mod}
@@ -209,11 +209,11 @@ class FileManager(object):
 
         :Args:
             - name (str, list): The filename of file to find, including
-                extension. Can also be a list of filenames.
+              extension. Can also be a list of filenames.
 
         :Returns:
             - A list of :class:`.UserFile` objects that are uploaded and
-                match the specified names.
+              match the specified names.
         """
         matches = self._client.query_files(name)
         if matches.success:

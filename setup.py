@@ -20,7 +20,7 @@ setup(
     name='BatchAppsClient',
     version='0.0.1',
     author='Microsoft Corporation',
-    author_email='antisch@microsoft.com',
+    author_email='anna.tisch@microsoft.com',
     packages=['batch_apps', 'batch_apps.test'],
     scripts=[],
     url='http://pypi.python.org/pypi/AzureBatchApps/',

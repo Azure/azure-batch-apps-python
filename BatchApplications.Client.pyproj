@@ -59,7 +59,7 @@
     <Content Include="CHANGES.txt" />
     <Content Include="LICENSE.txt" />
     <Content Include="MANIFEST.in" />
-    <Content Include="README.txt" />
+    <Content Include="README.rst" />
     <Content Include="requirements.txt" />
   </ItemGroup>
   <PropertyGroup>

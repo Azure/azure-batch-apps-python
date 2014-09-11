@@ -45,11 +45,11 @@ class FileCollection(object):
     def __init__(self, client, *files):
         """
         :Args:
-            - client (:class:`BatchAppsApi`): An authorized Batch Apps
-                Management API REST client.
+            - client (:class:`.BatchAppsApi`): An authorized Batch Apps
+              Management API REST client.
             - files (:class:`UserFile`, list): *Optional*. Any files to be
-                included in the collection. Can be individual
-                :class:`UserFile` objects or a list of them.
+              included in the collection. Can be individual
+              :class:`UserFile` objects or a list of them.
         """
         if not hasattr(client, 'query_files'):
             raise TypeError(
@@ -65,7 +65,7 @@ class FileCollection(object):
     def __str__(self):
         """String representation of FileCollection
 
-        Returns:
+        :Returns:
             - A string containing a list of filenames
         """
         return str([str(a) for a in self._collection])
@@ -75,9 +75,9 @@ class FileCollection(object):
 
         :Returns:
             - Number of files in the collection.
-                I.e. Length of internal list _collection
-                Example usage:
-                    >> if len(my_asset_collection) == 0: print("Empty")
+              I.e. Length of internal list _collection
+              Example usage:
+                  >> if len(my_asset_collection) == 0: print("Empty")
         """
         return len(self._collection)
 
@@ -86,8 +86,8 @@ class FileCollection(object):
 
         :Returns:
             - Iterator for internal list _collection.
-                Example usage:
-                    >> for _file in FileCollection(my_list): print(_file.name)
+              Example usage:
+                  >> for _file in FileCollection(my_list): print(_file.name)
         """
         return iter(self._collection)
 
@@ -96,26 +96,26 @@ class FileCollection(object):
 
         :Args:
             - filekey (int, str, slice): Index of a specific userfile in the
-                collection. This can be an integer index, a slice index or the
-                name of a particular file.
+              collection. This can be an integer index, a slice index or the
+              name of a particular file.
 
         :Returns:
-            If a string name is passed in, the output will be a list of
-            :class:`.UserFile` objects, as multplie files may have the same
-            name. Likewise, passing in a slice will produce a list of
-            :class:`.UserFile`. Passing an int index will return a single
-            :class:`.UserFile`
-            Example usage:
-                >> print(my_collection[5])
-                "texture.tif"
-                >> print(my_collection["star.png"])
-                "['star.png']"
-                >> print(my_collection[5:-3])
-                "['texture.tif', 'star.png']"
+            - If a string name is passed in, the output will be a list of
+              :class:`.UserFile` objects, as multplie files may have the same
+              name. Likewise, passing in a slice will produce a list of
+              :class:`.UserFile`. Passing an int index will return a single
+              :class:`.UserFile`
+              Example usage:
+                  >> print(my_collection[5])
+                  "texture.tif"
+                  >> print(my_collection["star.png"])
+                  "['star.png']"
+                  >> print(my_collection[5:-3])
+                  "['texture.tif', 'star.png']"
 
         :Raises:
             - FileMissingException: UserFile is not found or index is out
-                of range.
+              of range.
         """
         if isinstance(filekey, int) and filekey < len(self):
             return self._collection[filekey]
@@ -137,7 +137,7 @@ class FileCollection(object):
             - filekey: Ignored
 
         :Raises:
-            TypeError - an FileCollection subscript cannot be assigned to
+            - TypeError - an FileCollection subscript cannot be assigned to
         """
         raise TypeError("Collection subscript cannot be assigned to")
 
@@ -147,11 +147,11 @@ class FileCollection(object):
 
         :Args:
             - filekey (int, str): It an integer, will delete the userfile in
-                the collection at that index. Otherwise if it's a string, all
-                files in the collection with that name will be deleted.
+              the collection at that index. Otherwise if it's a string, all
+              files in the collection with that name will be deleted.
 
-                If the name is not found, or the index out of range,
-                nothing will happen.
+              If the name is not found, or the index out of range,
+              nothing will happen.
         """
         if isinstance(filekey, int) and filekey < len(self):
             del self._collection[filekey]
@@ -168,12 +168,12 @@ class FileCollection(object):
         Only used internally in :func:upload by the parallel subprocesses
 
         :Args:
-            -userfile (:class:`.UserFile`): The file from the collection
-                to be uploaded
+            - userfile (:class:`.UserFile`): The file from the collection
+              to be uploaded
 
         :Returns:
-            A tuple containing the result of the :func:`UserFile.upload` call,
-            and the original userfile.
+            - A tuple containing the result of the :func:`UserFile.upload` call,
+              and the original userfile.
         """
         self._log.debug("About to upload file: {0}".format(userfile))
         return (userfile.upload(force=True), userfile)
@@ -182,8 +182,8 @@ class FileCollection(object):
         """Generate file specifier list for REST API
 
         :Returns:
-            A list of the file specifier messages for each :class:`.UserFile`
-            in the collection, formatted for use for the REST API client.
+            - A list of the file specifier messages for each :class:`.UserFile`
+              in the collection, formatted for use for the REST API client.
         """
         filespecs = []
         for _file in self._collection:
@@ -201,14 +201,14 @@ class FileCollection(object):
 
         :Args:
             - userfile (:class:`.UserFile`, list): File to be added to the
-                collection. Must be unique or FileInvalidException will be
-                raised. ``userfile`` can also be a list, all non-unique and
-                non-:class:`.UserFile` objects will be removed with a warning
-                before the list is added to the collection.
+              collection. Must be unique or FileInvalidException will be
+              raised. ``userfile`` can also be a list, all non-unique and
+              non-:class:`.UserFile` objects will be removed with a warning
+              before the list is added to the collection.
 
         :Raises:
-            FileInvalidException if called with a non:cass:`.UserFile` object
-            or the file is already in the collection.
+            - :class:`.FileInvalidException` if called with a non:class:`.UserFile` object
+              or the file is already in the collection.
         """
         if isinstance(userfile, UserFile) and userfile not in self._collection:
             self._log.debug("Adding UserFile object to collection: "
@@ -238,12 +238,12 @@ class FileCollection(object):
 
         :Args:
             - file_collection (:class:`.FileCollection`): A file collection to
-                be merged into the current collection. Any duplicate userfiles
-                will be removed.
+              be merged into the current collection. Any duplicate userfiles
+              will be removed.
 
         :Raises:
             - AttributeError if ``file_collection`` is not a
-                :class:`.FileCollection`
+              :class:`.FileCollection`
         """
         if isinstance(file_collection, FileCollection):
             self._log.debug(
@@ -264,15 +264,15 @@ class FileCollection(object):
 
         :Args:
             - userfile (str, int, :class:`.UserFile`, list, slice): The name,
-                object or index of the file to be removed. If a name is passed
-                in, only the first occurance of that name will be removed. To
-                remove all occurances, use :meth:`.__delitem__()`.
-                A :class:`.UserFile` object can also be passed in or a list
-                of any of the above.
+              object or index of the file to be removed. If a name is passed
+              in, only the first occurance of that name will be removed. To
+              remove all occurances, use :meth:`.__delitem__()`.
+              A :class:`.UserFile` object can also be passed in or a list
+              of any of the above.
 
         :Raises:
-            TypeError if ``userfile`` is not a :class:`.UserFile`, int, str,
-            slice or list thereof.
+            - TypeError if ``userfile`` is not a :class:`.UserFile`, int, str,
+              slice or list thereof.
         """
         if isinstance(userfile, int) and userfile < len(self):
             self._log.debug("Removing userfile {0} from index: "
@@ -313,20 +313,20 @@ class FileCollection(object):
 
         :Kwargs:
             - force (bool): Whether the client will only upload if the file
-                has not be previously uploaded. Default is ``False``,
-                i.e. always check and if file has been uploaded, don't
-                re-uplod. Set to ``True`` to upload regardless.
+              has not be previously uploaded. Default is ``False``,
+              i.e. always check and if file has been uploaded, don't
+              re-uplod. Set to ``True`` to upload regardless.
             - threads (int): number of parallel uploads, default is 1
-                (i.e. not parallel). Max threads is 10.
+              (i.e. not parallel). Max threads is 10.
 
         :Returns:
-            A list of tuples containing any files that failed to upload and
-            the exception information. In the format:
-            ``[(UserFile(), Exception()), (UserFile(), Exception())..]``
+            - A list of tuples containing any files that failed to upload and
+              the exception information. In the format:
+              ``[(UserFile(), Exception()), (UserFile(), Exception())..]``
 
-            If an exception occurred during the threading process, the
-            exception will be logged and a list containing the files
-            pending upload will be returned.
+            - If an exception occurred during the threading process, the
+              exception will be logged and a list containing the files
+              pending upload will be returned.
 
         :: warning ::
             During parallel uploads, messages will only be logged to the
@@ -392,17 +392,17 @@ class FileCollection(object):
 
         :Kwargs:
             - per_call (int): Number of files to check against the server
-                at a time. The more per call, the slower the call and the
-                bigger the return object, but too few per call could mean a
-                large number of calls for a big file collection. Default is 50.
+              at a time. The more per call, the slower the call and the
+              bigger the return object, but too few per call could mean a
+              large number of calls for a big file collection. Default is 50.
 
         :Returns:
-            An :class:`FileCollection` containing the files that have yet
-            to be uploaded.
+            - An :class:`FileCollection` containing the files that have yet
+              to be uploaded.
 
         :Raises:
-            RestCallException. If an exception has been thrown be the REST
-            client, it will be raised here.
+            - :class:`.RestCallException`. If an exception has been thrown be the REST
+              client, it will be raised here.
         """
         file_set = FileCollection(self._api, *list(self._collection))
         collection_spec = self._get_message("query")
@@ -457,12 +457,12 @@ class UserFile(object):
         """
         :Args:
             - client (:class:`BatchAppsApi`): Authenticated and configured
-                REST API client.
+              REST API client.
             - file_def (str, dict): Defining information on the file. To create
-                a userfile of a local file, this will be a string of the full
-                path to the file. To represent a userfile that exists in the
-                cloud, this will be a dictionary containing the path, name,
-                last modified date, and url to the file.
+              a userfile of a local file, this will be a string of the full
+              path to the file. To represent a userfile that exists in the
+              cloud, this will be a dictionary containing the path, name,
+              last modified date, and url to the file.
         """
         if not hasattr(client, 'send_file'):
             raise TypeError(
@@ -505,9 +505,9 @@ class UserFile(object):
     def __len__(self):
         """Determine userfile length as the size of the file in bytes.
 
-        Returns:
+        :Returns:
             - Size of the file in bytes (int)
-                If the file doesn't exist, return 0.
+              If the file doesn't exist, return 0.
         """
         if self._exists:
             return path.getsize(self.path)
@@ -523,7 +523,7 @@ class UserFile(object):
 
         :Args:
             - compare_to (:class:`.UserFile`): The userfile to compare the
-                current userfile to.
+              current userfile to.
 
         :Returns:
             - ``True`` if the two files are equal, else ``False``.
@@ -550,11 +550,11 @@ class UserFile(object):
 
         :Args:
             - compare_to (:class:`.UserFile`): The userfile to sort the current
-                userfile against.
+              userfile against.
 
         :Returns:
             - ``True`` if current userfile is "less than" passed in userfile,
-                else ``False``.
+              else ``False``.
 
         Example usage:
             >> print(sorted(my_asset_collection))
@@ -588,7 +588,7 @@ class UserFile(object):
         """Verify existance of new userfile reference.
 
         :Returns:
-            ``True`` if file exists at the given path, else ``False``.
+            - ``True`` if file exists at the given path, else ``False``.
         """
         if not path.isfile(self.path):
             self._log.warning(
@@ -602,8 +602,8 @@ class UserFile(object):
         """Format the file path for use on Windows OS (Azure).
 
         :Returns:
-            Modified path with forward slashes replaced. No changes are
-            made to the root or structure of the path.
+            - Modified path with forward slashes replaced. No changes are
+              made to the root or structure of the path.
         """
         return self.path.replace('/', '\\')
 
@@ -612,7 +612,7 @@ class UserFile(object):
 
         :Returns:
             - If the file exists locally, the last modified
-                timestamp (string).
+              timestamp (string).
             - If the file doesn't exist locally, an empty string.
         """
 
@@ -628,11 +628,11 @@ class UserFile(object):
 
         :Args:
             - compare_to (:class:`.UserFile`): UserFile to compare to
-                current userfile.
+              current userfile.
 
         :Returns:
-            ``True`` if the files were last modified at the same time,
-            else ``False``.
+            - ``True`` if the files were last modified at the same time,
+              else ``False``.
         """
         self._last_modified = self.get_last_modified()
         file1 = utils.parse_date_string(self._last_modified)
@@ -673,11 +673,11 @@ class UserFile(object):
 
         :Returns:
             - Dictionary of the file specification.
-                Format: ``{'FileName':'', 'Timestamp':'', 'OriginalPath':''}``
+              Format: ``{'FileName':'', 'Timestamp':'', 'OriginalPath':''}``
 
         :Raises:
-            :class:`.FileMissingException` if the file of which the specifier
-            is requested does not exist locally.
+            - :class:`.FileMissingException` if the file of which the specifier
+              is requested does not exist locally.
         """
         if not self._exists:
             raise FileMissingException("File is not found to exist at path: "
@@ -697,11 +697,11 @@ class UserFile(object):
 
         :Returns:
             - Dictionary of the file specification.
-                Format: ``{'Name':'', 'Timestamp':''}``
+              Format: ``{'Name':'', 'Timestamp':''}``
 
         :Raises:
-            :class:`.FileMissingException` if the file of which the specifier
-            is requested does not exist locally.
+            - :class:`.FileMissingException` if the file of which the specifier
+              is requested does not exist locally.
         """
         if not self._exists:
             raise FileMissingException("File is not found to exist at path: "
@@ -720,8 +720,8 @@ class UserFile(object):
 
         :Kwargs:
             - force (bool): If ``True``, uploads regardless of whether the
-                file has already been uploaded. Else, checks if file has been
-                uploaded, and if so, skips.
+              file has already been uploaded. Else, checks if file has been
+              uploaded, and if so, skips.
 
         :Returns:
             - Client :class:`.Response` object if upload was attempted.
@@ -746,11 +746,11 @@ class UserFile(object):
         """Check if a file has already been uploaded.
 
         :Returns:
-            ``True`` if file has already been uploaded, else ``False``.
+            - ``True`` if file has already been uploaded, else ``False``.
 
         :Raises:
-            :class:`.RestCallException` if any errors occured in the API
-            client.
+            - :class:`.RestCallException` if any errors occured in the API
+              client.
         """
         resp = self._api.query_files(self.create_query_specifier())
         if resp.success:

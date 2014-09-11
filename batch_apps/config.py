@@ -55,29 +55,29 @@ class Configuration(object):
 
         :Kwargs:
             - data_path (str): The path where Batch Apps client data
-                (logs, configs) will be saved. If not set, will default to User
-                directory, i.e. ``os.path.expanduser("~")``
+              (logs, configs) will be saved. If not set, will default to User
+              directory, i.e. ``os.path.expanduser("~")``
             - log_level (str): The level of logging during Batch Apps session.
-                Must be a string in ``['debug', 'info', 'warning', 'error',
-                'critical']``. If not set default is 'warning'.
+              Must be a string in ``['debug', 'info', 'warning', 'error',
+              'critical']``. If not set default is 'warning'.
             - application (str): The application job type, used to determine
-                how a job will be processed in the cloud. The list of available
-                job types will depend on the configuration and can checked
-                using the :meth:`.applications()` method.
-                Default application is 'Blender'.
+              how a job will be processed in the cloud. The list of available
+              job types will depend on the configuration and can checked
+              using the :meth:`.applications()` method.
+              Default application is 'Blender'.
             - name (str): The name of the configuration file to read from and
-                save to. Unless set, the default 'batch_apps.ini' will be used.
+              save to. Unless set, the default 'batch_apps.ini' will be used.
             - datadir (str): The name of the directory that will be created to
-                hold the date (logs etc). Unless set the default
-                'BatchAppsData' will be used.
+              hold the date (logs etc). Unless set the default
+              'BatchAppsData' will be used.
             - default (bool): If ``True``, the default configuration will be
-                used regardless of whether an existing configuration file is
-                found. Any existing config will be overwritten by defaults
-                (unless an alternative config ``name`` is set).
+              used regardless of whether an existing configuration file is
+              found. Any existing config will be overwritten by defaults
+              (unless an alternative config ``name`` is set).
 
         :Raises:
-            :exc:`.InvalidConfigException` if the specified application is
-            not defined in the config.
+            - :exc:`.InvalidConfigException` if the specified application is
+              not defined in the config.
 
         """
         self._config = configparser.RawConfigParser()
@@ -183,13 +183,13 @@ class Configuration(object):
 
         :Args:
             - test_dir (str): Full path to the directory to be tested. If this
-                directory does not yet exist it will attempt to create it.
-                It will also attempt to write and then remove a temp file to
-                this directory to ensure the correct permissions are available.
+              directory does not yet exist it will attempt to create it.
+              It will also attempt to write and then remove a temp file to
+              this directory to ensure the correct permissions are available.
 
         :Returns:
-            ``True`` if the directory exists and can be written to,
-            else ``False``.
+            - ``True`` if the directory exists and can be written to,
+              else ``False``.
         """
         test_dir = os.path.join(test_dir, self._dir)
         try:
@@ -225,12 +225,12 @@ class Configuration(object):
 
         :Args:
             - data_path (str): The path that the log file will be written to
-                if file writting is enabled in the configuration
-                (see :meth:._check_directory())
+              if file writting is enabled in the configuration
+              (see :meth:._check_directory())
 
         :Returns:
             - :class:`.PickleLogger`: Configured logging singleton, using
-                custom serializable Logger extension class.
+              custom serializable Logger extension class.
         """
 
         if not self._config.has_section('Logging'):
@@ -271,10 +271,10 @@ class Configuration(object):
 
         :Args:
             - level (str): The logging level required for the session.
-                Must be one of the following:
-                ``['debug', 'info', 'warning', 'error', 'critical']``.
-                The input is not case sensitive. If an invalid input is
-                supplied, the default level - 'warning' - will be set.
+              Must be one of the following:
+              ``['debug', 'info', 'warning', 'error', 'critical']``.
+              The input is not case sensitive. If an invalid input is
+              supplied, the default level - 'warning' - will be set.
 
         :Returns:
             - The level applied (int).
@@ -335,7 +335,7 @@ class Configuration(object):
         writing, this will be logged but not raised.
 
         :Returns:
-            True if save was successful, else False.
+            - ``True`` if save was successful, else ``False``.
         """
         if not self._write_file:
             self._log.warning("Config file writing disabled - "
@@ -361,7 +361,7 @@ class Configuration(object):
         logged but not raised.
 
         :Returns:
-            ``True`` is the config was successfully cleared, else ``False``.
+            - ``True`` is the config was successfully cleared, else ``False``.
         """
         try:
             self._log.debug("Attempting to clear config "
@@ -385,17 +385,17 @@ class Configuration(object):
 
         :Args:
             - endpoint (str): *optional* A new endpoint, if supplied, will
-                redirect job submission for the current application. To persist
-                changes :meth:`.save_config()` must be called.
+              redirect job submission for the current application. To persist
+              changes :meth:`.save_config()` must be called.
 
         :Returns:
-            If ``endpoint`` is not supplied, the endpoint for the current
-                application will be returned (str). Otherwise the new
-                endpoint (str).
+            - If ``endpoint`` is not supplied, the endpoint for the current
+              application will be returned (str). Otherwise the new
+              endpoint (str).
 
         :Raises:
-            :exc:`.InvalidConfigException` if current application does not
-            have an endpoint configured.
+            - :exc:`.InvalidConfigException` if current application does not
+              have an endpoint configured.
 
         """
         if len(endpoint) > 0 and self._config.has_section(self.job_type):
@@ -417,18 +417,18 @@ class Configuration(object):
     def logging_level(self, *level):
         """Gets and sets the current logging level.
 
-        Args:
+        :Args:
             - level (str): *optional* A new level, if supplied, all further
-                logging in the current session will be at the new level. To
-                persist changes :meth:`.save_config()` must be called.
+              logging in the current session will be at the new level. To
+              persist changes :meth:`.save_config()` must be called.
 
-        Returns:
-            If ``level`` is not supplied, the current level used will be
-                returned (str). Otherwise the new level (str).
+        :Returns:
+            - If ``level`` is not supplied, the current level used will be
+              returned (str). Otherwise the new level (str).
 
-        Raises:
-            :exc:`.InvalidConfigException` if current configuration does not
-            have a logging level configured.
+        :Raises:
+            - :exc:`.InvalidConfigException` if current configuration does not
+              have a logging level configured.
 
         """
         if len(level) > 0 and self._config.has_option('Logging', 'level'):
@@ -453,15 +453,15 @@ class Configuration(object):
 
         :Args:
             - application (str): *optional* A new application, if supplied,
-                will update the current job type and job configuration for new
-                job submissions.
+              will update the current job type and job configuration for new
+              job submissions.
 
         :Returns:
-            The current application (str)
+            - The current application (str)
 
         :Raises:
-            :exc:`.InvalidConfigException` if the supplied application has no
-            associated configuration.
+            - :exc:`.InvalidConfigException` if the supplied application has no
+              associated configuration.
 
         """
         if application and self._config.has_section(str(application[0])):
@@ -482,7 +482,7 @@ class Configuration(object):
         """Gets a list of all the applications defined in the configuration.
 
         :Returns:
-            A list of strings of the application options configured.
+            - A list of strings of the application options configured.
 
         """
         apps = list(self._config.sections())
@@ -493,8 +493,8 @@ class Configuration(object):
         """Gets the default parameters for the current application.
 
         :Returns:
-            A dictionary of all the string parameters tied to the application.
-            This includes the application endpoint.
+            - A dictionary of all the string parameters tied to the application.
+              This includes the application endpoint.
 
         """
         return dict(self._config.items(self.job_type))
@@ -504,14 +504,14 @@ class Configuration(object):
 
         :Args:
             - application (str): The name of the application / job type to be
-                added.
+              added.
             - endpoint (str): The api endpoint for all server communication for
-                this application.
+              this application.
 
         :Kwargs:
             - params: *optional* Any additional parameters to be associated
-                with the application and to be submitted with a job of this
-                type can be added as keyword arguments.
+              with the application and to be submitted with a job of this
+              type can be added as keyword arguments.
 
         """
         self._log.debug("Configuring new application: "
@@ -533,7 +533,7 @@ class Configuration(object):
 
         :Args:
             - param (str): The parameter to set, either new or already
-                existing.
+              existing.
             - value (str): The value to assign to the given parameter.
 
         """
@@ -557,8 +557,8 @@ class Configuration(object):
             - param (str): The parameter to retrieve.
 
         :Returns:
-            The value of the given parameter (str) if it exists.
-            None if the parameter doesn't exist and a warning will be logged.
+            - The value of the given parameter (str) if it exists.
+            - ``None`` if the parameter doesn't exist and a warning will be logged.
 
         """
         try:
@@ -579,16 +579,16 @@ class Configuration(object):
 
         :Args:
             - setting (str): Application or parameter to be removed from
-                the config. If the supplied setting is not an application or
-                current application parameter, nothing will happen. The
-                'Logging' and 'Authentication' sections cannot be removed.
-                Likewise, the 'endpoint' parameter for an application cannot
-                be removed.
+              the config. If the supplied setting is not an application or
+              current application parameter, nothing will happen. The
+              'Logging' and 'Authentication' sections cannot be removed.
+              Likewise, the 'endpoint' parameter for an application cannot
+              be removed.
 
         :Raises:
-            :exc:`ValueError` if the section to be removed is the current
-            application. The current application will need to be changed before
-            the section can be removed.
+            - :exc:`ValueError` if the section to be removed is the current
+              application. The current application will need to be changed before
+              the section can be removed.
         """
         setting = str(setting)
         if (self._config.has_section(str(setting)) and
@@ -631,8 +631,8 @@ class Configuration(object):
             - dict containing the authentication parameters.
 
         :Raises:
-            :class:`.InvalidConfigException` is the authentication defaults
-            are not found in the configuration.
+            - :class:`.InvalidConfigException` is the authentication defaults
+              are not found in the configuration.
         """
         try:
             return dict(self._config.items("Authentication"))

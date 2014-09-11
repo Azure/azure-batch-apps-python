@@ -37,12 +37,12 @@ class Response(object):
         """
         :Args:
             - success (bool): Whether the REST call completed successfully and
-                returned an applicable result.
+              returned an applicable result.
 
         :Kwargs:
             - output: The response from the REST client. This could be the
-                result of a successful api call, or it could hold exception
-                information for a failed call. Defaults to None.
+              result of a successful api call, or it could hold exception
+              information for a failed call. Defaults to None.
         """
         self.success = success
         self.result = output
@@ -62,10 +62,10 @@ class BatchAppsApi(object):
         """
         :Args:
             - credentials (:class:`.Credentials`): Credentials with which all
-                API calls will be authenticated.
+              API calls will be authenticated.
             - config (:class:`.Configuration`): Configuration of the
-                application the jobs will be submitted as, as well as endpoint
-                and logging configuration.
+              application the jobs will be submitted as, as well as endpoint
+              and logging configuration.
         """
         self._config = config
         self._log = logging.getLogger('batch_apps')
@@ -79,7 +79,7 @@ class BatchAppsApi(object):
         """Retrieve the current jobtype from the :class:`.Configuration`.
 
         :Returns:
-            The current application from the configuration (str).
+            - The current application from the configuration (str).
         """
         return self._config.application()
 
@@ -88,7 +88,7 @@ class BatchAppsApi(object):
 
         :Args:
             - api_call (str): the url of the method that will be appended to
-                the root url provided by the :class:`.Configuration`.
+              the root url provided by the :class:`.Configuration`.
 
         :Returns:
             - The complete, formatted url (str)
@@ -109,7 +109,7 @@ class BatchAppsApi(object):
         :class:`.Configuration`
 
         :Returns:
-            Dictionary of strings of the configured parameters
+            - Dictionary of strings of the configured parameters
         """
         return self._config.default_params()
 
@@ -118,17 +118,17 @@ class BatchAppsApi(object):
 
         :Kwargs:
             - index (int): The starting index from which the list of jobs will
-                be returned. Default is 0, i.e. return all jobs from the start.
+              be returned. Default is 0, i.e. return all jobs from the start.
             - per_call (int): The number of job entries from ``index`` to
-                return. Default is 10.
+              return. Default is 10.
             - name (str): Return only the jobs whose name contains the given
-                string. Default is None.
+              string. Default is None.
 
         :Returns:
-            :class:`.Response` object containing success of call. If
-                successful, the ``Response.result`` will contain a list of
-                jobs as dictionaries. If failed, ``Response.result`` will
-                hold the :exc:`.RestCallException`.
+            - :class:`.Response` object containing success of call. If
+              successful, the ``Response.result`` will contain a list of
+              jobs as dictionaries. If failed, ``Response.result`` will
+              hold the :exc:`.RestCallException`.
         """
         self._log.debug("list_jobs, index={0}, per_call={1}, name={2}".format(
             index,
@@ -168,15 +168,15 @@ class BatchAppsApi(object):
             - url (str): A complete url to the job info.
 
         :Returns:
-            A :class:`.Response` object containing the job details as a
-            dictionary, if successful. Otherwise the Response will
-            contain the :exc:`.RestCallException`.
+            - A :class:`.Response` object containing the job details as a
+              dictionary, if successful. Otherwise the Response will
+              contain the :exc:`.RestCallException`.
 
         :Raises:
             - :class:`.RestCallException` if neither job ID or url are
-                supplied.
+              supplied.
             - :class:`.RestCallException` if job details dictionary is
-                malformed / missing necessary keys
+              malformed / missing necessary keys
         """
         self._log.debug("get_job, job_id={0}, url={1}".format(job_id, url))
         if not url and job_id:
@@ -209,16 +209,16 @@ class BatchAppsApi(object):
 
         :Args:
             - job_message (dict): A job specification formatted as a
-                dictionary.
+              dictionary.
 
         :Returns:
-            A :class:`.Response` object containing a dictionary of the newly
-            submitted job's ID and details url if successful. Otherwise the
-            Response will contain the :exc:`.RestCallException`.
+            - A :class:`.Response` object containing a dictionary of the newly
+              submitted job's ID and details url if successful. Otherwise the
+              Response will contain the :exc:`.RestCallException`.
 
         :Raises:
             - :class:`.RestCallException` if new job dictionary is
-                malformed / missing necessary keys.
+              malformed / missing necessary keys.
         """
         self._log.debug("send_job, job_message={0}".format(job_message))
         url = self.url("jobs")
@@ -252,19 +252,19 @@ class BatchAppsApi(object):
 
         :Kwargs:
             - start (str): The start time from which the logs will be
-                downloaded. If not specified, the default is from the
-                beginning of the job.
+              downloaded. If not specified, the default is from the
+              beginning of the job.
             - max_lines (int): The max number of logging messages to retrieve.
-                Default is 100. If set to ``None``, all messages from start
-                time will be retrieved.
+              Default is 100. If set to ``None``, all messages from start
+              time will be retrieved.
 
         :Returns:
-            A :class:`.Response` object with a dictionary containing the
-            timestamp of the most recent message returned and a list of
-            the log messages, represented as dictionaries, with the message
-            text, timestamp and task id that the message applies to.
-            If the call failed, the response contains the
-            :class:`.RestCallException`.
+            - A :class:`.Response` object with a dictionary containing the
+              timestamp of the most recent message returned and a list of
+              the log messages, represented as dictionaries, with the message
+              text, timestamp and task id that the message applies to.
+            - If the call failed, the response contains the
+              :class:`.RestCallException`.
         """
         self._log.debug("get_log, job_id={0}, start={1}, max_lines={2}".format(
             job_id,
@@ -299,13 +299,13 @@ class BatchAppsApi(object):
 
         :Returns:
             - A :class:`.Response` object with the POST response, however this
-                is not required if the call is successful. The call will only
-                be successful if the job can be and is cancelled.
+              is not required if the call is successful. The call will only
+              be successful if the job can be and is cancelled.
             - If the job is not running (and therefore cannot be cancelled),
-                the call will fail and the :class:`.RestCallException` will be
-                returned in the :class:`.Response` object.
+              the call will fail and the :class:`.RestCallException` will be
+              returned in the :class:`.Response` object.
             - Any other communication failures will also return a
-                :class:`.RestCallException`.
+              :class:`.RestCallException`.
         """
         self._log.debug("cancel, job_id={0}".format(job_id))
         url = self.url("jobs/{jobid}/actions/cancel").format(jobid=job_id)
@@ -328,11 +328,11 @@ class BatchAppsApi(object):
             - job_id (str): ID of the job to be reprocessed.
 
         :Returns:
-            A :class:`.Response` object containing a dictionary with the job
-            ID of the reprocessed job and a url to retrieve the job
-            information (see :meth:`.BatchAppsApi.get_job()`).
-            If the call failed the response will hold the
-            :class:`.RestCallException`.
+            - A :class:`.Response` object containing a dictionary with the job
+              ID of the reprocessed job and a url to retrieve the job
+              information (see :meth:`.BatchAppsApi.get_job()`).
+            - If the call failed the response will hold the
+              :class:`.RestCallException`.
         """
         self._log.debug("reprocess, job_id={0}".format(job_id))
         url = self.url("jobs/{jobid}/actions/reprocess").format(jobid=job_id)
@@ -361,9 +361,9 @@ class BatchAppsApi(object):
 
         :Returns:
             - A list of the outputs represented as dictionaries, each with
-                the 'name' and 'type' of the output as well as a download
-                'link'. Contained in a :class:`.Response`. If the call failed,
-                Response will contain the :class:`.RestCallException`.
+              the 'name' and 'type' of the output as well as a download
+              'link'. Contained in a :class:`.Response`. If the call failed,
+              Response will contain the :class:`.RestCallException`.
         """
         self._log.debug("list_outputs, job_id={0}".format(job_id))
         url = self.url("jobs/{jobid}/outputs").format(jobid=job_id)
@@ -408,29 +408,29 @@ class BatchAppsApi(object):
 
         :Args:
             - download_dir (str): The full path to the directory where the
-                output will be downloaded to.
+              output will be downloaded to.
             - size (int): The size in bytes of the file to be downloaded.
-                Used for progress reporting.
+              Used for progress reporting.
             - fname (str): The name of the output file to be downloaded.
             - overwrite (bool): Whether to overwrite an existing file if
-                present.
+              present.
 
         :Kwargs:
             - job_id (str): The ID of the job whose output will be downloaded.
-                Default is None.
+              Default is None.
             - otype (str): The type of output to be downloaded, must be a
-                string in ``['output', 'preview']``.
+              string in ``['output', 'preview']``.
             - url (str): The url directly to the file to be downloaded. If
-                supplied, ``job_id`` and ``otype`` will not be used.
-                Default is None.
+              supplied, ``job_id`` and ``otype`` will not be used.
+              Default is None.
 
         :Returns:
             - :class:`.Response` with the GET response, however this is not
-                required if the call was successful.
+              required if the call was successful.
             - :class:`.Response` with :exc:`AttributeError` if the correct
-                url arguments are not supplied.
+              url arguments are not supplied.
             - :class:`.Response` with :class:`.RestCallException` if the
-                download failed.
+              download failed.
         """
         self._log.debug(
             "get_output, download_dir={dd}, size={sz}, fname={fn}, "
@@ -487,20 +487,20 @@ class BatchAppsApi(object):
 
         :Kwargs:
             - job_id (str): The ID of the job whose output will be checked.
-                Default is None.
+              Default is None.
             - otype (str): The type of output to be checked, must be a
-                string in ``['output', 'preview']``.
+              string in ``['output', 'preview']``.
             - url (str): The url directly to the file to be checked. If
-                supplied, ``job_id`` and ``otype`` will not be used.
-                Default is None.
+              supplied, ``job_id`` and ``otype`` will not be used.
+              Default is None.
 
         :Returns:
             - :class:`.Response` with the requested output size in bytes (int)
-                if the call was successful.
+              if the call was successful.
             - :class:`.Response` with :exc:`AttributeError` if the correct url
-                arguments are not supplied.
+              arguments are not supplied.
             - :class:`.Response` with :class:`.RestCallException` if the
-                download failed.
+              download failed.
         """
         self._log.debug("props_output, job_id={0}, "
                         "otype={1}, url={2}".format(job_id, otype, url))
@@ -541,9 +541,9 @@ class BatchAppsApi(object):
 
         :Returns:
             - A list of the outputs represented as dictionaries, each with the
-                'name' and 'type' of the output as well as a download 'link'.
-                Contained in a :class:`.Response`. If the call failed, Response
-                will contain the :class:`.RestCallException`.
+              'name' and 'type' of the output as well as a download 'link'.
+              Contained in a :class:`.Response`. If the call failed, Response
+              will contain the :class:`.RestCallException`.
         """
         self._log.debug("list_output_files, job_id={0}".format(job_id))
         url = self.url("jobs/{jobid}/outputs/files").format(jobid=job_id)
@@ -587,26 +587,26 @@ class BatchAppsApi(object):
 
         :Args:
             - download_dir (str): The full path to the directory where the
-                output will be downloaded to.
+              output will be downloaded to.
             - size (int): The size in bytes of the file to be downloaded.
-                Used for progress reporting.
+              Used for progress reporting.
             - overwrite (bool): Whether to overwrite an existing file if
-                present.
+              present.
 
         :Kwargs:
             - job_id (str): The ID of the job whose output will be downloaded.
-                Default is None.
+              Default is None.
             - fname (str): The name of the output file to be downloaded.
             - url (str): The url directly to the file to be downloaded.
-                Default is None.
+              Default is None.
 
         :Returns:
             - :class:`.Response` with the GET response, however this is not
-                required if the call was successful.
+              required if the call was successful.
             - :class:`.Response` with :exc:`AttributeError` if the correct url
-                arguments are not supplied.
+              arguments are not supplied.
             - :class:`.Response` with :class:`.RestCallException` if the
-                download failed.
+              download failed.
         """
         self._log.debug("get_output_file, download_dir={dd}, size={sz}, "
                         "overwrite={ow}, job_id={ji}, fname={fn}, "
@@ -651,18 +651,18 @@ class BatchAppsApi(object):
 
         :Kwargs:
             - job_id (str): The ID of the job whose output will be checked.
-                Default is None.
+              Default is None.
             - fname (str): The name of the output file to be downloaded.
             - url (str): The url directly to the file to be checked.
-                Default is None.
+              Default is None.
 
         :Returns:
             - :class:`.Response` with the requested output size in bytes (int)
-                if the call was successful.
+              if the call was successful.
             - :class:`.Response` with :exc:`AttributeError` if the correct
-                url arguments are not supplied.
+              url arguments are not supplied.
             - :class:`.Response` with :class:`.RestCallException` if the
-                download failed.
+              download failed.
         """
         self._log.debug("props_output_file, job_id={0}, "
                         "fname={1}, url={2}".format(job_id, fname, url))
@@ -695,15 +695,15 @@ class BatchAppsApi(object):
 
         :Kwargs:
             - job_id (str): ID of of the job to list the tasks for.
-                Default is None.
+              Default is None.
             - url (str): Direct url to the task list of the job
-                (supplied by :meth:`.BatchAppsApi.get_job()`)
+              (supplied by :meth:`.BatchAppsApi.get_job()`)
 
         :Returns:
             - A :class:`.Response` object containing the list of task
-                dictionaries if the call is successfull.
+              dictionaries if the call is successfull.
             - A :class:`.Response` object containing the
-                :class:`.RestCallException` is the call failed.
+              :class:`.RestCallException` is the call failed.
         """
         self._log.debug("list_tasks, job_id={0}, url={1}".format(job_id, url))
         if not url and job_id:
@@ -741,9 +741,9 @@ class BatchAppsApi(object):
 
         :Returns:
             - A list of the outputs represented as dictionaries, each with the
-                'name' and 'type' of the output as well as a download 'link'.
-                Contained in a :class:`.Response`. If the call failed,
-                Response will contain the :class:`.RestCallException`.
+              'name' and 'type' of the output as well as a download 'link'.
+              Contained in a :class:`.Response`. If the call failed,
+              Response will contain the :class:`.RestCallException`.
         """
         self._log.debug("list_task_outputs, job_id={0}, "
                         "task={1}".format(job_id, task))
@@ -782,13 +782,13 @@ class BatchAppsApi(object):
 
         :Returns:
             - A :class:`.Response` object with the POST response, however this
-                is not required if the call is successful. The call will only
-                be successful if the task can be and is cancelled.
+              is not required if the call is successful. The call will only
+              be successful if the task can be and is cancelled.
             - If the task is not running (and therefore cannot be cancelled),
-                the call will fail and the :class:`.RestCallException` will be
-                returned in the :class:`.Response` object.
+              the call will fail and the :class:`.RestCallException` will be
+              returned in the :class:`.Response` object.
             - Any other communication failures will also return a
-                :class:`.RestCallException`.
+              :class:`.RestCallException`.
         """
         self._log.debug("cancel_task, job_id={0}, task={1}".format(job_id,
                                                                    task))
@@ -813,10 +813,10 @@ class BatchAppsApi(object):
 
         :Returns:
             - A :class:`.Response` object containing a list of files as
-                dictionaries, with data:
-                ``['id','name','lastModifiedBy','lastModifiedTime','link']``
+              dictionaries, with data:
+              ``['id','name','lastModifiedBy','lastModifiedTime','link']``
             - If the call failed or if the response is incomplete/malformed
-                a :class:`.Response` object with a :class:`.RestCallException`.
+              a :class:`.Response` object with a :class:`.RestCallException`.
         """
         self._log.debug("list_files, no params")
         url = self.url("files")
@@ -845,22 +845,22 @@ class BatchAppsApi(object):
 
         :Args:
             - files (list, dict, str): The files to query.
-                If this is in the form of a single filename, or list of
-                filenames, the call will query for user files that match
-                that filename. If this is in the form of a dict, or list of
-                dicts, the call will query for a more specific match.
-                Query dict should have the keys ``{'fileName', 'timestamp'}``
-                and optionally ``{'originalPath'}``.
+              If this is in the form of a single filename, or list of
+              filenames, the call will query for user files that match
+              that filename. If this is in the form of a dict, or list of
+              dicts, the call will query for a more specific match.
+              Query dict should have the keys ``{'fileName', 'timestamp'}``
+              and optionally ``{'originalPath'}``.
 
         :Returns:
             - If the query was by filename, a :class:`.Response` containing a
-                list of all the files (as dicts) with that name will be
-                returned.
+              list of all the files (as dicts) with that name will be
+              returned.
             - If the query was by specification, a :class:`.Response`
-                containing a list of all the matching files (as dicts) will
-                be returned.
+              containing a list of all the matching files (as dicts) will
+              be returned.
             - If the call failed, a :class:`.Response` object containing a
-                :class:`.RestCallException` will be returned.
+              :class:`.RestCallException` will be returned.
         """
         self._log.debug("query_files, files={0}".format(files))
         url = self.url("files/query/{queryby}")
@@ -921,14 +921,14 @@ class BatchAppsApi(object):
 
         :Args:
             - files (dict, list): Either a file specification dictionary, or a
-                list of file spec dictionaries.
+              list of file spec dictionaries.
 
         :Returns:
             - A :class:`.Response` object containing a list of the files that
-                don't yet exist in the cloud. The files are represented as a
-                dict with only a 'name' key.
+              don't yet exist in the cloud. The files are represented as a
+              dict with only a 'name' key.
             - If the call failed, a :class:`.Response` object containing
-                a :class:`.RestCallException` is returned.
+              a :class:`.RestCallException` is returned.
         """
         #TODO: Check whether 'FileHash' is supported.
         self._log.debug("query_missing_files, files={0}".format(files))
@@ -968,22 +968,22 @@ class BatchAppsApi(object):
 
         :Args:
             - userfile (:class:`.UserFile`): The userfile reference for the
-                file to be downloaded. Could be generated from a
-                :meth:`.FileManager.list_files()` call or file query.
-                Must have url attr.
+              file to be downloaded. Could be generated from a
+              :meth:`.FileManager.list_files()` call or file query.
+              Must have url attr.
             - size (int): Size of the file in byte to be downloaded
-                (see :meth:`.props_file()`).
+              (see :meth:`.props_file()`).
             - download_dir (str): The full path to the destination directory.
 
         :Kwargs:
             - overwrite (bool): Whether to overwrite a destination file if it
-                already exists. Default is ``False``.
+              already exists. Default is ``False``.
 
         :Returns:
             - :class:`.Response` with the GET response, however this is not
-                required if the call was successful.
+              required if the call was successful.
             - :class:`.Response` with :class:`.RestCallException` if the
-                download failed.
+              download failed.
         """
         #TODO: Nothing uses this yet - maybe build into the FileManager?
         #      Or just UserFile?
@@ -1019,15 +1019,15 @@ class BatchAppsApi(object):
 
         :Args:
             - userfile (:class:`.UserFile`): The userfile reference for the
-                file to be checked. Could be generated from a
-                :meth:`.FileManager.list_files()` call or file query.
-                Must have url attr.
+              file to be checked. Could be generated from a
+              :meth:`.FileManager.list_files()` call or file query.
+              Must have url attr.
 
         :Returns:
             - :class:`.Response` with the requested file size in bytes (int) if
-                the call was successful.
+              the call was successful.
             - :class:`.Response` with :class:`.RestCallException` if the
-                download failed.
+              download failed.
         """
         #TODO: Nothing uses this yet - maybe build into the FileManager?
         #      Or just UserFile?
@@ -1053,14 +1053,14 @@ class BatchAppsApi(object):
 
         :Args:
             - userfile (:class:`.UserFile`): The userfile reference for the
-                file to be uploaded. Must be created from a file that exists
-                locally.
+              file to be uploaded. Must be created from a file that exists
+              locally.
 
         :Returns:
             - :class:`.Response` with the PUT response, however this is not
-                required if the call was successful.
+              required if the call was successful.
             - :class:`.Response` with :class:`.RestCallException` if the
-                upload failed of ``userfile`` was invalid.
+              upload failed of ``userfile`` was invalid.
         """
         #TODO: Get progress feedback working
         if not isinstance(userfile, UserFile):
