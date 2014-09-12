@@ -84,7 +84,7 @@ Job Management
 Job management, including submission, monitoring, and accessing outputs is done 
 through the JobManager class::
 
-    from batch_apps import AzureOAuth, JobManager
+	from batch_apps import AzureOAuth, JobManager
 
 	creds = AzureOAuth.get_session()
 	mgr = JobManager(creds)
@@ -95,7 +95,7 @@ through the JobManager class::
 	job_id = my_job.submit()['jobid']
 
 	job_progress = mgr.get_job(jobid=job_id)
-	s
+	
 	if job_progress.status == 'Complete':
 		job_progress.get_output('c:\\my_download_dir')
 
