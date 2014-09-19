@@ -200,10 +200,8 @@ class JobSubmission(object):
         #TODO: Final check of source file, add xml settings, allow for user
         #      to set priority, verify all job data is correct format
 
-        if (not hasattr(self.required_files, '_get_message')
-            or len(self.required_files) < 1):
-
-            raise ValueError("This job has no files attached.")
+        if not hasattr(self.required_files, '_get_message'):
+            self.add_file_collection()
 
         job_message = {
             'Name': str(self.name),
@@ -358,7 +356,7 @@ class SubmittedJob(object):
     """
     _api = None
     _log = None
-    _id = ""
+    id = ""
 
     type = ""
     name = ""
@@ -382,8 +380,8 @@ class SubmittedJob(object):
         """
         self._api = client
         self._log = logging.getLogger('batch_apps')
-        self._id = job_id
 
+        self.id = job_id
         self.name = job_name
         self.type = job_type
         self.submission = self._format_submission(job_settings)
@@ -395,6 +393,18 @@ class SubmittedJob(object):
             - The dict of the job object.
         """
         return str(self.__dict__)
+
+    def __len__(self):
+        """Length of a job.
+
+        :Returns:
+            -The number of tasks in the job is available.
+             Otherwise 0.
+        """
+        try:
+            return self.number_tasks
+        except AttributeError:
+            return 0
 
     def __getattr__(self, name):
         """
@@ -493,7 +503,7 @@ class SubmittedJob(object):
         formatted['time_started'] = sub.get('startTime', None)
         formatted['time_completed'] = sub.get('completionTime', None)
         formatted['requested_instances'] = sub.get('instanceCount', None)
-        formatted['number_tasks'] = sub.get('taskCount', None)
+        formatted['number_tasks'] = int(sub.get('taskCount', 0))
         formatted['output_filename'] = sub.get('outputFileName', None)
         formatted['output_url'] = sub.get('outputLink', {'href':None})['href']
         formatted['thumb_url'] = sub.get('previewLink', {'href':None})['href']
@@ -594,6 +604,7 @@ class SubmittedJob(object):
         return self._api.get_output_file(download_dir,
                                          size,
                                          overwrite,
+                                         fname=output.get('name'),
                                          url=output.get('link'))
 
     def get_tasks(self):
@@ -612,10 +623,10 @@ class SubmittedJob(object):
             resp = self._api.list_tasks(url=self.tasks_url)
 
         else:
-            resp = self._api.list_tasks(job_id=self._id)
+            resp = self._api.list_tasks(job_id=self.id)
 
         if resp.success:
-            self.tasks = [Task(self._api, self._id, **task_def)
+            self.tasks = [Task(self._api, self.id, **task_def)
                           for task_def in resp.result]
 
             return self.tasks
@@ -681,7 +692,7 @@ class SubmittedJob(object):
         :Raises:
             - :exc:`.RestCallException` if error occured during request.
         """
-        all_outputs = self._api.list_output_files(self._id)
+        all_outputs = self._api.list_output_files(self.id)
 
         if all_outputs.success:
             return all_outputs.result
@@ -754,7 +765,7 @@ class SubmittedJob(object):
             - If unsuccessful, returns ``None``.
         """
 
-        logs = self._api.get_log(self._id, start, max_lines)
+        logs = self._api.get_log(self.id, start, max_lines)
 
         if logs.success:
             return logs.result
@@ -776,8 +787,8 @@ class SubmittedJob(object):
         :Raises:
             - :exc:`.RestCallException` if an error occured during the request.
         """
-        self._log.debug("About to update job {0}".format(self._id))
-        resp = self._api.get_job(self._id)
+        self._log.debug("About to update job {0}".format(self.id))
+        resp = self._api.get_job(self.id)
 
         if resp.success:
             self.submission = self._format_submission(resp.result)
@@ -799,10 +810,11 @@ class SubmittedJob(object):
         :Raises:
             - :exc:`.RestCallException` if the request failed.
         """
-        self._log.debug("About to cancel job {0}".format(self._id))
-        resp = self._api.cancel(self._id)
+        self._log.debug("About to cancel job {0}".format(self.id))
+        resp = self._api.cancel(self.id)
 
         if resp.success:
+            self.update()
             return True
 
         if resp.result.type is None:
@@ -824,8 +836,8 @@ class SubmittedJob(object):
         :Raises:
             - :exc:`.RestCallException` if the request failed.
         """
-        self._log.debug("About to reprocess job {0}".format(self._id))
-        resp = self._api.reprocess(self._id)
+        self._log.debug("About to reprocess job {0}".format(self.id))
+        resp = self._api.reprocess(self.id)
 
         if resp.success:
             return True
@@ -875,8 +887,8 @@ class Task(object):
         self._api = client
         self._job = str(job_id)
         self._log = logging.getLogger('batch_apps')
-        self._id = props.get('id', None)
 
+        self.id = int(props.get('id', 0))
         self.status = props.get('status', None)
         self.completion_time = props.get('completionTime', None)
         self.instance = props.get('instanceId', None)
@@ -995,7 +1007,7 @@ class Task(object):
         :Raises:
             - :exc:`.RestCallException` if error occured during request.
         """
-        resp = self._api.list_task_outputs(self._job, self._id)
+        resp = self._api.list_task_outputs(self._job, self.id)
 
         if resp.success:
             self.outputs = resp.result
@@ -1041,7 +1053,7 @@ class Task(object):
             - :exc:`.RestCallException` if the request failed or the task was
               not able to be cancelled.
         """
-        resp = self._api.cancel_task(self._job, self._id)
+        resp = self._api.cancel_task(self._job, self.id)
 
         if resp.success:
             return True

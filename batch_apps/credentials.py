@@ -273,6 +273,9 @@ class AzureOAuth(object):
         except oauth2.rfc6749.errors.InvalidGrantError as excp:
             raise AuthenticationException(excp.description)
 
+        except oauth2.rfc6749.errors.OAuth2Error as excp:
+            raise AuthenticationException(excp.description)
+
         authorized_creds = Credentials(AzureOAuth.config,
                                        client_id,
                                        token=token)

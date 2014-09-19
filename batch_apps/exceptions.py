@@ -111,12 +111,12 @@ class RestCallException(Exception):
                          "Message: {msg}".format(type=self.type, msg=self.msg))
 
             if isinstance(excep, Exception):
-                LOG.debug("Root exception details: {args}, {trace}".format(
+                LOG.debug("Details: {args}, {trace}".format(
                     args=excep.args,
                     trace=utils.get_trace(excep)))
 
             elif hasattr(excep, "content"):
-                LOG.debug("Root exception details: {resp}".format(
+                LOG.debug("Details: {resp}".format(
                     resp=excep.content))
 
             else:

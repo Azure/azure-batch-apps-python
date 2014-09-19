@@ -488,7 +488,8 @@ class TestBatchAppsApi(unittest.TestCase):
                                          self.headers,
                                          "c:\\dir",
                                          500,
-                                         False)
+                                         False,
+                                         f_name=None)
         self.assertTrue(val.success)
 
         val = _api.get_output_file("c:\\dir",
@@ -502,7 +503,8 @@ class TestBatchAppsApi(unittest.TestCase):
                                          self.headers,
                                          "c:\\dir",
                                          500,
-                                         False)
+                                         False,
+                                         f_name=None)
         self.assertTrue(val.success)
 
         mock_url.reset()
@@ -795,10 +797,8 @@ class TestBatchAppsApi(unittest.TestCase):
         val = _api.send_file(test_file)
         self.assertTrue(mock_open.called)
         spec = {"OriginalFilePath": mock.ANY,
-                "OwnedBy": mock.ANY,
                 "ContentLength": 0,
                 "ContentType": "application/octet-stream",
-                "LastModifiedBy": mock.ANY,
                 "LastModifiedTime": mock.ANY}
         mock_put.assert_called_with(mock_creds,
                                     "https://test.com",

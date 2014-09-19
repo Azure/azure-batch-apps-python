@@ -199,9 +199,9 @@ class TestFileManager(unittest.TestCase):
         resp.result = RestCallException(None, "test", None)
         mgr._client.list_files.return_value = resp
 
-        test = mgr.list_files()
+        with self.assertRaises(RestCallException):
+            test = mgr.list_files()
         self.assertTrue(mgr._client.list_files.called)
-        self.assertEqual(test, resp.result)
         self.assertFalse(mock_file.called)
 
         resp.success = True
@@ -209,9 +209,9 @@ class TestFileManager(unittest.TestCase):
         test = mgr.list_files()
         self.assertIsInstance(test, list)
         mock_file.assert_any_call(mgr._client, "test")
-        mock_file.assert_any_call(mgr._client, "True")
-        mock_file.assert_any_call(mgr._client, "42")
-        mock_file.assert_any_call(mgr._client, "None")
+        mock_file.assert_any_call(mgr._client, True)
+        mock_file.assert_any_call(mgr._client, 42)
+        mock_file.assert_any_call(mgr._client, None)
         self.assertEqual(mock_file.call_count, 4)
 
     @mock.patch('batch_apps.credentials.Configuration')
@@ -232,12 +232,13 @@ class TestFileManager(unittest.TestCase):
         resp.result = RestCallException(None, "test", None)
         mgr._client.query_files.return_value = resp
 
-        res = mgr.find_file("test", "date")
+        with self.assertRaises(RestCallException):
+            res = mgr.find_file("test", "date")
         mgr._client.query_files.assert_called_with({'FileName':'test',
                                                     'Timestamp':'date'})
-        self.assertEqual(res, resp.result)
 
-        res = mgr.find_file("test", "date", full_path="path")
+        with self.assertRaises(RestCallException):
+            res = mgr.find_file("test", "date", full_path="path")
         mgr._client.query_files.assert_called_with({'FileName':'test',
                                                     'Timestamp':'date',
                                                     'OriginalPath':'path'})
@@ -251,7 +252,7 @@ class TestFileManager(unittest.TestCase):
         res = mgr.find_file("test", "date")
         self.assertEqual(len(res), 2)
         mock_file.assert_any_call(mgr._client, "testFile")
-        mock_file.assert_any_call(mgr._client, "None")
+        mock_file.assert_any_call(mgr._client, None)
 
     @mock.patch('batch_apps.credentials.Configuration')
     @mock.patch('batch_apps.credentials.Credentials')
@@ -271,11 +272,12 @@ class TestFileManager(unittest.TestCase):
         resp.result = RestCallException(None, "test", None)
         mgr._client.query_files.return_value = resp
 
-        res = mgr.find_files("test")
+        with self.assertRaises(RestCallException):
+            res = mgr.find_files("test")
         mgr._client.query_files.assert_called_with("test")
-        self.assertEqual(res, resp.result)
 
-        res = mgr.find_files([None])
+        with self.assertRaises(RestCallException):
+            res = mgr.find_files([None])
         mgr._client.query_files.assert_called_with([None])
 
         resp.success = True
@@ -288,5 +290,5 @@ class TestFileManager(unittest.TestCase):
         res = mgr.find_files("test")
         self.assertEqual(len(res), 2)
         mock_file.assert_any_call(mgr._client, "testFile")
-        mock_file.assert_any_call(mgr._client, "None")
+        mock_file.assert_any_call(mgr._client, None)
  

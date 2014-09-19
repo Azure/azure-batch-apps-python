@@ -196,6 +196,22 @@ class FileCollection(object):
 
         return filespecs
 
+    def _remove_duplicates(self, rm_list):
+        """Custom duplicate removal for UserFile objects, as
+        using set() does not work correctly.
+
+        :Args:
+            -rm_list (list): The list that will have duplicates removed.
+
+        :Returns:
+            - The cleaned up list.
+        """
+        cleaned = []
+        for i in rm_list:
+            if i not in cleaned:
+                cleaned.append(i)
+        return cleaned
+
     def add(self, userfile):
         """Add a userfile to the collection.
 
@@ -218,7 +234,7 @@ class FileCollection(object):
         elif isinstance(userfile, list):
             self._log.debug("Adding list object to collection")
 
-            file_list = [a for a in userfile
+            file_list = [a for a in self._remove_duplicates(userfile)
                          if isinstance(a, UserFile)
                          and a not in self._collection]
 
@@ -250,7 +266,7 @@ class FileCollection(object):
                 "Extending file collection with: {0}".format(file_collection))
 
             self._collection.extend(file_collection._collection)
-            self._collection = list(set(self._collection))
+            self._collection = self._remove_duplicates(self._collection)
 
         else:
             msg = ("FileCollection can only be "
@@ -352,7 +368,7 @@ class FileCollection(object):
             for _file in file_set:
                 result, userfile = self._upload_forced(_file)
                 if not result.success:
-                    failed.append(userfile)
+                    failed.append((userfile, result.result))
 
         else:
             try:
@@ -621,7 +637,7 @@ class UserFile(object):
             return ""
 
         mod_time = datetime.utcfromtimestamp(path.getmtime(self.path))
-        return mod_time.strftime("%Y-%m-%dT%H:%M:%S.%f") + "Z"
+        return mod_time.strftime("%Y-%m-%dT%H:%M:%S") + "Z"
 
     def compare_lastmodified(self, compare_to):
         """Compare files based on their last modified date.
@@ -633,11 +649,18 @@ class UserFile(object):
         :Returns:
             - ``True`` if the files were last modified at the same time,
               else ``False``.
+            - Returns ``False`` if either of the UserFiles don't exist locally.
         """
+
         self._last_modified = self.get_last_modified()
-        file1 = utils.parse_date_string(self._last_modified)
-        file2 = utils.parse_date_string(compare_to._last_modified)
-        return file1 == file2
+        if not self._last_modified:
+            return False
+        # It looks like the way date time stamps are returned has changed...
+        #file1 = utils.parse_date_string(self._last_modified)
+        #file2 = utils.parse_date_string(compare_to._last_modified)
+        #return file1 == file2
+
+        return self._last_modified == compare_to._last_modified
 
 
     def get_checksum(self):
@@ -758,7 +781,6 @@ class UserFile(object):
                           for r_file in resp.result]
 
             for r_file in resp_files: #TODO: Set up path or md5 comparison
-
                 if (self.name == r_file.name
                     and self.compare_lastmodified(r_file)):
 

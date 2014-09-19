@@ -26,7 +26,7 @@ setup(
     url='http://pypi.python.org/pypi/AzureBatchApps/',
     license='LICENSE.txt',
     description='Batch Apps Python Client.',
-    long_description=open('README.txt').read(),
+    long_description=open('README.rst').read(),
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Programming Language :: Python',

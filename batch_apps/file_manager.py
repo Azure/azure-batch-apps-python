@@ -163,21 +163,21 @@ class FileManager(object):
         all_files = self._client.list_files()
 
         if all_files.success:
-            cloud_files = [UserFile(self._client, str(_file))
+            cloud_files = [UserFile(self._client, _file)
                            for _file in all_files.result]
 
             return cloud_files
 
         else:
-            self._log.error(all_files.result.msg)
-            return all_files.result
+            #self._log.error(all_files.result.msg)
+            raise all_files.result
 
     def find_file(self, name, last_mod, full_path=None):
         """Find the reference to a specific file on the cloud.
 
         :Args:
             - name (str): The name of the file to be located in the cloud.
-            - last_mod (datetime, str): The last modified timestamp of the
+            - last_mod (str): The last modified timestamp of the
               file.
 
         :Kwargs:
@@ -188,20 +188,19 @@ class FileManager(object):
             - A list of :class:`.UserFile` objects that are uploaded and
               match the specified names.
         """
-        #TODO: Convert datetime to string
         spec = {'FileName':name, 'Timestamp':last_mod}
         if full_path:
             spec['OriginalPath'] = full_path
 
         matches = self._client.query_files(spec)
         if matches.success:
-            cloud_files = [UserFile(self._client, str(_file))
+            cloud_files = [UserFile(self._client, _file)
                            for _file in matches.result]
 
             return cloud_files
         else:
-            self._log.error(matches.result.msg)
-            return matches.result
+            #self._log.error(matches.result.msg)
+            raise matches.result
 
     def find_files(self, name):
         """Returns a list of existing files in the users account meeting
@@ -217,10 +216,10 @@ class FileManager(object):
         """
         matches = self._client.query_files(name)
         if matches.success:
-            cloud_files = [UserFile(self._client, str(_file))
+            cloud_files = [UserFile(self._client, _file)
                            for _file in matches.result]
 
             return cloud_files
         else:
-            self._log.error(matches.result.msg)
-            return matches.result
+            #self._log.error(matches.result.msg)
+            raise matches.result

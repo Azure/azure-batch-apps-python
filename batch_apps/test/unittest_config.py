@@ -117,10 +117,11 @@ class TestConfiguration(unittest.TestCase):
         self.assertTrue(mock_read.called)
         self.assertEqual(cfg.job_type, "Blender")
 
+        cfg = Configuration(data_path=self.test_dir, application=None)
+        self.assertEqual(cfg.job_type, "Blender")
+
         with self.assertRaises(InvalidConfigException):
             Configuration(application='TestApp', default=True)
-        with self.assertRaises(InvalidConfigException):
-            Configuration(application=None, default=True)
         with self.assertRaises(InvalidConfigException):
             Configuration(application=42, default=True)
 

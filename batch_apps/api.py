@@ -616,9 +616,12 @@ class BatchAppsApi(object):
                                           ji=job_id,
                                           fn=fname,
                                           ur=url))
-        if job_id and fname:
+
+        name = fname if fname else None
+
+        if job_id and name:
             url = self.url("jobs/{jobid}/outputs/files/{name}")
-            url = url.format(jobid=job_id, name=fname)
+            url = url.format(jobid=job_id, name=name)
 
         elif url is None:
             return Response(
@@ -633,7 +636,8 @@ class BatchAppsApi(object):
                                             url,
                                             self.headers,
                                             download_dir,
-                                            size, overwrite)
+                                            size, overwrite,
+                                            f_name=name)
 
         except RestCallException as exp:
             return Response(False, exp)
@@ -1076,10 +1080,8 @@ class BatchAppsApi(object):
         try:
             file_spec = userfile.create_query_specifier()
             file_desc = {"OriginalFilePath": file_spec['OriginalPath'],
-                         "OwnedBy": self._auth.email,
                          "ContentLength": len(userfile),
                          "ContentType": "application/octet-stream",
-                         "LastModifiedBy": self._auth.email,
                          "LastModifiedTime": file_spec['Timestamp']}
 
             self._log.debug("File description: {0}".format(file_desc))

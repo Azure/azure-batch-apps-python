@@ -48,7 +48,7 @@ class TestJobManager(unittest.TestCase):
 
         mgr = JobManager(mock_creds, cfg=mock_cfg)
 
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(ValueError):
             mgr.get_job()
 
         resp = mock.create_autospec(Response)
@@ -71,9 +71,9 @@ class TestJobManager(unittest.TestCase):
         mgr._client.get_job.assert_called_with(job_id="test_id")
         mock_job.assert_called_with(mgr._client, '1', '2', '3', other='4')
 
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(ValueError):
             mgr.get_job("test")
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(ValueError):
             mgr.get_job(job="test")
 
         sub = mock.create_autospec(SubmittedJob)
@@ -98,7 +98,7 @@ class TestJobManager(unittest.TestCase):
 
         with self.assertRaises(RestCallException):
             mgr.get_jobs()
-        mgr._client.list_jobs.assert_called_with(0, 10, name='None')
+        mgr._client.list_jobs.assert_called_with(0, 10)
 
         resp.success = True
         resp.result = {'totalCount':10, 'jobs':[]}

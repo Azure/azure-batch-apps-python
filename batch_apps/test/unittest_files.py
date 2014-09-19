@@ -383,7 +383,10 @@ class TestFileCollection(unittest.TestCase):
         failed = col.upload(force=True)
         mock_upload.assert_any_call(1)
         self.assertEqual(mock_upload.call_count, 4)
-        self.assertEqual(failed, ["f", "f", "f", "f"])
+        self.assertEqual(failed, [("f", resp.result),
+                                  ("f", resp.result),
+                                  ("f", resp.result),
+                                  ("f", resp.result)])
 
         mock_upload.call_count = 0
         resp.success = True
@@ -519,7 +522,7 @@ class TestUserFile(unittest.TestCase):
         u_file._exists = True
         mod = u_file.get_last_modified()
         mock_mod.assert_called_once_with("c:\\test")
-        self.assertTrue(mod.startswith("2014-08-04T03:53:30.6928"))
+        self.assertTrue(mod.startswith("2014-08-04T03:53:30"))
 
     def test_userfile_get_windows_path(self):
         """Test _get_windows_path"""
@@ -584,11 +587,12 @@ class TestUserFile(unittest.TestCase):
         """Test compare_lastmodified"""
 
         api = mock.create_autospec(batch_apps.api.BatchAppsApi)
-        mock_mod.return_value = "2014-08-04T03:53:30.6928"
+        mock_mod.return_value = "2014-08-04T03:53:30Z"
         u_file = UserFile(api, {'name':'star.png'})
-        u_file._last_modified = "2014-08-04T03:53:30.692879Z"
+        u_file._last_modified = "2014-08-04T03:53:30Z"
 
         x_file = UserFile(api, {'name':'same.png'})
+        x_file._exists = True
         self.assertTrue(x_file.compare_lastmodified(u_file))
 
         mock_mod.return_value = ""

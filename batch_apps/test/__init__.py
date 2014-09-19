@@ -61,17 +61,5 @@ def run_unit_tests():
                                       pattern="unittest_*.py",
                                       top_level_dir=top_dir))
 
-def run_integration_tests():
-    """
-    Discover all unit test cases located in the test directory and run
-    """
-    test_dir = os.path.dirname(__file__)
-    top_dir = os.path.dirname(os.path.dirname(test_dir))
-
-    test_loader = TestLoader()
-    run_unittest(test_loader.discover(test_dir,
-                                      pattern="integrationtest_*.py",
-                                      top_level_dir=top_dir))
-
 if __name__ == '__main__':
     run_unit_tests()

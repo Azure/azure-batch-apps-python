@@ -150,8 +150,16 @@ class TestJobSubmission(unittest.TestCase):
         mock_filter.return_value = [{"Name":"k1", "Value":"v1"}]
         job = JobSubmission(api, "test_job", params={})
 
-        with self.assertRaises(ValueError):
-            msg = job._create_job_message()
+        #with self.assertRaises(ValueError):
+        msg = job._create_job_message()
+        self.assertEqual(msg, {'Name':'test_job',
+                               'Type': 'TestApp',
+                               'RequiredFiles':[],
+                               'InstanceCount':'0',
+                               'Parameters':[{"Name":"k1", "Value":"v1"}],
+                               'JobFile':'',
+                               'Settings':'',
+                               'Priority':'Medium'})
 
         job.required_files = files
         msg = job._create_job_message()
@@ -420,7 +428,8 @@ class TestSubmittedJob(unittest.TestCase):
         api.get_output_file.assert_called_with("dir",
                                                42,
                                                True,
-                                               url='http://output')
+                                               url='http://output',
+                                               fname=None)
 
         self.assertEqual(output, resp_b)
 
@@ -642,7 +651,7 @@ class TestTask(unittest.TestCase):
                     status='Complete',
                     cores='8',
                     instance='sample_0')
-        self.assertEqual(task._id, None)
+        self.assertEqual(task.id, 0)
         self.assertEqual(task._job, 'job_id')
         self.assertEqual(task.status, 'Complete')
         self.assertIsNone(task.deployment)
@@ -741,10 +750,10 @@ class TestTask(unittest.TestCase):
         api = mock.create_autospec(BatchAppsApi)
         api.list_task_outputs.return_value = resp
 
-        task = Task(api, "job", id="task")
+        task = Task(api, "job", id="5")
         with self.assertRaises(RestCallException):
             task.list_outputs()
-        api.list_task_outputs.assert_called_with("job", "task")
+        api.list_task_outputs.assert_called_with("job", 5)
 
         resp.success = True
         outputs = task.list_outputs()
@@ -783,7 +792,7 @@ class TestTask(unittest.TestCase):
 
         task = Task(api, "abc")
         cancelled = task.cancel()
-        api.cancel_task.assert_called_with("abc", None)
+        api.cancel_task.assert_called_with("abc", 0)
         self.assertFalse(cancelled)
 
         resp.result = RestCallException(TypeError, "Boom!", None)

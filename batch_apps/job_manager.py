@@ -74,7 +74,7 @@ class JobManager(object):
             - :exc:`.RestCallException` if an error occured during the request.
         """
         resp = None
-        if job and hasattr(job, 'update'):
+        if hasattr(job, 'update'):
             resp = job.update()
             if resp:
                 return job
@@ -86,8 +86,8 @@ class JobManager(object):
             resp = self._client.get_job(job_id=str(jobid))
 
         else:
-            raise AttributeError("Call must be passed either a jobid, "
-                                 "url or a SubmittedJob object")
+            raise ValueError("Call must be passed either a jobid, "
+                             "url or a SubmittedJob object")
 
         if resp.success:
             return SubmittedJob(self._client,
@@ -116,9 +116,12 @@ class JobManager(object):
         :Raises:
             - :exc:`.RestCallException` if an error occured during the request.
         """
-        resp = self._client.list_jobs(int(index),
-                                      int(per_call),
-                                      name=str(name))
+        if name:
+            resp = self._client.list_jobs(int(index),
+                                          int(per_call),
+                                          name=str(name))
+        else:
+            resp = self._client.list_jobs(int(index), int(per_call))
 
         if resp.success:
             self.count = resp.result['totalCount']

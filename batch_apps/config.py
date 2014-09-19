@@ -43,7 +43,7 @@ class Configuration(object):
     def __init__(self,
                  data_path=None,
                  log_level=None,
-                 application="Blender",
+                 application=None,
                  name="batch_apps.ini",
                  datadir="BatchAppsData",
                  default=False):
@@ -64,7 +64,7 @@ class Configuration(object):
               how a job will be processed in the cloud. The list of available
               job types will depend on the configuration and can checked
               using the :meth:`.applications()` method.
-              Default application is 'Blender'.
+              Default application is 'Blender', unless overridden in config.
             - name (str): The name of the configuration file to read from and
               save to. Unless set, the default 'batch_apps.ini' will be used.
             - datadir (str): The name of the directory that will be created to
@@ -83,7 +83,7 @@ class Configuration(object):
         self._config = configparser.RawConfigParser()
         self._config.optionxform = str
         self._dir = datadir
-        self.job_type = application
+        self.job_type = 'Blender'
 
         if data_path and self._check_directory(data_path):
             self._write_file = True
@@ -99,9 +99,11 @@ class Configuration(object):
             try:
                 self._config.read(self._cfg_file)
                 for sec in self._config.sections():
+
                     if (self._config.has_option(sec, "default_app") and
                     self._config.get(sec, "default_app") == "True"):
                         self.job_type = sec
+                        break
 
             except EnvironmentError as exp:
                 print("Failed to load config {0} with error: {0}".format(exp))
@@ -112,9 +114,12 @@ class Configuration(object):
         if LOGGERS.get('level'):
             current_level = LOGGERS.get('level')
         else:
-            current_level = self._config.get("Logging", "level")
+            current_level = int(self._config.get("Logging", "level"))
 
         self._set_logging_level(log_level if log_level else current_level)
+
+        if application:
+            self.job_type = application
 
         if not self._config.has_section(self.job_type):
             raise InvalidConfigException(
