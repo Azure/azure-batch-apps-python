@@ -1,10 +1,10 @@
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the MIT License (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
+#   http://opensource.org/licenses/MIT
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,8 @@ from batch_apps.exceptions import (
     FileMissingException)
 
 import logging
+
+API_VERSION = "2014-10-01-preview"
 
 class Response(object):
     """
@@ -72,7 +74,7 @@ class BatchAppsApi(object):
         self._auth = credentials
 
         self.headers = {"Accept": "application/json",
-                        "x-gb-version": "1.0",
+                        "x-ms-version": API_VERSION,
                         "Content-Type": "application/json"}
 
     def app(self):
@@ -154,7 +156,7 @@ class BatchAppsApi(object):
             return Response(
                 False,
                 RestCallException(KeyError,
-                                  "jobs key not in response message",
+                                  "Key not in response message",
                                   get_resp))
 
     def get_job(self, job_id=None, url=None):
@@ -1067,7 +1069,7 @@ class BatchAppsApi(object):
               upload failed of ``userfile`` was invalid.
         """
         #TODO: Get progress feedback working
-        if not isinstance(userfile, UserFile):
+        if not hasattr(userfile, "create_query_specifier"):
             return Response(
                 False,
                 RestCallException(TypeError,

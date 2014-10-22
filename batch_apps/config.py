@@ -1,10 +1,10 @@
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the MIT License (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
+#   http://opensource.org/licenses/MIT
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,14 +19,13 @@ import logging
 import os
 import shutil
 import time
-
 import sys
-VERSION = sys.version_info
-
-if VERSION[:1] == (2,):
-    import ConfigParser as configparser
-else:
+    
+try:
     import configparser
+
+except ImportError:
+    import ConfigParser as configparser
 
 from .exceptions import InvalidConfigException
 from . import utils
@@ -151,7 +150,7 @@ class Configuration(object):
         self._config.add_section("Test")
         self._config.set("Test", "client_id", "{client_id}")
         self._config.set("Test", "endpoint", "{endpoint}")
-        self._config.set("Blender", "redirect_uri", "{redirect}")
+        self._config.set("Test", "redirect_uri", "{redirect}")
 
         if not self._config.has_section('Logging'):
             self._config.add_section("Logging")
@@ -167,9 +166,12 @@ class Configuration(object):
         self._config.set("Authentication",
                          "auth_uri",
                          "login.windows.net/common/oauth2/authorize")
+        #self._config.set("Authentication",
+        #                 "resource",
+        #                 "batchapps.core.windows.net/")
         self._config.set("Authentication",
                          "resource",
-                         "batchapps.core.windows.net/")
+                         "greenbuttonapps.onmicrosoft.com/GreenbuttonApi")
         self._config.set("Authentication",
                          "token_uri",
                          "login.windows.net/common/oauth2/token")
@@ -290,11 +292,11 @@ class Configuration(object):
                   'error': 40,
                   'critical': 50}
 
-        if isinstance(level, str) and level.lower() in utils.get_keys(levels):
+        if isinstance(level, str) and level.lower() in levels:
             level = levels[level.lower()]
 
         elif ((not isinstance(level, int)) or
-              (level not in utils.get_values(levels))):
+              (level not in levels.values())):
 
             print("Logging level '{level}' not recognized. Must be a string "
                   "name such as 'debug' or the associated integer. Defaulting"
@@ -512,6 +514,8 @@ class Configuration(object):
               added.
             - endpoint (str): The api endpoint for all server communication for
               this application.
+            - client_id (str): The client id of the application registered in
+              Azure Active Directory.
 
         :Kwargs:
             - params: *optional* Any additional parameters to be associated

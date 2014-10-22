@@ -47,11 +47,18 @@
     <Compile Include="batch_apps\test\__init__.py" />
     <Compile Include="batch_apps\utils.py" />
     <Compile Include="batch_apps\__init__.py" />
+    <Compile Include="samples\BatchAppsExample-cancel_job.py" />
+    <Compile Include="samples\BatchAppsExample-job_output.py" />
+    <Compile Include="samples\BatchAppsExample-job_status.py" />
+    <Compile Include="samples\BatchAppsExample-submit_job.py" />
+    <Compile Include="samples\BatchAppsExample-task_thumbnail.py" />
+    <Compile Include="samples\BatchAppsExample-update_job.py" />
+    <Compile Include="samples\BatchAppsExample-upload_files.py" />
     <Compile Include="package.py" />
     <Compile Include="setup.py" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="bin\" />
+    <Folder Include="samples\" />
     <Folder Include="batch_apps\" />
     <Folder Include="batch_apps\test\" />
   </ItemGroup>

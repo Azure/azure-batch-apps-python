@@ -1,10 +1,10 @@
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the MIT License (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
+#   http://opensource.org/licenses/MIT
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,17 +18,23 @@ from distutils.core import setup
 
 setup(
     name='BatchAppsClient',
-    version='0.0.1',
+    version='0.1.0',
     author='Microsoft Corporation',
-    author_email='anna.tisch@microsoft.com',
     packages=['batch_apps', 'batch_apps.test'],
-    scripts=[],
+    scripts=[
+        'samples/BatchAppsExample-cancel_job.py',
+        'samples/BatchAppsExample-job_output.py',
+        'samples/BatchAppsExample-job_status.py',
+        'samples/BatchAppsExample-submit_job.py',
+        'samples/BatchAppsExample-task_thumbnail.py',
+        'samples/BatchAppsExample-update_job.py',
+        'samples/BatchAppsExample-upload_files.py'],
     url='http://pypi.python.org/pypi/AzureBatchApps/',
     license='LICENSE.txt',
     description='Batch Apps Python Client.',
     long_description=open('README.rst').read(),
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 3 - Alpha',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.6',
@@ -37,7 +43,8 @@ setup(
         'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
-        'License :: OSI Approved :: Apache Software License'],
+        'License :: OSI Approved :: MIT License',
+        'Topic :: Software Development :: Libraries :: Python Modules'],
     install_requires=[
         "requests==2.3.0",
         "keyring==3.8",

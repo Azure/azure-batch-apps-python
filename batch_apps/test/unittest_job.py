@@ -1,10 +1,10 @@
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the MIT License (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
+#   http://opensource.org/licenses/MIT
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,16 +16,14 @@
 
 import sys
 
-if sys.version_info[:2] < (2, 7, ):
+try:
     import unittest2 as unittest
-
-else:
+except ImportError:
     import unittest
 
-if sys.version_info[:2] >= (3, 3, ):
+try:
     from unittest import mock
-
-else:
+except ImportError:
     import mock
 
 import tempfile
@@ -87,11 +85,11 @@ class TestJobSubmission(unittest.TestCase):
         job.data = "my_data"
         job.number = 42
 
-        with self.assertRaises(AttributeError):
-            job.none_obj = None
+        #with self.assertRaises(AttributeError):
+        job.none_obj = None
 
-        with self.assertRaises(AttributeError):
-            job.dict_obj = {"a":[]}
+        #with self.assertRaises(AttributeError):
+        job.dict_obj = {"a":[]}
 
         self.assertEqual(job.params["test"], "my_param")
         self.assertEqual(job.params["data"], "my_data")
@@ -99,13 +97,16 @@ class TestJobSubmission(unittest.TestCase):
         self.assertEqual(job.test, "my_param")
         self.assertEqual(job.data, "my_data")
         self.assertEqual(job.number, "42")
+        self.assertEqual(job.none_obj, "None")
+        self.assertEqual(job.dict_obj, "{'a': []}")
 
         with self.assertRaises(AttributeError):
-            print(job.none_obj)
+            print(job.other_obj)
 
         job.source = "my_file.txt"
         del job.source
-        self.assertEqual(job.source, "")
+        with self.assertRaises(AttributeError):
+            self.assertEqual(job.source, "")
 
         del job.test
         with self.assertRaises(AttributeError):
@@ -122,7 +123,7 @@ class TestJobSubmission(unittest.TestCase):
         api.default_params.return_value = {}
 
         job = JobSubmission(api, "test_job", params={})
-        self.assertEqual(job._filter_params(), [])
+        self.assertEqual(list(job._filter_params()), [])
 
         job.params = {"k1":"v1", "k2":"v2"}
         self.assertEqual(sorted(job._filter_params(), key=itemgetter('Name')),
@@ -155,7 +156,7 @@ class TestJobSubmission(unittest.TestCase):
         self.assertEqual(msg, {'Name':'test_job',
                                'Type': 'TestApp',
                                'RequiredFiles':[],
-                               'InstanceCount':'0',
+                               'Pool': {'InstanceCount':'0'},
                                'Parameters':[{"Name":"k1", "Value":"v1"}],
                                'JobFile':'',
                                'Settings':'',
@@ -166,7 +167,7 @@ class TestJobSubmission(unittest.TestCase):
         self.assertEqual(msg, {'Name':'test_job',
                                'Type': 'TestApp',
                                'RequiredFiles':["file1", "file2"],
-                               'InstanceCount':'0',
+                               'Pool': {'InstanceCount':'0'},
                                'Parameters':[{"Name":"k1", "Value":"v1"}],
                                'JobFile':'',
                                'Settings':'',
@@ -185,7 +186,7 @@ class TestJobSubmission(unittest.TestCase):
         self.assertEqual(msg, {'Name':'{}',
                                'Type': 'TestApp42',
                                'RequiredFiles':["file1", "file2"],
-                               'InstanceCount':'100',
+                               'Pool': {'InstanceCount':'100'},
                                'Parameters':[{"Name":"k1", "Value":"v1"}],
                                'JobFile':'None',
                                'Settings':'',
@@ -305,12 +306,12 @@ class TestSubmittedJob(unittest.TestCase):
                            settings="some_data")
 
         self.assertEqual(job.submission['status'], "InProgress")
-        self.assertEqual(job.submission['requested_instances'], "5")
+        self.assertEqual(job.submission['requested_instances'], 5)
         self.assertEqual(job.submission['output_filename'], "output")
         self.assertEqual(job.submission['xml_settings'], "some_data")
 
         self.assertEqual(job.status, "InProgress")
-        self.assertEqual(job.requested_instances, "5")
+        self.assertEqual(job.requested_instances, 5)
         self.assertEqual(job.output_filename, "output")
         self.assertEqual(job.xml_settings, "some_data")
 
@@ -377,7 +378,7 @@ class TestSubmittedJob(unittest.TestCase):
 
         job = SubmittedJob(api, None, None, None)
         output = job._get_final_preview("dir", "name", True)
-        api.get_output.assert_called_with("dir", None, "name", True, url=None)
+        api.get_output.assert_called_with("dir", 0, "name", True, url=None)
         self.assertEqual(output, resp)
 
         job = SubmittedJob(api,
@@ -387,7 +388,7 @@ class TestSubmittedJob(unittest.TestCase):
                            previewLink={'href':'http://thumb'})
         output = job._get_final_preview("dir", "name", False)
         api.get_output.assert_called_with("dir",
-                                          None,
+                                          0,
                                           "name",
                                           False,
                                           url='http://thumb')

@@ -1,10 +1,10 @@
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the MIT License (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
+#   http://opensource.org/licenses/MIT
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,15 +45,6 @@ class JobSubmission(object):
         - instances (int)
         - params (dict)
     """
-    _api = None
-    _log = None
-
-    type = ""
-    name = ""
-    params = {}
-    required_files = None
-    source = ""
-    instances = 0
 
     def __init__(self, client, job_name, **job_settings):
         """
@@ -81,15 +72,23 @@ class JobSubmission(object):
             raise TypeError(
                 "client must be an authenticated BatchAppsApi object.")
 
-        self._api = client
-        self._log = logging.getLogger('batch_apps')
+        super(JobSubmission, self).__setattr__(
+            '_api', client)
+        super(JobSubmission, self).__setattr__(
+            '_log', logging.getLogger('batch_apps'))
 
-        self.name = str(job_name)
-        self.type = str(job_settings.get('job_type', ""))
-        self.params = job_settings.get('params', self.get_default_params())
-        self.required_files = job_settings.get('files', None)
-        self.source = str(job_settings.get('job_file', ""))
-        self.instances = int(job_settings.get('instances', 0))
+        super(JobSubmission, self).__setattr__(
+            'name', str(job_name))
+        super(JobSubmission, self).__setattr__(
+            'type', str(job_settings.get('job_type', "")))
+        super(JobSubmission, self).__setattr__(
+            'params', job_settings.get('params', self.get_default_params()))
+        super(JobSubmission, self).__setattr__(
+            'required_files', job_settings.get('files', None))
+        super(JobSubmission, self).__setattr__(
+            'source', str(job_settings.get('job_file', "")))
+        super(JobSubmission, self).__setattr__(
+            'instances', int(job_settings.get('instances', 0)))
 
     def __str__(self):
         """Job submission as a string
@@ -132,24 +131,16 @@ class JobSubmission(object):
 
         :Args:
             - name (str): The name of the attribute/parameter to be set.
-            - value: The value of the attribute/parameter to set to.
+            - value: The value of the attribute/parameter to set to. If this
+              value is added as a parameter, it will be converted to a string
+              regardless of its initial type.
 
-        :Raises:
-            - :py:exc:`AttributeError` if the requested attribute does not exist,
-              or the parameter cannot be set because the type of the supplied
-              value is not in ``[str, bool, int, float]``.
         """
-        if hasattr(JobSubmission, name):
+        if hasattr(self, name):
             super(JobSubmission, self).__setattr__(name, value)
 
-        elif isinstance(value, (str, bool, int, float)):
-            self.params[str(name)] = str(value) #TODO: resolve parameter cases
-
         else:
-            raise AttributeError(
-                "'JobSubmission' object has no attribute {atr}. "
-                "JobSubmission parameter can only be str not "
-                "{type}".format(atr=name, type=type(value)))
+            self.params[str(name)] = str(value) #TODO: resolve parameter cases
 
     def __delattr__(self, name):
         """Clear job attribute or delete parameter if it exists
@@ -158,16 +149,20 @@ class JobSubmission(object):
             - name (str): The name of the attribute/parameter to wipe.
 
         :Raises:
-            - :py:class:`AttributeError` if the :py:class:`.JobSubmission` object
-              has no attribute or parameter of that name.
+            - :py:class:`AttributeError` if the :py:class:`.JobSubmission`
+              object has no attribute or parameter of that name.
         """
-        if hasattr(JobSubmission, name):
+        try:
             super(JobSubmission, self).__delattr__(name)
+            return
 
-        elif str(name) in self.params:
+        except AttributeError:
+            pass
+
+        try:
             del self.params[str(name)] # TODO: resolve parameter cases
 
-        else:
+        except KeyError:
             raise AttributeError("'JobSubmission' object has no attribute or "
                                  "parameter: {atr}".format(atr=name))
 
@@ -184,8 +179,8 @@ class JobSubmission(object):
               against defaults.
         """
         default_params = self.get_default_params()
-        complete_params = dict(
-            list(default_params.items()) + list(self.params.items()))
+        complete_params = dict(self.get_default_params())
+        complete_params.update(self.params)
 
         return utils.format_dictionary(complete_params)
 
@@ -207,8 +202,8 @@ class JobSubmission(object):
             'Name': str(self.name),
             'Type': (self._api.app() + str(self.type)),
             'RequiredFiles': self.required_files._get_message("submit"),
-            'InstanceCount': str(int(self.instances)),
-            'Parameters': self._filter_params(),
+            'Pool': {'InstanceCount': str(int(self.instances))},
+            'Parameters': list(self._filter_params()),
             'JobFile': str(self.source),
             'Settings': '',
             'Priority': 'Medium'
@@ -290,7 +285,7 @@ class JobSubmission(object):
         if self.required_files is None:
             raise ValueError("This job has no associated FileCollection.")
 
-        if isinstance(jobfile, UserFile):
+        if hasattr(jobfile, "create_query_specifier"):
 
             if jobfile not in self.required_files:
                 self._log.info("Assigned job file not in collection, "
@@ -354,14 +349,6 @@ class SubmittedJob(object):
         - thumb_url (str)
         - tasks_url (str)
     """
-    _api = None
-    _log = None
-    id = ""
-
-    type = ""
-    name = ""
-    submission = {}
-    tasks = []
 
     def __init__(self, client, job_id, job_name, job_type, **job_settings):
         """
@@ -378,13 +365,21 @@ class SubmittedJob(object):
               is at when the data is collected.
               See :meth:`._format_submission()`
         """
-        self._api = client
-        self._log = logging.getLogger('batch_apps')
+        super(SubmittedJob, self).__setattr__(
+            '_api', client)
+        super(SubmittedJob, self).__setattr__(
+            '_log', logging.getLogger('batch_apps'))
 
-        self.id = job_id
-        self.name = job_name
-        self.type = job_type
-        self.submission = self._format_submission(job_settings)
+        super(SubmittedJob, self).__setattr__(
+            'id', job_id)
+        super(SubmittedJob, self).__setattr__(
+            'name', job_name)
+        super(SubmittedJob, self).__setattr__(
+            'type', job_type)
+        super(SubmittedJob, self).__setattr__(
+            'tasks', [])
+        super(SubmittedJob, self).__setattr__(
+            'submission', self._format_submission(job_settings))
 
     def __str__(self):
         """String representation of job.
@@ -444,16 +439,13 @@ class SubmittedJob(object):
             - :exc:`AttributeError` if attribute or submission key of that
               name does not exist.
         """
-        if hasattr(SubmittedJob, name):
-            super(SubmittedJob, self).__setattr__(name, value)
 
-        elif name in self.submission:
+        if name in self.submission:
             raise ValueError("Can't override job submission data: "
                              "{data}".format(data=self.submission[name]))
 
         else:
-            raise AttributeError("'SubmittedJob' object has no attribute: "
-                                 "{atr}".format(atr=name))
+            super(SubmittedJob, self).__setattr__(name, value)
 
     def __delattr__(self, name):
         """
@@ -502,7 +494,8 @@ class SubmittedJob(object):
         formatted['time_submitted'] = sub.get('submissionTime', None)
         formatted['time_started'] = sub.get('startTime', None)
         formatted['time_completed'] = sub.get('completionTime', None)
-        formatted['requested_instances'] = sub.get('instanceCount', None)
+        #formatted['requested_instances'] = sub.get('pool', {'instanceCount':0})['instanceCount']
+        formatted['requested_instances'] = int(sub.get('instanceCount', 0))
         formatted['number_tasks'] = int(sub.get('taskCount', 0))
         formatted['output_filename'] = sub.get('outputFileName', None)
         formatted['output_url'] = sub.get('outputLink', {'href':None})['href']
@@ -564,7 +557,7 @@ class SubmittedJob(object):
               :class:`.BatchAppsApi`.
         """
         return self._api.get_output(download_dir,
-                                    None,
+                                    0,
                                     filename,
                                     overwrite,
                                     url=self.thumb_url)
@@ -609,7 +602,7 @@ class SubmittedJob(object):
 
     def get_tasks(self):
         """
-        Get a lsit of the jobs tasks.
+        Get a list of the jobs tasks.
         This will only return those tasks that have been started so far.
 
         :Returns:

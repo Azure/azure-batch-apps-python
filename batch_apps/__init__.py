@@ -1,10 +1,10 @@
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the MIT License (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
+#   http://opensource.org/licenses/MIT
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,7 +26,10 @@ from .file_manager import FileManager
 from .credentials import Credentials, AzureOAuth
 from .config import Configuration
 
-__all__ = ["job_manager", "file_manager", "credentials", "config"]
+__all__ = ["job_manager",
+           "file_manager",
+           "credentials",
+           "config"]
 
 
 __version__ = "0.1.0"

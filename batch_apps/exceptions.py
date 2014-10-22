@@ -1,10 +1,10 @@
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the MIT License (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
+#   http://opensource.org/licenses/MIT
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +15,7 @@
 
 from . import utils
 
+import traceback
 import logging
 LOG = logging.getLogger('batch_apps')
 
@@ -74,13 +75,14 @@ class FileInvalidException(Exception):
         LOG.error("FileInvalidException: {0}".format(*args))
         super(FileInvalidException, self).__init__(*args)
 
+
 class RestCallException(Exception):
     """
     Gather all exceptions thrown by the rest_client and during REST
     call preparation and interpretation in :class:`.BatchAppsApi`.
     """
 
-    def __init__(self, exp_type, message, excep, silent=False):
+    def __init__(self, exp_type, message, excep, *args, **kwargs):
         """
         Will mostly be used to wrap an exception thrown during a REST call,
         then returned to the user as the ``result`` of a :class:`.Response`
@@ -102,11 +104,13 @@ class RestCallException(Exception):
             - silent (bool): If ``True``, the error will not be logged.
               Default is ``False``.
         """
+        #TODO: Restructure the way we log these exception, as these can
+        #be missed.
         self.type = exp_type
         self.msg = message
         self.root_exception = excep
 
-        if not silent:
+        if not kwargs.get("silent", False):
             LOG.critical("Exception of type {type} occurred in the client. "
                          "Message: {msg}".format(type=self.type, msg=self.msg))
 
@@ -121,7 +125,8 @@ class RestCallException(Exception):
 
             else:
                 LOG.debug("Root exception: {0}".format(excep))
-        super(RestCallException, self).__init__(message)
+
+        super(RestCallException, self).__init__(message, *args)
 
     def __str__(self):
         """RestCallException as a string.

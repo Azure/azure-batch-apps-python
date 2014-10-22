@@ -1,10 +1,10 @@
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the MIT License (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
+#   http://opensource.org/licenses/MIT
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,15 +16,21 @@
 
 import sys
 
-if sys.version_info[:2] <= (2, 7, ):
+try:
     import unittest2 as unittest
-else:
+except ImportError:
     import unittest
 
-if sys.version_info[:2] >= (3, 3, ):
+try:
     from unittest import mock
-else:
+except ImportError:
     import mock
+
+try:
+    from builtins import open
+    BUILTIN = "builtins"
+except ImportError:
+    BUILTIN = "__builtin__"
 
 import os
 import batch_apps
@@ -37,12 +43,6 @@ from batch_apps.exceptions import (
     FileMissingException,
     FileInvalidException,
     RestCallException)
-
-if sys.version_info[:1] == (2,):
-    BUILTIN = "__builtin__"
-
-else:
-    BUILTIN = "builtins"
 
 class UFile(object):
     """Mock UserFile"""
@@ -364,7 +364,8 @@ class TestFileCollection(unittest.TestCase):
         resp.success = False
         resp.result = RestCallException(None, "Boom", None)
         mock_isup.return_value = []
-        mock_upload.return_value = (resp, "f")
+        #mock_upload.return_value = (resp, "f")
+        mock_upload.return_value = (False, "f", "Error!")
 
         mock_isup.called = False
         col = FileCollection(mock_api)
@@ -383,13 +384,18 @@ class TestFileCollection(unittest.TestCase):
         failed = col.upload(force=True)
         mock_upload.assert_any_call(1)
         self.assertEqual(mock_upload.call_count, 4)
-        self.assertEqual(failed, [("f", resp.result),
-                                  ("f", resp.result),
-                                  ("f", resp.result),
-                                  ("f", resp.result)])
+        #self.assertEqual(failed, [("f", resp.result),
+        #                          ("f", resp.result),
+        #                          ("f", resp.result),
+        #                          ("f", resp.result)])
+        self.assertEqual(failed, [("f", "Error!"),
+                                  ("f", "Error!"),
+                                  ("f", "Error!"),
+                                  ("f", "Error!")])
 
         mock_upload.call_count = 0
         resp.success = True
+        mock_upload.return_value = (True, "f", "All good!")
         failed = col.upload(force=True, threads=None)
         mock_upload.assert_any_call(1)
         self.assertEqual(mock_upload.call_count, 4)
@@ -413,7 +419,11 @@ class TestFileCollection(unittest.TestCase):
         col._collection = [1, 2, 3, 4]
         failed = col.upload(force=True, threads=1)
         self.assertEqual(mock_pik.call_count, 1)
-        self.assertEqual(failed, [1, 2, 3, 4])
+        self.assertEqual(failed, 
+                         [(1, "'int' object has no attribute 'upload'"),
+                          (2, "'int' object has no attribute 'upload'"),
+                          (3, "'int' object has no attribute 'upload'"),
+                          (4, "'int' object has no attribute 'upload'")])
 
         mock_pik.call_count = 0
         col._collection = [UFile()]
@@ -638,7 +648,7 @@ class TestUserFile(unittest.TestCase):
         resp.success = False
         resp.result = RestCallException(None, "Boom", None)
 
-        mock_isup.return_value = True
+        mock_isup.return_value = mock.create_autospec(UserFile)
         api.send_file.return_value = resp
 
         ufile = UserFile(api, {})
@@ -646,7 +656,7 @@ class TestUserFile(unittest.TestCase):
         self.assertEqual(ufile.upload(force=True), resp)
         api.send_file.assert_called_once_with(ufile)
 
-        mock_isup.return_value = False
+        mock_isup.return_value = None
         self.assertEqual(ufile.upload(), resp)
         self.assertEqual(ufile.upload(force=True), resp)
 
@@ -674,11 +684,61 @@ class TestUserFile(unittest.TestCase):
 
         resp.success = True
         resp.result = ['1', '2', '3']
-        self.assertTrue(ufile.is_uploaded())
+        self.assertIsInstance(ufile.is_uploaded(), UserFile)
         self.assertTrue(api.query_files.called)
         self.assertTrue(mock_query.called)
         self.assertEqual(mock_ufile.call_count, 3)
         mock_ufile.assert_called_with(mock.ANY, '3')
 
         result.name = "4"
-        self.assertFalse(ufile.is_uploaded())
+        self.assertIsNone(ufile.is_uploaded())
+
+    @mock.patch.object(UserFile, "is_uploaded")
+    @mock.patch.object(batch_apps.files.path, "getsize")
+    def test_userfile_download(self, mock_size, mock_is_uploaded):
+        """Test download"""
+
+        mock_size.return_value = 0
+        api = mock.create_autospec(batch_apps.api.BatchAppsApi)
+        ufile = UserFile(api, {})
+        download_dir = "test"
+
+        mock_is_uploaded.side_effect = RestCallException(None, "Boom", None)
+        with self.assertRaises(RestCallException):
+            ufile.download(download_dir)
+        
+        mock_is_uploaded.side_effect = None
+        mock_is_uploaded.return_value = None
+        ufile.download(download_dir)
+        self.assertFalse(api.props_file.called)
+
+        ufile._exists = True
+        resp = mock.create_autospec(Response)
+        resp.success = False
+        resp.result = RestCallException(None, "Boom", None)
+        api.props_file.return_value = resp
+        mock_is_uploaded.return_value = ufile
+        with self.assertRaises(RestCallException):
+            ufile.download(download_dir)
+            self.assertTrue(api.props_file.called)
+
+        resp.success = True
+        resp.result = 123
+        api.props_file.return_value = resp
+        r = mock.create_autospec(Response)
+        r.success = False
+        r.result = RestCallException(None, "Boom", None)
+        api.get_file.return_value = r
+        with self.assertRaises(RestCallException):
+            ufile.download(download_dir)
+            api.get_file.assert_called_with(ufile, r.result, download_dir)
+        
+        r.success = True
+        r.result = "test"
+        ufile.download(download_dir)
+        self.assertTrue(api.get_file.called)
+
+        
+
+        
+            

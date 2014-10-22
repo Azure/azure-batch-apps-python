@@ -1,10 +1,10 @@
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the MIT License (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
+#   http://opensource.org/licenses/MIT
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -97,7 +97,7 @@ class AzureOAuth(object):
             - A :class:`.InvalidConfigException` if the supplied,
               or default configuration does not contain the necessary
               authentication data.
-            - A :class:`AuthenticationException` if there's not existing
+            - A :class:`.AuthenticationException` if there's not existing
               stored session or the token is invalid.
         """
         AzureOAuth.config = config if config else Configuration()
@@ -125,7 +125,7 @@ class AzureOAuth(object):
             - A :class:`.InvalidConfigException` if the supplied, or default
               configuration does not contain the necessary authentication
               data.
-            - A :class:`AuthenticationException` if there was an error
+            - A :class:`.AuthenticationException` if there was an error
               generating the url.
         """
 
@@ -170,7 +170,7 @@ class AzureOAuth(object):
             - A :class:`.InvalidConfigException` if the supplied, or default
               configuration does not contain the necessary authentication
               data.
-            - A :class:`AuthenticationException` if the supplied ``auth_url``
+            - A :class:`.AuthenticationException` if the supplied ``auth_url``
               is invalid (e.g. has expired).
         """
 
@@ -207,6 +207,9 @@ class AzureOAuth(object):
         except oauth2.rfc6749.errors.OAuth2Error as excp:
             raise AuthenticationException(excp.description)
 
+        except oauth2.rfc6749.errors.MismatchingStateError as excep:
+            raise AuthenticationException(excp.description)
+
         authorized_creds = Credentials(AzureOAuth.config,
                                        AzureOAuth.config.get('client_id'),
                                        token=token)
@@ -228,7 +231,7 @@ class AzureOAuth(object):
             - A :class:`.InvalidConfigException` if the supplied, or default
               configuration does not contain the necessary authentication
               data.
-            - A :class:`AuthenticationException` if the supplied credentials
+            - A :class:`.AuthenticationException` if the supplied credentials
               are invalid (e.g. have expired).
         """
 
@@ -382,7 +385,8 @@ class Credentials(object):
         :Raises:
             - :class:`.AuthenticationException` if no stored token is found.
         """
-
+        self._log.debug("Retrieving stored token with {0} "
+                        "and {1}".format(CRED_STORE, self._id))
         token = keyring.get_password(CRED_STORE, self._id)
 
         if token is None:

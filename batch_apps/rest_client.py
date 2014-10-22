@@ -1,10 +1,10 @@
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the MIT License (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
+#   http://opensource.org/licenses/MIT
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,13 +21,9 @@ from .utils import (
     url_from_filename,
     filename_from_url)
 
-try:
-    import requests
-    from oauthlib import oauth2
 
-except:
-    raise ImportError(
-        "Cannot find installation of lib Requests. Please install.")
+import requests
+from oauthlib import oauth2
 
 import json
 import os
@@ -61,13 +57,13 @@ def _call(auth, *args, **kwargs):
             exp)
 
     else:
-        LOG.debug("Request response received, status:{0}, headers:{1}, "
-                  "encoding:{2}, content:{3}, request_headers:{4}".format(
+        LOG.debug("Request response received, status:{0}, " #headers:{1}, 
+                  "encoding:{1}, content:{2}".format( #, request_headers:{4}
                       resp.status_code,
-                      resp.headers,
+                      #resp.headers,
                       resp.encoding,
-                      resp.content[0:100],
-                      resp.request.headers))
+                      resp.content[0:100]))
+                      #resp.request.headers))
 
         if resp.status_code == 200 or resp.status_code == 202:
             LOG.info(
@@ -322,7 +318,7 @@ def download(auth, url, headers, output_path, size, overwrite,
 
     LOG.info("Starting download to {0}".format(downloadfile))
 
-    if isinstance(size, int) and size > 0:
+    if size > 0:
         percent_complete = float(0)
         LOG.info("Downloading...{0}%".format(int(percent_complete)))
         percent_incr = float(block_size/size*100)
@@ -338,7 +334,7 @@ def download(auth, url, headers, output_path, size, overwrite,
 
                 handle.write(block)
 
-                if isinstance(size, int) and size > 0:
+                if size > 0:
                     percent_complete += percent_incr
                     LOG.info("Downloading...{0}%".format(
                         min(100, int(percent_complete))))

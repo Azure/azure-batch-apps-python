@@ -1,10 +1,10 @@
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the MIT License (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
+#   http://opensource.org/licenses/MIT
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,14 +24,13 @@ from datetime import datetime
 from . import utils
 from .exceptions import (
     FileMissingException,
-    FileInvalidException)
+    FileInvalidException,
+    RestCallException)
 
 def upload_wrapper(arg, **kwargs):
     '''
     Wrapper to pull upload method from self to avoid multiprocessing
     errors in Python 2.6.
-    Code snippet from
-    http://www.rueckstiess.net/research/snippets/show/ca1d7d90
     '''
     return FileCollection._upload_forced(*arg, **kwargs)
 
@@ -173,10 +172,17 @@ class FileCollection(object):
 
         :Returns:
             - A tuple containing the result of the :func:`UserFile.upload` call,
-              and the original userfile.
+              and the original userfile:
+              ``(bool success, userfile, string result)``
         """
         self._log.debug("About to upload file: {0}".format(userfile))
-        return (userfile.upload(force=True), userfile)
+        resp = userfile.upload(force=True)
+
+        # TODO: Need to fix hanging when we try to return the result
+        # object rather than just a string.
+        # self._log.critical(str(resp.result))
+
+        return (resp.success, userfile, str(resp.result))
 
     def _get_message(self, operation):
         """Generate file specifier list for REST API
@@ -338,11 +344,8 @@ class FileCollection(object):
         :Returns:
             - A list of tuples containing any files that failed to upload and
               the exception information. In the format:
-              ``[(UserFile(), Exception()), (UserFile(), Exception())..]``
-
-            - If an exception occurred during the threading process, the
-              exception will be logged and a list containing the files
-              pending upload will be returned.
+              ``[(UserFile(), ExceptionStr), (UserFile(), ExceptionStr)..]``
+              If all files successfully uploaded this list will be empty.
 
         :: warning ::
             During parallel uploads, messages will only be logged to the
@@ -366,9 +369,9 @@ class FileCollection(object):
 
         if not threads or threads < 1: # No subprocessed uploads
             for _file in file_set:
-                result, userfile = self._upload_forced(_file)
-                if not result.success:
-                    failed.append((userfile, result.result))
+                result, userfile, error = self._upload_forced(_file)
+                if not result:
+                    failed.append((userfile, error))
 
         else:
             try:
@@ -390,16 +393,15 @@ class FileCollection(object):
                     processes = parallel_uploads.map_async(upload_wrapper,
                                                            zipped)
                     results = processes.get()
-
-                    failed.extend([(res[1], res[0].result)
-                                   for res in results
-                                   if not res[0].success])
+                    for res in results:
+                        if not res[0]:
+                            failed.append((res[1], res[2]))
 
             except Exception as exp:
                 self._log.exception(
                     "Exception in parallel uploads: {0}".format(exp))
 
-                return file_set._collection
+                return [(f, str(exp)) for f in file_set._collection]
 
         return failed
 
@@ -759,7 +761,7 @@ class UserFile(object):
             uploaded = self.is_uploaded()
             self._log.info("Uploaded: {0}".format(uploaded))
 
-        if force or not uploaded:
+        if force or uploaded is None:
             self._log.info("Uploading file {0}".format(self.name))
             return self._api.send_file(self)
 
@@ -769,7 +771,7 @@ class UserFile(object):
         """Check if a file has already been uploaded.
 
         :Returns:
-            - ``True`` if file has already been uploaded, else ``False``.
+            - :class:.`.UserFile` if file has already been uploaded, else ``None``.
 
         :Raises:
             - :class:`.RestCallException` if any errors occured in the API
@@ -777,16 +779,64 @@ class UserFile(object):
         """
         resp = self._api.query_files(self.create_query_specifier())
         if resp.success:
+
             resp_files = [UserFile(self._api, r_file)
                           for r_file in resp.result]
 
             for r_file in resp_files: #TODO: Set up path or md5 comparison
+
                 if (self.name == r_file.name
                     and self.compare_lastmodified(r_file)):
+                    return r_file
 
-                    return True
-
-            return False
+            return None
 
         else:
             raise resp.result
+
+    def download(self, download_dir):
+        """Download file.
+        
+        :Args:
+            - download_dir (str): Path to the directory that to which the file 
+              will be downloaded.
+
+        :Raises:
+            - :class:`.RestCallException` if any errors occured in the API
+              client.
+        """
+        
+        try:
+            uploaded = self.is_uploaded()
+
+        except RestCallException:
+            raise
+        except FileMissingException:
+            return #TODO: We should be able to download a file that doesn't
+                   # exist locally.
+        
+        if uploaded is None:
+            self._log.debug("File has not been previously uploaded. "
+                            "Cannot download file.")
+            return
+
+        resp = self._api.props_file(uploaded)
+
+        if not resp.success:
+            self._log.debug("Unable to retrieve properties of uploaded "
+                            "file: {0}".format(resp.result))
+            raise resp.result
+
+        else:
+            size = resp.result
+            dl_file = self._api.get_file(self, size, download_dir)
+
+            if not dl_file.success:
+
+                self._log.debug("Failed to download file: "
+                                "{0}".format(dl_file.result))
+                raise dl_file.result
+
+            else:
+                self._log.info("Successfully downloaded file to "
+                               "{0}".format(download_dir))

@@ -1,10 +1,10 @@
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the MIT License (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
+#   http://opensource.org/licenses/MIT
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,21 +16,21 @@
 
 import sys
 
-if sys.version_info[:2] <= (2, 7, ):
+try:
     import unittest2 as unittest
-else:
+except ImportError:
     import unittest
 
-if sys.version_info[:2] >= (3, 3,):
+try:
     from unittest import mock
-else:
+except ImportError:
     import mock
 
-if sys.version_info[:1] == (2,):
-    BUILTIN_OPEN = "__builtin__.open"
-
-else:
+try:
+    from builtins import open
     BUILTIN_OPEN = "builtins.open"
+except ImportError:
+    BUILTIN_OPEN = "__builtin__.open"
 
 import requests_oauthlib
 import requests
@@ -217,31 +217,38 @@ class TestRestClient(unittest.TestCase):
         auth = mock.create_autospec(Credentials)
         mock_path.return_value = True
         val = rest_client.download(auth,
-                                   "http://test",
+                                   "http://host//something//test?a=b",
                                    {},
                                    "c:\\test",
-                                   None,
+                                   10,
                                    False)
 
         self.assertFalse(mock_call.called)
         self.assertTrue(val)
 
+        #with self.assertRaises(TypeError):
+        #    val = rest_client.download(auth,
+        #                               "http://host//something//test?a=b",
+        #                               {},
+        #                               "c:\\test",
+        #                               None,
+        #                               True)
         val = rest_client.download(auth,
-                                   "http://test",
+                                   "http://host//something//test?a=b",
                                    {},
                                    "c:\\test",
-                                   None,
+                                   0,
                                    True)
 
         mock_call.assert_called_with(auth,
                                      'GET',
-                                     "http://test",
+                                     "http://host//something//test?a=b",
                                      headers={},
                                      stream=True)
 
         mock_path.return_value = False
         val = rest_client.download(auth,
-                                   "http://test",
+                                   "http://host//something//test?a=b",
                                    {},
                                    "c:\\test",
                                    500,
@@ -250,14 +257,14 @@ class TestRestClient(unittest.TestCase):
 
         mock_call.assert_called_with(auth,
                                      'GET',
-                                     "http://test",
+                                     "http://host//something//test?a=b",
                                      headers={},
                                      stream=True)
 
         mock_open.assert_called_with("c:\\test\\test.jpg", "wb")
 
         val = rest_client.download(auth,
-                                   "http://test",
+                                   "http://host//something//test?a=b",
                                    {},
                                    "c:\\test",
                                    500,
@@ -267,7 +274,7 @@ class TestRestClient(unittest.TestCase):
 
         mock_call.assert_called_with(auth,
                                      'GET',
-                                     "http://test",
+                                     "http://host//something//test?a=b",
                                      headers={},
                                      stream=True)
 
@@ -276,17 +283,17 @@ class TestRestClient(unittest.TestCase):
         mock_open.side_effect = IOError('oops!')
         with self.assertRaises(RestCallException):
             rest_client.download(auth,
-                                 "http://test",
+                                 "http://host//something//test?a=b",
                                  {},
                                  "c:\\test",
-                                 None,
+                                 0,
                                  True)
 
         mock_call.side_effect = RestCallException(None, "Boom!", None)
         with self.assertRaises(RestCallException):
             rest_client.download(auth,
-                                 "http://test",
+                                 "http://host//something//test?a=b",
                                  {},
                                  "c:\\test",
-                                 None,
+                                 0,
                                  True)

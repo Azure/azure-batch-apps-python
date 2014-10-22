@@ -1,10 +1,10 @@
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the MIT License (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
+#   http://opensource.org/licenses/MIT
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,23 +18,23 @@
 import sys
 import os
 
+try:
+    from test.support import run_unittest
+except ImportError:
+    from test.test_support import run_unittest
+
+
+
 if sys.version_info[:2] < (2, 7, ):
     try:
         import unittest2
         from unittest2 import TestLoader
-        from test.test_support import run_unittest
 
     except ImportError:
         raise ImportError("The BatchApps Python Client test suite requires "
                           "the unittest2 package to run on Python 2.6 and "
                           "below.\nPlease install this package to continue.")
 else:
-    if sys.version_info[:1] == (2,):
-        from test.test_support import run_unittest
-
-    else:
-        from test.support import run_unittest
-
     import unittest
     from unittest import TestLoader
 

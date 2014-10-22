@@ -1,10 +1,10 @@
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the MIT License (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
+#   http://opensource.org/licenses/MIT
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,10 +17,19 @@
 import re
 import urllib
 import sys
+import traceback
+
+try:
+    from urllib.parse import quote as urlquote, unquote as urlunquote
+    from urllib.parse import urlsplit
+
+except ImportError:
+    from urllib import quote as urlquote, unquote as urlunquote
+    from urlparse import urlsplit
+
 
 import logging
 LOG = logging.getLogger('batch_apps')
-VERSION = sys.version_info
 
 def parse_date_string(time_string):
     """Format datetime string into an easily comparable and REST happy form.
@@ -39,7 +48,7 @@ def parse_date_string(time_string):
 
 def url_from_filename(filename):
     """
-    Format a given filename for use in a url according to python version.
+    Format a given filename for use in a url, version independant.
 
     :Args:
         - filename (str): The filename to be used in the url.
@@ -47,10 +56,7 @@ def url_from_filename(filename):
     :Returns:
         - The correctly formatted filename (str).
     """
-    if VERSION[:1] == (2,):
-        return urllib.quote(filename)
-    else:
-        return urllib.parse.quote(filename)
+    return urlquote(filename)
 
 def filename_from_url(url, ext):
     """Extract a valid filename from a url
@@ -63,13 +69,9 @@ def filename_from_url(url, ext):
     :Returns:
         - A valid filename.
     """
-    no_params = url.split("?")[0]
-    url_file = no_params.split('/')[-1]
-
-    if VERSION[:1] == (2,):
-        filename = urllib.unquote(url_file)
-    else:
-        filename = urllib.parse.unquote(url_file)
+    alt = urlsplit(url)
+    url_file = alt.path.rpartition('/')[2]
+    filename = urlunquote(url_file)
 
     LOG.debug("Filename {fn} with extension {ex} from url "
               "{ur}".format(fn=filename, ex=ext, ur=url))
@@ -87,43 +89,7 @@ def format_dictionary(dictionary):
         - REST list in the format
             [ {'Name':'parameter}, {'Value':'value'} ]
     """
-    rest_list = []
-
-    for i in list(dictionary.items()):
-        rest_list.append({"Name": str(i[0]), "Value": str(i[1])})
-
-    return rest_list
-
-def get_values(resp_dict):
-    '''Extract values from a given dictionary according to python version.
-
-    :Args:
-        - resp_dict (dict): any dict whos values we want to list.
-
-    :Returns:
-        - List of the extracted values.
-    '''
-
-    if VERSION[:2] == (2, 7,):
-        # python 2.7 briefly used this odd method name
-        return  list(resp_dict.viewvalues())
-    else:
-        return  list(resp_dict.values())
-
-def get_keys(resp_dict):
-    '''Extract keys from a given dictionary according to python version.
-
-    :Args:
-        - resp_dict (dict): any dict whos keys we want to list.
-
-    :Returns:
-        - List of the extracted keys.
-    '''
-
-    if VERSION[:2] == (2, 7,):
-        return resp_dict.viewkeys()
-    else:
-        return resp_dict.keys()
+    return ({"Name": str(k), "Value": str(v)} for k, v in dictionary.items())
 
 def valid_keys(resp_dict, search_keys):
     '''
@@ -141,12 +107,13 @@ def valid_keys(resp_dict, search_keys):
     if not isinstance(resp_dict, dict):
         return False
 
-    elif VERSION[:2] < (2, 7,):
-        matching_keys = set(search_keys).intersection(get_keys(resp_dict))
-        return len(list(matching_keys)) == len(search_keys)
+    try:
+        overlap = list(list(resp_dict) & set(search_keys))
+        return len(overlap) == len(search_keys)
 
-    else:
-        return get_keys(resp_dict) & set(search_keys)
+    except TypeError:
+        matching_keys = set(search_keys).intersection(list(resp_dict))
+        return len(list(matching_keys)) == len(search_keys)
 
 def get_trace(excep):
     """Retrieve an exception traceback
@@ -157,10 +124,11 @@ def get_trace(excep):
     :Returns:
         The traceback information (str).
     """
-    if VERSION[:1] == (2,):
-        return str(sys.exc_info)
-    else:
-        return str(excep.__traceback__)
+    try:
+        trace = traceback.format_exc()
+        return trace
+    except AttributeError:
+        return None
 
 
 class Listener(object):
