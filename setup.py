@@ -17,9 +17,10 @@
 from distutils.core import setup
 
 setup(
-    name='BatchAppsClient',
+    name='azure-batch-apps',
     version='0.1.0',
     author='Microsoft Corporation',
+    author_email='BigCompute@microsoft.com',
     packages=['batch_apps', 'batch_apps.test'],
     scripts=[
         'samples/BatchAppsExample-cancel_job.py',
@@ -29,12 +30,12 @@ setup(
         'samples/BatchAppsExample-task_thumbnail.py',
         'samples/BatchAppsExample-update_job.py',
         'samples/BatchAppsExample-upload_files.py'],
-    url='http://pypi.python.org/pypi/AzureBatchApps/',
-    license='LICENSE.txt',
-    description='Batch Apps Python Client.',
+    url='https://github.com/WindowsAzure/azure-batch-apps-python',
+    license='MIT License',
+    description='Batch Apps Python Client',
     long_description=open('README.rst').read(),
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.6',
@@ -44,7 +45,7 @@ setup(
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'License :: OSI Approved :: MIT License',
-        'Topic :: Software Development :: Libraries :: Python Modules'],
+        'Topic :: Software Development'],
     install_requires=[
         "requests==2.3.0",
         "keyring==3.8",
