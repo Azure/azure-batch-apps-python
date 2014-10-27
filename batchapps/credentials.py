@@ -117,7 +117,7 @@ class AzureOAuth(object):
                            AzureOAuth.config.get('client_id'))
 
     @staticmethod
-    def get_authorization_url(config=None, msa=False, prompt=False, **additional_args):
+    def get_authorization_url(config=None, prompt=False, **additional_args):
         """
         Construct client-specific authentication URL. This URL can be used
         in a web browser to direct the user to log in and authenticate
@@ -127,7 +127,6 @@ class AzureOAuth(object):
             - config (:class:`.Configuration`): A custom configuration object.
               Default is `None` where a default :class:`.Configuration` will
               be created.
-            - msa (bool): Authenticate with MSA. Default is ``False``.
             - prompt (bool): Force login prompt regardless of existing session.
               Default is ``False``.
             - additional_args (dict): Any additional AAD parameters to include
@@ -155,8 +154,9 @@ class AzureOAuth(object):
         auth = AzureOAuth.config.aad_config()
         AzureOAuth._setup_session(auth, AzureOAuth.config.default_params())
 
-        if msa:
-            additional_args['domain_hint'] = 'live.com'
+        #if msa:
+        #    additional_args['domain_hint'] = 'live.com'
+
         if prompt:
             additional_args['prompt'] = 'login'
 
