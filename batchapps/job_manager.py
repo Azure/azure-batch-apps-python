@@ -68,12 +68,12 @@ class JobManager(object):
     def get_job(self, job=None, url=None, jobid=None):
         """
         Get details of single job. Input can be either a
-        :class:`.SubmittedJob` object, a url, or a job ID.
+        :class:`.SubmittedJob` object, a URL, or a job ID.
         If more than one option is set, they will be prioritized in that order.
 
         :Kwargs:
             - job (:class:`.SubmittedJob`): A job object to be updated.
-            - url (str): The url to a the details of a job, as returned by
+            - url (str): The URL to a the details of a job, as returned by
               :meth:`.JobSubmission.submit()`.
             - jobid (str): The ID of a submitted job, as retrieved from
               Mission Control or returned by :meth:`.JobSubmission.submit()`.

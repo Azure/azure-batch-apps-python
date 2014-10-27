@@ -26,27 +26,27 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="batch_apps\api.py" />
-    <Compile Include="batch_apps\config.py" />
-    <Compile Include="batch_apps\credentials.py" />
-    <Compile Include="batch_apps\exceptions.py" />
-    <Compile Include="batch_apps\files.py" />
-    <Compile Include="batch_apps\file_manager.py" />
-    <Compile Include="batch_apps\job.py" />
-    <Compile Include="batch_apps\job_manager.py" />
-    <Compile Include="batch_apps\log.py" />
-    <Compile Include="batch_apps\rest_client.py" />
-    <Compile Include="batch_apps\test\unittest_api.py" />
-    <Compile Include="batch_apps\test\unittest_config.py" />
-    <Compile Include="batch_apps\test\unittest_credentials.py" />
-    <Compile Include="batch_apps\test\unittest_files.py" />
-    <Compile Include="batch_apps\test\unittest_file_manager.py" />
-    <Compile Include="batch_apps\test\unittest_job.py" />
-    <Compile Include="batch_apps\test\unittest_job_manager.py" />
-    <Compile Include="batch_apps\test\unittest_rest_client.py" />
-    <Compile Include="batch_apps\test\__init__.py" />
-    <Compile Include="batch_apps\utils.py" />
-    <Compile Include="batch_apps\__init__.py" />
+    <Compile Include="batchapps\api.py" />
+    <Compile Include="batchapps\config.py" />
+    <Compile Include="batchapps\credentials.py" />
+    <Compile Include="batchapps\exceptions.py" />
+    <Compile Include="batchapps\files.py" />
+    <Compile Include="batchapps\file_manager.py" />
+    <Compile Include="batchapps\job.py" />
+    <Compile Include="batchapps\job_manager.py" />
+    <Compile Include="batchapps\log.py" />
+    <Compile Include="batchapps\rest_client.py" />
+    <Compile Include="batchapps\test\unittest_api.py" />
+    <Compile Include="batchapps\test\unittest_config.py" />
+    <Compile Include="batchapps\test\unittest_credentials.py" />
+    <Compile Include="batchapps\test\unittest_files.py" />
+    <Compile Include="batchapps\test\unittest_file_manager.py" />
+    <Compile Include="batchapps\test\unittest_job.py" />
+    <Compile Include="batchapps\test\unittest_job_manager.py" />
+    <Compile Include="batchapps\test\unittest_rest_client.py" />
+    <Compile Include="batchapps\test\__init__.py" />
+    <Compile Include="batchapps\utils.py" />
+    <Compile Include="batchapps\__init__.py" />
     <Compile Include="samples\BatchAppsExample-cancel_job.py" />
     <Compile Include="samples\BatchAppsExample-job_output.py" />
     <Compile Include="samples\BatchAppsExample-job_status.py" />
@@ -59,8 +59,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="samples\" />
-    <Folder Include="batch_apps\" />
-    <Folder Include="batch_apps\test\" />
+    <Folder Include="batchapps\" />
+    <Folder Include="batchapps\test\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="CHANGES.txt" />

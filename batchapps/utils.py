@@ -60,10 +60,10 @@ def parse_date_string(time_string):
 
 def url_from_filename(filename):
     """
-    Format a given filename for use in a url, version independant.
+    Format a given filename for use in a URL, version independant.
 
     :Args:
-        - filename (str): The filename to be used in the url.
+        - filename (str): The filename to be used in the URL.
 
     :Returns:
         - The correctly formatted filename (str).
@@ -71,10 +71,10 @@ def url_from_filename(filename):
     return urlquote(filename)
 
 def filename_from_url(url, ext):
-    """Extract a valid filename from a url
+    """Extract a valid filename from a URL
 
     :Args:
-        - url (str): Url to extract the filename from.
+        - url (str): URL to extract the filename from.
         - ext (str): An additional file extension if necessary.
             May be ``None``.
 

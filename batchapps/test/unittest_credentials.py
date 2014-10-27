@@ -41,12 +41,12 @@ except ImportError:
 import requests_oauthlib
 import logging
 
-from batch_apps import (
+from batchapps import (
     AzureOAuth,
     Credentials,
     Configuration)
 
-from batch_apps.exceptions import (
+from batchapps.exceptions import (
     AuthenticationException,
     InvalidConfigException)
 
@@ -55,7 +55,7 @@ from batch_apps.exceptions import (
 class TestAzureOAuth(unittest.TestCase):
     """Unit tests for AzureOAuth"""
 
-    @mock.patch('batch_apps.credentials.requests_oauthlib')
+    @mock.patch('batchapps.credentials.requests_oauthlib')
     def test_azureoauth_setup_session(self, mock_requests):
         """Test _setup_session"""
 
@@ -82,8 +82,8 @@ class TestAzureOAuth(unittest.TestCase):
         self.assertFalse(mock_requests.OAuth2Session.called)
         AzureOAuth.session = None
 
-    @mock.patch('batch_apps.credentials.Credentials')
-    @mock.patch('batch_apps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
     def test_azureoauth_get_session(self, mock_config, mock_credentials):
         """Test get_session"""
 
@@ -99,7 +99,7 @@ class TestAzureOAuth(unittest.TestCase):
         self.assertFalse(mock_config.called)
         mock_credentials.assert_called_with(mock_cfg, mock.ANY)
 
-    @mock.patch('batch_apps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Configuration')
     @mock.patch.object(AzureOAuth, '_setup_session')
     def test_azureoauth_get_authorization_url(self, mock_setup, mock_config):
         """Test get_authorization_url"""
@@ -124,9 +124,9 @@ class TestAzureOAuth(unittest.TestCase):
         self.assertFalse(mock_config.called)
         AzureOAuth.session = None
 
-    @mock.patch('batch_apps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Configuration')
     @mock.patch.object(AzureOAuth, '_setup_session')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Credentials')
     def test_get_authorization_token(self,
                                      mock_creds,
                                      mock_setup,
@@ -151,10 +151,10 @@ class TestAzureOAuth(unittest.TestCase):
         authed = AzureOAuth.get_authorization_token("test", state="test")
         mock_setup.assert_called_with(mock.ANY, mock.ANY, state="test")
 
-    @mock.patch('batch_apps.credentials.requests_oauthlib')
-    @mock.patch('batch_apps.credentials.BackendApplicationClient')
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.requests_oauthlib')
+    @mock.patch('batchapps.credentials.BackendApplicationClient')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     def test_get_principal_token(self,
                                  mock_creds,
                                  mock_config,
@@ -205,7 +205,7 @@ class TestAzureOAuth(unittest.TestCase):
 class TestCredentials(unittest.TestCase):
     """Unit tests for Credentials"""
 
-    @mock.patch('batch_apps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Configuration')
     @mock.patch.object(Credentials, 'get_stored_auth')
     @mock.patch.object(Credentials, 'store_auth')
     @mock.patch.object(Credentials, 'get_session')
@@ -234,7 +234,7 @@ class TestCredentials(unittest.TestCase):
         self.assertTrue(mock_get_session.called)
         self.assertTrue(mock_get_stored_auth.called)
 
-    @mock.patch('batch_apps.credentials.keyring')
+    @mock.patch('batchapps.credentials.keyring')
     def test_credentials_store_auth(self, mock_keyring):
         """Test store_auth"""
 
@@ -249,7 +249,7 @@ class TestCredentials(unittest.TestCase):
                                                      str({'token_type':'1',
                                                           'access_token':'2'}))
 
-    @mock.patch('batch_apps.credentials.keyring')
+    @mock.patch('batchapps.credentials.keyring')
     def test_credentials_clear_auth(self, mock_keyring):
         """Test clear_auth"""
 
@@ -261,7 +261,7 @@ class TestCredentials(unittest.TestCase):
         mock_keyring.delete_password.assert_called_with("AzureBatchApps",
                                                         "test")
 
-    @mock.patch('batch_apps.credentials.keyring')
+    @mock.patch('batchapps.credentials.keyring')
     def test_credentials_get_stored_auth(self, mock_keyring):
         """Test get_stored_auth"""
 
@@ -280,7 +280,7 @@ class TestCredentials(unittest.TestCase):
         Credentials.get_stored_auth(creds)
         mock_keyring.get_password.assert_called_with("AzureBatchApps", "test")
 
-    @mock.patch('batch_apps.credentials.requests_oauthlib')
+    @mock.patch('batchapps.credentials.requests_oauthlib')
     def test_credentials_get_session(self, mock_requests):
         """Test get_session"""
 

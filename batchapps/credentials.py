@@ -44,13 +44,13 @@ CRED_STORE = 'AzureBatchApps'
 
 
 def _http(base_uri, *extra):
-    """Combine url components in the an http url"""
+    """Combine URL components in the an http url"""
 
     parts = [str(e) for e in extra]
     return "http://{0}{1}".format(str(base_uri), ''.join(parts))
 
 def _https(base_uri, *extra):
-    """Combine url components in the an https url"""
+    """Combine URL components in the an https url"""
 
     parts = [str(e) for e in extra]
     return "https://{0}{1}".format(str(base_uri), ''.join(parts))
@@ -58,7 +58,7 @@ def _https(base_uri, *extra):
 
 class AzureOAuth(object):
     """
-    Static class for setting up Azure Active Directory authenticated
+    Static class for setting up an Azure Active Directory authenticated
     session.
     """
 
@@ -117,9 +117,9 @@ class AzureOAuth(object):
                            AzureOAuth.config.get('client_id'))
 
     @staticmethod
-    def get_authorization_url(config=None):
+    def get_authorization_url(config=None, msa=False, prompt=False, **additional_args):
         """
-        Construct client-specific authentication url. This url can be used
+        Construct client-specific authentication URL. This URL can be used
         in a web browser to direct the user to log in and authenticate
         the client session.
 
@@ -127,9 +127,14 @@ class AzureOAuth(object):
             - config (:class:`.Configuration`): A custom configuration object.
               Default is `None` where a default :class:`.Configuration` will
               be created.
+            - msa (bool): Authenticate with MSA. Default is ``False``.
+            - prompt (bool): Force login prompt regardless of existing session.
+              Default is ``False``.
+            - additional_args (dict): Any additional AAD parameters to include
+              in the URL
 
         :Returns:
-            - A url (str) that can be used to direct the user to a login page.
+            - A URL (str) that can be used to direct the user to a login page.
             - A guid (str) for validating the state of the server
               communication.
 
@@ -138,7 +143,7 @@ class AzureOAuth(object):
               configuration does not contain the necessary authentication
               data.
             - A :class:`.AuthenticationException` if there was an error
-              generating the url.
+              generating the URL.
         """
 
         AzureOAuth.config = config if config else Configuration()
@@ -150,10 +155,16 @@ class AzureOAuth(object):
         auth = AzureOAuth.config.aad_config()
         AzureOAuth._setup_session(auth, AzureOAuth.config.default_params())
 
+        if msa:
+            additional_args['domain_hint'] = 'live.com'
+        if prompt:
+            additional_args['prompt'] = 'login'
+
         try:
             auth_url, state = AzureOAuth.session.authorization_url(
                 _https(auth['auth_uri']),
-                resource=_https(auth['resource']))
+                resource=_https(auth['resource']),
+                **additional_args)
 
             return auth_url, state
 

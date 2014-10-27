@@ -16,7 +16,7 @@ Installation
 
 This package has been tested with Python 2.6, 2.7, 3.2, 3.3 and 3.4
 
->> pip install batch_apps
+>> pip install azure-batch-apps
 
 Required packages:
 
@@ -47,11 +47,11 @@ Authentication
 ---------------
 
 The module authenticates with Azure Active Directory (an implementation of OAuth2).
-The batch_apps module provides a helper class to assist in retrieving an AAD token 
+The batchapps module provides a helper class to assist in retrieving an AAD token 
 using Requests-OAuthlib. However if you have a preferred OAuth implementation, you 
 authenticate with this instead::
 
-	from batch_apps import AzureOAuth
+	from batchapps import AzureOAuth
 	import webbrowser
 
 	webbrowser.open(AzureOAuth.get_authorization_url())
@@ -61,7 +61,7 @@ authenticate with this instead::
 
 Or alternatively, if you use a different AAD implementation::
 
-	from batch_apps import Credentials
+	from batchapps import Credentials
 	import my_oauth
 
 	aad_token = my_oauth.get_token()
@@ -76,7 +76,7 @@ file::
 
 Then you can authenticate with these credentials::
 
-	from batch_apps import AzureOAuth
+	from batchapps import AzureOAuth
 
 	creds = AzureOAuth.get_principal_token()
 
@@ -84,7 +84,7 @@ Once you have logged in for the first time, your session will be auth-refreshed
 for a limited time, so you will not need to re-authenticate. If you have a 
 stored session, you can authenticate with::
 
-	from batch_apps import AzureOAuth
+	from batchapps import AzureOAuth
 
 	creds = AzureOAuth.get_session()
 
@@ -95,7 +95,7 @@ Job Management
 Job management, including submission, monitoring, and accessing outputs is done 
 through the JobManager class::
 
-	from batch_apps import AzureOAuth, JobManager
+	from batchapps import AzureOAuth, JobManager
 
 	creds = AzureOAuth.get_session()
 	mgr = JobManager(creds)
@@ -120,7 +120,7 @@ File Management
 File management, including job source files and dependencies can by synced to 
 the cloud using the FileManager class::
 
-	from batch_apps import AzureOAuth, FileManager
+	from batchapps import AzureOAuth, FileManager
 
 	creds = AzureOAuth.get_session()
 	mgr = FileManager(creds)
@@ -146,7 +146,7 @@ with it, it can be added to the configuration file.
 You can edit the file directly, or via the Configuration class.
 By default the configuration file will be created in the user directory::
 
-	from batch_apps import Configuration
+	from batchapps import Configuration
 
 	cfg = Configuration(log_level='debug', default=True)
 	cfg.add_application('my_app', 'my.endpoint.com', 'client_id')

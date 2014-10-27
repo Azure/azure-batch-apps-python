@@ -48,10 +48,10 @@ import requests_oauthlib
 import requests
 from oauthlib import oauth2
 
-from batch_apps import rest_client
-from batch_apps.credentials import Credentials
-from batch_apps.files import UserFile
-from batch_apps.exceptions import RestCallException
+from batchapps import rest_client
+from batchapps.credentials import Credentials
+from batchapps.files import UserFile
+from batchapps.exceptions import RestCallException
 
 
 # pylint: disable=W0212

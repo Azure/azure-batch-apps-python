@@ -27,10 +27,10 @@
 """ Client for the Batch Apps Managment API.
 """
 
-from batch_apps import rest_client
-from batch_apps.files import UserFile
-from batch_apps import utils
-from batch_apps.exceptions import (
+from batchapps import rest_client
+from batchapps.files import UserFile
+from batchapps import utils
+from batchapps.exceptions import (
     RestCallException,
     FileMissingException)
 
@@ -98,14 +98,14 @@ class BatchAppsApi(object):
         return self._config.application()
 
     def url(self, api_call):
-        """Format API endpoint url.
+        """Format API endpoint URL.
 
         :Args:
-            - api_call (str): the url of the method that will be appended to
-              the root url provided by the :class:`.Configuration`.
+            - api_call (str): the URL of the method that will be appended to
+              the root URL provided by the :class:`.Configuration`.
 
         :Returns:
-            - The complete, formatted url (str)
+            - The complete, formatted URL (str)
         """
         end_p = self._config.endpoint()
         self._log.debug("Formatting url: https://{endpoint}/api/{api}".format(
@@ -175,11 +175,11 @@ class BatchAppsApi(object):
         """
         Gets information about a job.
         Job info can be retrieved by supplying **either** the job's ID
-        **or** a url to the job. If both are supplied, url is used.
+        **or** a URL to the job. If both are supplied, URL is used.
 
         :Kwargs:
             - job_id (str): Guid of the job on which info is requested.
-            - url (str): A complete url to the job info.
+            - url (str): A complete URL to the job info.
 
         :Returns:
             - A :class:`.Response` object containing the job details as a
@@ -187,7 +187,7 @@ class BatchAppsApi(object):
               contain the :exc:`.RestCallException`.
 
         :Raises:
-            - :class:`.RestCallException` if neither job ID or url are
+            - :class:`.RestCallException` if neither job ID or URL are
               supplied.
             - :class:`.RestCallException` if job details dictionary is
               malformed / missing necessary keys
@@ -227,7 +227,7 @@ class BatchAppsApi(object):
 
         :Returns:
             - A :class:`.Response` object containing a dictionary of the newly
-              submitted job's ID and details url if successful. Otherwise the
+              submitted job's ID and URL if successful. Otherwise the
               Response will contain the :exc:`.RestCallException`.
 
         :Raises:
@@ -343,7 +343,7 @@ class BatchAppsApi(object):
 
         :Returns:
             - A :class:`.Response` object containing a dictionary with the job
-              ID of the reprocessed job and a url to retrieve the job
+              ID of the reprocessed job and a URL to retrieve the job
               information (see :meth:`.BatchAppsApi.get_job()`).
             - If the call failed the response will hold the
               :class:`.RestCallException`.
@@ -368,7 +368,7 @@ class BatchAppsApi(object):
         To retrieve a list of all files created by all tasks of the job use
         :meth:`.list_output_files()`.
         Can be used to ascertain the output filenames before calling the
-        generic output download url.
+        generic output download URL.
 
         :Args:
             - job_id (str): ID of the job whose outputs will be listed.
@@ -418,7 +418,7 @@ class BatchAppsApi(object):
         """
         Gets the content of the job output or its thumbnail.
         Either ``url``, or both ``job_id`` and ``otype`` must be set.
-        If all three are set, url will be used.
+        If all three are set, URL will be used.
 
         :Args:
             - download_dir (str): The full path to the directory where the
@@ -434,7 +434,7 @@ class BatchAppsApi(object):
               Default is None.
             - otype (str): The type of output to be downloaded, must be a
               string in ``['output', 'preview']``.
-            - url (str): The url directly to the file to be downloaded. If
+            - url (str): The URL directly to the file to be downloaded. If
               supplied, ``job_id`` and ``otype`` will not be used.
               Default is None.
 
@@ -442,7 +442,7 @@ class BatchAppsApi(object):
             - :class:`.Response` with the GET response, however this is not
               required if the call was successful.
             - :class:`.Response` with :exc:`AttributeError` if the correct
-              url arguments are not supplied.
+              URL arguments are not supplied.
             - :class:`.Response` with :class:`.RestCallException` if the
               download failed.
         """
@@ -497,21 +497,21 @@ class BatchAppsApi(object):
         which is returned in the response Content Length header.
         Either ``url``, or both ``job_id`` and ``otype`` must be set (although
         ``otype`` is already set by default).
-        If all three are set, url will be used.
+        If all three are set, URL will be used.
 
         :Kwargs:
             - job_id (str): The ID of the job whose output will be checked.
               Default is None.
             - otype (str): The type of output to be checked, must be a
               string in ``['output', 'preview']``.
-            - url (str): The url directly to the file to be checked. If
+            - url (str): The URL directly to the file to be checked. If
               supplied, ``job_id`` and ``otype`` will not be used.
               Default is None.
 
         :Returns:
             - :class:`.Response` with the requested output size in bytes (int)
               if the call was successful.
-            - :class:`.Response` with :exc:`AttributeError` if the correct url
+            - :class:`.Response` with :exc:`AttributeError` if the correct URL
               arguments are not supplied.
             - :class:`.Response` with :class:`.RestCallException` if the
               download failed.
@@ -611,13 +611,13 @@ class BatchAppsApi(object):
             - job_id (str): The ID of the job whose output will be downloaded.
               Default is None.
             - fname (str): The name of the output file to be downloaded.
-            - url (str): The url directly to the file to be downloaded.
+            - url (str): The URL directly to the file to be downloaded.
               Default is None.
 
         :Returns:
             - :class:`.Response` with the GET response, however this is not
               required if the call was successful.
-            - :class:`.Response` with :exc:`AttributeError` if the correct url
+            - :class:`.Response` with :exc:`AttributeError` if the correct URL
               arguments are not supplied.
             - :class:`.Response` with :class:`.RestCallException` if the
               download failed.
@@ -671,14 +671,14 @@ class BatchAppsApi(object):
             - job_id (str): The ID of the job whose output will be checked.
               Default is None.
             - fname (str): The name of the output file to be downloaded.
-            - url (str): The url directly to the file to be checked.
+            - url (str): The URL directly to the file to be checked.
               Default is None.
 
         :Returns:
             - :class:`.Response` with the requested output size in bytes (int)
               if the call was successful.
             - :class:`.Response` with :exc:`AttributeError` if the correct
-              url arguments are not supplied.
+              URL arguments are not supplied.
             - :class:`.Response` with :class:`.RestCallException` if the
               download failed.
         """
@@ -714,7 +714,7 @@ class BatchAppsApi(object):
         :Kwargs:
             - job_id (str): ID of of the job to list the tasks for.
               Default is None.
-            - url (str): Direct url to the task list of the job
+            - url (str): Direct URL to the task list of the job
               (supplied by :meth:`.BatchAppsApi.get_job()`)
 
         :Returns:
@@ -988,7 +988,7 @@ class BatchAppsApi(object):
             - userfile (:class:`.UserFile`): The userfile reference for the
               file to be downloaded. Could be generated from a
               :meth:`.FileManager.list_files()` call or file query.
-              Must have url attr.
+              Must have 'url' attr.
             - size (int): Size of the file in byte to be downloaded
               (see :meth:`.props_file()`).
             - download_dir (str): The full path to the destination directory.
@@ -1003,8 +1003,6 @@ class BatchAppsApi(object):
             - :class:`.Response` with :class:`.RestCallException` if the
               download failed.
         """
-        #TODO: Nothing uses this yet - maybe build into the FileManager?
-        #      Or just UserFile?
         if not isinstance(userfile, UserFile):
             return Response(False, RestCallException(TypeError,
                                                      "Not a valid UserFile",
@@ -1039,7 +1037,7 @@ class BatchAppsApi(object):
             - userfile (:class:`.UserFile`): The userfile reference for the
               file to be checked. Could be generated from a
               :meth:`.FileManager.list_files()` call or file query.
-              Must have url attr.
+              Must have 'url' attr.
 
         :Returns:
             - :class:`.Response` with the requested file size in bytes (int) if
@@ -1047,8 +1045,6 @@ class BatchAppsApi(object):
             - :class:`.Response` with :class:`.RestCallException` if the
               download failed.
         """
-        #TODO: Nothing uses this yet - maybe build into the FileManager?
-        #      Or just UserFile?
         if not isinstance(userfile, UserFile):
             return Response(False,
                             RestCallException(TypeError,

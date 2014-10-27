@@ -39,10 +39,10 @@ except ImportError:
     import mock
 
 import os
-import batch_apps.file_manager
-from batch_apps import FileManager
-from batch_apps.api import Response
-from batch_apps.exceptions import RestCallException
+import batchapps.file_manager
+from batchapps import FileManager
+from batchapps.api import Response
+from batchapps.exceptions import RestCallException
 
 # pylint: disable=W0212
 class TestFileManager(unittest.TestCase):
@@ -51,12 +51,13 @@ class TestFileManager(unittest.TestCase):
     def setUp(self):
         self.cwd = os.path.dirname(os.path.abspath(__file__))
         self.test_dir = os.path.join(self.cwd, "test_assets")
+        self.use_test_files = os.path.exists(self.test_dir)
         return super(TestFileManager, self).setUp()
 
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
-    @mock.patch('batch_apps.api.BatchAppsApi')
-    @mock.patch('batch_apps.file_manager.UserFile')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
+    @mock.patch('batchapps.api.BatchAppsApi')
+    @mock.patch('batchapps.file_manager.UserFile')
     def test_filemgr_create_file(self,
                                  mock_file,
                                  mock_api,
@@ -77,10 +78,10 @@ class TestFileManager(unittest.TestCase):
         mock_file.assert_called_with(mock.ANY, "42")
         self.assertIsNotNone(ufile)
 
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
-    @mock.patch('batch_apps.api.BatchAppsApi')
-    @mock.patch('batch_apps.file_manager.FileCollection')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
+    @mock.patch('batchapps.api.BatchAppsApi')
+    @mock.patch('batchapps.file_manager.FileCollection')
     def test_filemgr_create_file_set(self,
                                      mock_file,
                                      mock_api,
@@ -102,13 +103,13 @@ class TestFileManager(unittest.TestCase):
         coll = mgr.create_file_set("a", "a", "a")
         mock_file.assert_called_with(mock.ANY, *['a'])
 
-    @mock.patch.object(batch_apps.file_manager.os.path, 'isfile')
-    @mock.patch.object(batch_apps.file_manager.os.path, 'isdir')
-    @mock.patch('batch_apps.file_manager.glob')
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
-    @mock.patch('batch_apps.api.BatchAppsApi')
-    @mock.patch.object(batch_apps.file_manager.FileManager, "create_file_set")
+    @mock.patch.object(batchapps.file_manager.os.path, 'isfile')
+    @mock.patch.object(batchapps.file_manager.os.path, 'isdir')
+    @mock.patch('batchapps.file_manager.glob')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
+    @mock.patch('batchapps.api.BatchAppsApi')
+    @mock.patch.object(batchapps.file_manager.FileManager, "create_file_set")
     def test_filemgr_files_from_dir_a(self,
                                       mock_file,
                                       mock_api,
@@ -129,6 +130,9 @@ class TestFileManager(unittest.TestCase):
             mgr.files_from_dir("")
         with self.assertRaises(OSError):
             mgr.files_from_dir(42)
+
+        if not self.use_test_files:
+            self.skipTest("No test files present")
 
         mock_isdir.return_value = True
         mgr.files_from_dir(os.path.join(self.test_dir, "test_config"))
@@ -165,11 +169,14 @@ class TestFileManager(unittest.TestCase):
         mock_glob.glob.assert_any_call(self.test_dir + "\\*.png")
         mock_glob.glob.assert_any_call(self.test_dir + "\\test_config\\*.png")
 
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
-    @mock.patch('batch_apps.file_manager.BatchAppsApi')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
+    @mock.patch('batchapps.file_manager.BatchAppsApi')
     def test_filemgr_files_from_dir_b(self, mock_api, mock_creds, mock_cfg):
         """Test files_from_dir"""
+
+        if not self.use_test_files:
+            self.skipTest("No test files present")
 
         mgr = FileManager(mock_creds, cfg=mock_cfg)
         collection = mgr.files_from_dir(self.test_dir)
@@ -191,10 +198,10 @@ class TestFileManager(unittest.TestCase):
         with self.assertRaises(OSError):
             mgr.files_from_dir(os.path.join(self.test_dir, "not a dir"))
 
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
-    @mock.patch('batch_apps.file_manager.BatchAppsApi')
-    @mock.patch('batch_apps.file_manager.UserFile')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
+    @mock.patch('batchapps.file_manager.BatchAppsApi')
+    @mock.patch('batchapps.file_manager.UserFile')
     def test_filemgr_list_files(self,
                                 mock_file,
                                 mock_api,
@@ -224,10 +231,10 @@ class TestFileManager(unittest.TestCase):
         mock_file.assert_any_call(mgr._client, None)
         self.assertEqual(mock_file.call_count, 4)
 
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
-    @mock.patch('batch_apps.file_manager.BatchAppsApi')
-    @mock.patch('batch_apps.file_manager.UserFile')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
+    @mock.patch('batchapps.file_manager.BatchAppsApi')
+    @mock.patch('batchapps.file_manager.UserFile')
     def test_filemgr_find_file(self,
                                mock_file,
                                mock_api,
@@ -264,10 +271,10 @@ class TestFileManager(unittest.TestCase):
         mock_file.assert_any_call(mgr._client, "testFile")
         mock_file.assert_any_call(mgr._client, None)
 
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
-    @mock.patch('batch_apps.file_manager.BatchAppsApi')
-    @mock.patch('batch_apps.file_manager.UserFile')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
+    @mock.patch('batchapps.file_manager.BatchAppsApi')
+    @mock.patch('batchapps.file_manager.UserFile')
     def test_filemgr_find_files(self,
                                 mock_file,
                                 mock_api,

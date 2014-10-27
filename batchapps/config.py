@@ -594,7 +594,7 @@ class Configuration(object):
 
     def remove(self, setting):
         """
-        Remove a parameter or whole whole section from the config.
+        Remove a parameter or whole section from the config.
         For these changes to be persisted :meth:`.save_config()`
         must be called.
 

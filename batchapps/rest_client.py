@@ -25,7 +25,7 @@
 #
 #--------------------------------------------------------------------------
 
-from batch_apps.exceptions import (
+from batchapps.exceptions import (
     RestCallException,
     AuthenticationException)
 
@@ -116,7 +116,7 @@ def get(auth, url, headers, params=None):
     Call GET.
 
     :Args:
-        - url (str): The complete endpoint url.
+        - url (str): The complete endpoint URL.
         - headers (dict): The headers to be used in the request.
 
     :Kwargs:
@@ -153,11 +153,11 @@ def head(auth, url, headers, filename=""):
     header to get a file size.
 
     :Args:
-        - url (str): The complete endpoint url.
+        - url (str): The complete endpoint URL.
         - headers (dict): The headers to be used in the request.
 
     :Kwargs:
-        - filename (str): Used to add a filename to the end of the url if
+        - filename (str): Used to add a filename to the end of the URL if
           doesn't already have one. Default is an empty string.
 
     :Returns:
@@ -192,7 +192,7 @@ def post(auth, url, headers, message=None):
     Used for job submission, job commands and file queries.
 
     :Args:
-        - url (str): The complete endpoint url.
+        - url (str): The complete endpoint URL.
         - headers (dict): The headers to be used in the request.
 
     :Kwargs:
@@ -236,7 +236,7 @@ def put(auth, url, headers, userfile, description, file_data):
     This call is only used to upload files.
 
     :Args:
-        - url (str): The complete endpoint url.
+        - url (str): The complete endpoint URL.
         - headers (dict): The headers to be used in the request.
         - userfile (:class:`.UserFile`): The :class:`.UserFile`
           reference of the file to be uploaded.
@@ -289,7 +289,7 @@ def download(auth, url, headers, output_path, size, overwrite,
     Call GET for a file stream.
 
     :Args:
-        - url (str): The complete endpoint url.
+        - url (str): The complete endpoint URL.
         - headers (dict): The headers to be used in the request.
         - output_path (str): Full file path to download the data to.
         - size (int): File size of the file to be downloaded as retrieved
@@ -299,9 +299,9 @@ def download(auth, url, headers, output_path, size, overwrite,
 
     :Kwargs:
         - f_name (str): Used to specify a filename if one is not already
-          included in the url. Default is ``None``.
+          included in the URL. Default is ``None``.
         - ext (str): Used to specify a file extension if one is not already
-          included in the url. Default is ``None``.
+          included in the URL. Default is ``None``.
         - block_size (int): Used to vary the upload chunk size.
           Default is 1024 bytes.
 

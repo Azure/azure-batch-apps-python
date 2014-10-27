@@ -44,10 +44,10 @@ try:
 except ImportError:
     BUILTIN_OPEN = "__builtin__.open"
 
-from batch_apps import api
-from batch_apps.exceptions import RestCallException
-from batch_apps.files import UserFile
-from batch_apps.api import (
+from batchapps import api
+from batchapps.exceptions import RestCallException
+from batchapps.files import UserFile
+from batchapps.api import (
     BatchAppsApi,
     Response)
 
@@ -64,8 +64,8 @@ class TestBatchAppsApi(unittest.TestCase):
                         "Content-Type": "application/json"}
         return super(TestBatchAppsApi, self).setUp()
 
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     def test_api_app(self, mock_creds, mock_config):
         """Test app"""
 
@@ -73,8 +73,8 @@ class TestBatchAppsApi(unittest.TestCase):
         _api.app()
         self.assertTrue(mock_config.application.called)
 
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     def test_api_url(self, mock_creds, mock_config):
         """Test url"""
 
@@ -84,8 +84,8 @@ class TestBatchAppsApi(unittest.TestCase):
         self.assertTrue(mock_config.endpoint.called)
         self.assertEqual(val, "https://test_endpoint.com/api/jobs")
 
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     def test_api_default_params(self, mock_creds, mock_config):
         """Test default_params"""
 
@@ -94,8 +94,8 @@ class TestBatchAppsApi(unittest.TestCase):
         self.assertTrue(mock_config.default_params.called)
 
     @mock.patch.object(api.rest_client, 'get')
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     @mock.patch.object(BatchAppsApi, 'url')
     def test_api_list_jobs(self, mock_url, mock_creds, mock_config, mock_get):
         """Test list_jobs"""
@@ -132,8 +132,8 @@ class TestBatchAppsApi(unittest.TestCase):
         self.assertFalse(val.success)
 
     @mock.patch.object(api.rest_client, 'get')
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     @mock.patch.object(BatchAppsApi, 'url')
     def test_api_get_job(self, mock_url, mock_creds, mock_config, mock_get):
         """Test get_job"""
@@ -171,8 +171,8 @@ class TestBatchAppsApi(unittest.TestCase):
         self.assertFalse(val.success)
 
     @mock.patch.object(api.rest_client, 'post')
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     @mock.patch.object(BatchAppsApi, 'url')
     def test_api_send_job(self, mock_url, mock_creds, mock_config, mock_post):
         """Test send_job"""
@@ -199,8 +199,8 @@ class TestBatchAppsApi(unittest.TestCase):
         self.assertFalse(val.success)
 
     @mock.patch.object(api.rest_client, 'get')
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     @mock.patch.object(BatchAppsApi, 'url')
     def test_api_get_log(self, mock_url, mock_creds, mock_config, mock_get):
         """Test get_log"""
@@ -225,8 +225,8 @@ class TestBatchAppsApi(unittest.TestCase):
         self.assertFalse(val.success)
 
     @mock.patch.object(api.rest_client, 'post')
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     @mock.patch.object(BatchAppsApi, 'url')
     def test_api_cancel(self, mock_url, mock_creds, mock_config, mock_post):
         """Test cancel"""
@@ -246,8 +246,8 @@ class TestBatchAppsApi(unittest.TestCase):
         self.assertFalse(val.success)
 
     @mock.patch.object(api.rest_client, 'post')
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     @mock.patch.object(BatchAppsApi, 'url')
     def test_api_reprocess(self, mock_url, mock_creds, mock_config, mock_post):
         """Test reprocess"""
@@ -267,8 +267,8 @@ class TestBatchAppsApi(unittest.TestCase):
         self.assertFalse(val.success)
 
     @mock.patch.object(api.rest_client, 'get')
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     @mock.patch.object(BatchAppsApi, 'url')
     def test_api_list_outputs(self,
                               mock_url,
@@ -319,8 +319,8 @@ class TestBatchAppsApi(unittest.TestCase):
         self.assertFalse(val.success)
 
     @mock.patch.object(api.rest_client, 'download')
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     @mock.patch.object(BatchAppsApi, 'url')
     def test_api_get_output(self,
                             mock_url,
@@ -392,8 +392,8 @@ class TestBatchAppsApi(unittest.TestCase):
         self.assertFalse(val.success)
 
     @mock.patch.object(api.rest_client, 'head')
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     @mock.patch.object(BatchAppsApi, 'url')
     def test_api_props_output(self,
                               mock_url,
@@ -421,8 +421,8 @@ class TestBatchAppsApi(unittest.TestCase):
         self.assertFalse(val.success)
 
     @mock.patch.object(api.rest_client, 'get')
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     @mock.patch.object(BatchAppsApi, 'url')
     def test_api_list_output_files(self,
                                    mock_url,
@@ -473,8 +473,8 @@ class TestBatchAppsApi(unittest.TestCase):
         self.assertFalse(val.success)
 
     @mock.patch.object(api.rest_client, 'download')
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     @mock.patch.object(BatchAppsApi, 'url')
     def test_api_get_output_file(self,
                                  mock_url,
@@ -536,8 +536,8 @@ class TestBatchAppsApi(unittest.TestCase):
         self.assertTrue(val.success)
 
     @mock.patch.object(api.rest_client, 'head')
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     @mock.patch.object(BatchAppsApi, 'url')
     def test_api_props_output_file(self,
                                    mock_url,
@@ -583,8 +583,8 @@ class TestBatchAppsApi(unittest.TestCase):
         self.assertFalse(val.success)
 
     @mock.patch.object(api.rest_client, 'get')
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     @mock.patch.object(BatchAppsApi, 'url')
     def test_api_list_tasks(self, mock_url, mock_creds, mock_config, mock_get):
         """Test list_tasks"""
@@ -619,8 +619,8 @@ class TestBatchAppsApi(unittest.TestCase):
         self.assertFalse(val.success)
 
     @mock.patch.object(api.rest_client, 'get')
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     @mock.patch.object(BatchAppsApi, 'url')
     def test_api_list_task_outputs(self,
                                    mock_url,
@@ -671,8 +671,8 @@ class TestBatchAppsApi(unittest.TestCase):
         self.assertFalse(val.success)
 
     @mock.patch.object(api.rest_client, 'post')
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     @mock.patch.object(BatchAppsApi, 'url')
     def test_api_cancel_task(self,
                              mock_url,
@@ -696,8 +696,8 @@ class TestBatchAppsApi(unittest.TestCase):
         self.assertFalse(val.success)
 
     @mock.patch.object(api.rest_client, 'get')
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     @mock.patch.object(BatchAppsApi, 'url')
     def test_api_list_files(self, mock_url, mock_creds, mock_config, mock_get):
         """Test list_files"""
@@ -726,8 +726,8 @@ class TestBatchAppsApi(unittest.TestCase):
         self.assertFalse(val.success)
 
     @mock.patch.object(api.rest_client, 'download')
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     @mock.patch.object(BatchAppsApi, 'url')
     def test_api_get_file(self,
                           mock_url,
@@ -759,8 +759,8 @@ class TestBatchAppsApi(unittest.TestCase):
         self.assertFalse(val.success)
 
     @mock.patch.object(api.rest_client, 'head')
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     @mock.patch.object(BatchAppsApi, 'url')
     def test_api_props_file(self,
                             mock_url,
@@ -786,8 +786,8 @@ class TestBatchAppsApi(unittest.TestCase):
         self.assertFalse(val.success)
 
     @mock.patch.object(api.rest_client, 'put')
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     @mock.patch.object(BatchAppsApi, 'url')
     @mock.patch(BUILTIN_OPEN)
     def test_api_send_file(self,
@@ -831,8 +831,8 @@ class TestBatchAppsApi(unittest.TestCase):
         self.assertFalse(val.success)
 
     @mock.patch.object(api.rest_client, 'post')
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     @mock.patch.object(BatchAppsApi, 'url')
     def test_api_query_files(self,
                              mock_url,
@@ -899,8 +899,8 @@ class TestBatchAppsApi(unittest.TestCase):
         self.assertFalse(val.success)
 
     @mock.patch.object(api.rest_client, 'post')
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
     @mock.patch.object(BatchAppsApi, 'url')
     def test_api_query_missing_files(self,
                                      mock_url,

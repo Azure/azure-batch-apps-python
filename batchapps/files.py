@@ -492,7 +492,7 @@ class UserFile(object):
               a userfile of a local file, this will be a string of the full
               path to the file. To represent a userfile that exists in the
               cloud, this will be a dictionary containing the path, name,
-              last modified date, and url to the file.
+              last modified date, and URL to the file.
         """
         if not hasattr(client, 'send_file'):
             raise TypeError(

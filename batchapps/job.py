@@ -25,10 +25,10 @@
 #
 #--------------------------------------------------------------------------
 
-from batch_apps.exceptions import FileDownloadException
-from batch_apps import utils
-from batch_apps.utils import Listener
-from batch_apps.files import (
+from batchapps.exceptions import FileDownloadException
+from batchapps import utils
+from batchapps.utils import Listener
+from batchapps.files import (
     UserFile,
     FileCollection)
 
@@ -184,7 +184,7 @@ class JobSubmission(object):
         Checks the job submission parameters against the defaults for that
         application, and adds additional parameters where necessary.
         The new dictionary is formatted for the REST client (See
-        :py:func:`batch_apps.utils.format_dictionary()`).
+        :py:func:`batchapps.utils.format_dictionary()`).
 
         :Returns:
             - Updated, formatted, parameters dictionary after cross-referencing
@@ -320,7 +320,7 @@ class JobSubmission(object):
         """Submit the job.
 
         :Returns:
-            - If successful, a dictionary holding the new job's ID and a url
+            - If successful, a dictionary holding the new job's ID and a URL
               to get the job details (See: :meth:`.SubmittedJob.update()`).
               Dictionary has the keys: ``['jobId', 'link']``
 
@@ -659,7 +659,7 @@ class SubmittedJob(object):
             - The full path to the downloaded file (str).
 
         :Raises:
-            - :exc:`.FileDownloadException` if the SubmittedJob has no url
+            - :exc:`.FileDownloadException` if the SubmittedJob has no URL
               to a final output yet. This may be because the job has not yet
               finished, or has not been updated.
             - :exc:`.RestCallException` if an error occured during the request.

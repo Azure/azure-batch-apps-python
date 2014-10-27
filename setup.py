@@ -33,7 +33,8 @@ setup(
     version='0.1.0',
     author='Microsoft Corporation',
     author_email='BigCompute@microsoft.com',
-    packages=['batch_apps', 'batch_apps.test'],
+    packages=['batchapps',
+              'batchapps.test'],
     scripts=[
         'samples/BatchAppsExample-cancel_job.py',
         'samples/BatchAppsExample-job_output.py',
@@ -59,8 +60,8 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Topic :: Software Development'],
     install_requires=[
-        "requests==2.3.0",
-        "keyring==3.8",
-        "requests_oauthlib==0.4.1"
+        "requests>=2.3.0",
+        "keyring>=3.8",
+        "requests_oauthlib>=0.4.1"
     ],
 )

@@ -40,21 +40,21 @@ except ImportError:
 
 import tempfile
 from operator import itemgetter
-from batch_apps.utils import Listener
-from batch_apps.api import (
+from batchapps.utils import Listener
+from batchapps.api import (
     BatchAppsApi,
     Response)
 
-from batch_apps.job import (
+from batchapps.job import (
     JobSubmission,
     SubmittedJob,
     Task)
 
-from batch_apps.files import (
+from batchapps.files import (
     UserFile,
     FileCollection)
 
-from batch_apps.exceptions import (
+from batchapps.exceptions import (
     FileDownloadException,
     RestCallException)
 
@@ -204,7 +204,7 @@ class TestJobSubmission(unittest.TestCase):
                                'Settings':'',
                                'Priority':'Medium'})
 
-    @mock.patch('batch_apps.job.FileCollection')
+    @mock.patch('batchapps.job.FileCollection')
     def test_jobsubmission_add_collection(self, mock_coll):
         """Test add_file_collection"""
 
@@ -225,7 +225,7 @@ class TestJobSubmission(unittest.TestCase):
         self.assertEqual(job.required_files, files)
         self.assertFalse(mock_coll.called)
 
-    @mock.patch('batch_apps.job.FileCollection')
+    @mock.patch('batchapps.job.FileCollection')
     def test_jobsubmission_add_file(self, mock_coll):
         """Test add_file"""
 
@@ -446,7 +446,7 @@ class TestSubmittedJob(unittest.TestCase):
 
         self.assertEqual(output, resp_b)
 
-    @mock.patch('batch_apps.job.Task')
+    @mock.patch('batchapps.job.Task')
     def test_submittedjob_get_tasks(self, mock_task):
         """Test get_tasks"""
 

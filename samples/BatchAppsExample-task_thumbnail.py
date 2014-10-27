@@ -26,7 +26,7 @@
 #--------------------------------------------------------------------------
 
 """
-A sample script showing use of the batch_apps module to download the preview
+A sample script showing use of the batchapps module to download the preview
 thumbnail of a completed task given the ID of a job.
 """
 
@@ -34,15 +34,15 @@ import getpass
 import sys
 import webbrowser
 
-from batch_apps import (
+from batchapps import (
     FileManager,
     JobManager,
     Credentials,
     Configuration)
 
-from batch_apps.credentials import AzureOAuth
+from batchapps.credentials import AzureOAuth
 
-from batch_apps.exceptions import (
+from batchapps.exceptions import (
     AuthenticationException,
     RestCallException,
     InvalidConfigException)

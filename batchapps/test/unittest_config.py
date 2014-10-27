@@ -51,9 +51,9 @@ except ImportError:
 
 import os
 import logging
-import batch_apps.config
-from batch_apps import Configuration
-from batch_apps.exceptions import InvalidConfigException
+import batchapps.config
+from batchapps import Configuration
+from batchapps.exceptions import InvalidConfigException
 
 
 # pylint: disable=W0212
@@ -64,14 +64,15 @@ class TestConfiguration(unittest.TestCase):
         self.userdir = os.path.expanduser("~")
         self.cwd = os.path.dirname(os.path.abspath(__file__))
         self.test_dir = os.path.join(self.cwd, "test_assets", "test_config")
+        self.use_test_files = os.path.exists(self.test_dir)
         return super(TestConfiguration, self).setUp()
 
     @mock.patch.object(Configuration, '_check_directory')
     @mock.patch.object(Configuration, '_configure_logging')
     @mock.patch.object(Configuration, '_set_logging_level')
     @mock.patch.object(Configuration, 'save_config')
-    @mock.patch.object(batch_apps.config.os.path, 'isfile')
-    @mock.patch.object(batch_apps.config.configparser.RawConfigParser, 'read')
+    @mock.patch.object(batchapps.config.os.path, 'isfile')
+    @mock.patch.object(batchapps.config.configparser.RawConfigParser, 'read')
     def test_config_set_defaults(self,
                                  mock_read,
                                  mock_file,
@@ -146,7 +147,7 @@ class TestConfiguration(unittest.TestCase):
     @mock.patch.object(Configuration, '_configure_logging')
     @mock.patch.object(Configuration, '_set_logging_level')
     @mock.patch.object(Configuration, 'save_config')
-    @mock.patch.object(batch_apps.config.os.path, 'isfile')
+    @mock.patch.object(batchapps.config.os.path, 'isfile')
     def test_config_read_defaults(self,
                                   mock_file,
                                   mock_save,
@@ -154,7 +155,8 @@ class TestConfiguration(unittest.TestCase):
                                   mock_logging,
                                   mock_dir):
         """Test read"""
-
+        if not self.use_test_files:
+            self.skipTest("No test files present")
         mock_dir.return_value = True
         mock_logging.return_value = logging.getLogger("read_defaults")
         mock_file.return_value = True
@@ -167,9 +169,9 @@ class TestConfiguration(unittest.TestCase):
 
         self.assertEqual(cfg.job_type, "Blender")
 
-    @mock.patch.object(batch_apps.config.os.path, 'isdir')
-    @mock.patch.object(batch_apps.config.os, 'mkdir')
-    @mock.patch.object(batch_apps.config.os, 'remove')
+    @mock.patch.object(batchapps.config.os.path, 'isdir')
+    @mock.patch.object(batchapps.config.os, 'mkdir')
+    @mock.patch.object(batchapps.config.os, 'remove')
     @mock.patch(BUILTIN_OPEN)
     def test_config_check_directory_a(self,
                                       mock_open,
@@ -193,9 +195,9 @@ class TestConfiguration(unittest.TestCase):
         mock_rem.assert_called_with("c:\\my_dir\\BatchAppsData\\gb_test")
         self.assertTrue(check)
 
-    @mock.patch.object(batch_apps.config.os.path, 'isdir')
-    @mock.patch.object(batch_apps.config.os, 'mkdir')
-    @mock.patch.object(batch_apps.config.os, 'remove')
+    @mock.patch.object(batchapps.config.os.path, 'isdir')
+    @mock.patch.object(batchapps.config.os, 'mkdir')
+    @mock.patch.object(batchapps.config.os, 'remove')
     @mock.patch(BUILTIN_OPEN)
     def test_config_check_directory_b(self,
                                       mock_open,
@@ -221,13 +223,13 @@ class TestConfiguration(unittest.TestCase):
         self.assertFalse(mock_rem.called)
         self.assertFalse(check)
 
-    @mock.patch.object(batch_apps.config.logging, 'Formatter')
-    @mock.patch.object(batch_apps.config.logging, 'StreamHandler')
-    @mock.patch.object(batch_apps.config.logging, 'FileHandler')
-    @mock.patch.object(batch_apps.config.logging, 'getLogger')
-    @mock.patch.object(batch_apps.config.os.path, 'isfile')
-    @mock.patch.object(batch_apps.config.os.path, 'getsize')
-    @mock.patch.object(batch_apps.config.shutil, 'move')
+    @mock.patch.object(batchapps.config.logging, 'Formatter')
+    @mock.patch.object(batchapps.config.logging, 'StreamHandler')
+    @mock.patch.object(batchapps.config.logging, 'FileHandler')
+    @mock.patch.object(batchapps.config.logging, 'getLogger')
+    @mock.patch.object(batchapps.config.os.path, 'isfile')
+    @mock.patch.object(batchapps.config.os.path, 'getsize')
+    @mock.patch.object(batchapps.config.shutil, 'move')
     def test_config_configure_logging_a(self,
                                         mock_move,
                                         mock_size,
@@ -252,13 +254,13 @@ class TestConfiguration(unittest.TestCase):
         mock_file.assert_called_with(
             os.path.join(self.test_dir, "batch_apps.log"))
 
-    @mock.patch.object(batch_apps.config.logging, 'Formatter')
-    @mock.patch.object(batch_apps.config.logging, 'StreamHandler')
-    @mock.patch.object(batch_apps.config.logging, 'FileHandler')
-    @mock.patch.object(batch_apps.config.logging, 'getLogger')
-    @mock.patch.object(batch_apps.config.os.path, 'isfile')
-    @mock.patch.object(batch_apps.config.os.path, 'getsize')
-    @mock.patch.object(batch_apps.config.shutil, 'move')
+    @mock.patch.object(batchapps.config.logging, 'Formatter')
+    @mock.patch.object(batchapps.config.logging, 'StreamHandler')
+    @mock.patch.object(batchapps.config.logging, 'FileHandler')
+    @mock.patch.object(batchapps.config.logging, 'getLogger')
+    @mock.patch.object(batchapps.config.os.path, 'isfile')
+    @mock.patch.object(batchapps.config.os.path, 'getsize')
+    @mock.patch.object(batchapps.config.shutil, 'move')
     def test_config_configure_logging_b(self,
                                         mock_move,
                                         mock_size,
@@ -281,13 +283,13 @@ class TestConfiguration(unittest.TestCase):
         self.assertFalse(mock_move.called)
         self.assertFalse(mock_file.called)
 
-    @mock.patch.object(batch_apps.config.logging, 'Formatter')
-    @mock.patch.object(batch_apps.config.logging, 'StreamHandler')
-    @mock.patch.object(batch_apps.config.logging, 'FileHandler')
-    @mock.patch.object(batch_apps.config.logging, 'getLogger')
-    @mock.patch.object(batch_apps.config.os.path, 'isfile')
-    @mock.patch.object(batch_apps.config.os.path, 'getsize')
-    @mock.patch.object(batch_apps.config.shutil, 'move')
+    @mock.patch.object(batchapps.config.logging, 'Formatter')
+    @mock.patch.object(batchapps.config.logging, 'StreamHandler')
+    @mock.patch.object(batchapps.config.logging, 'FileHandler')
+    @mock.patch.object(batchapps.config.logging, 'getLogger')
+    @mock.patch.object(batchapps.config.os.path, 'isfile')
+    @mock.patch.object(batchapps.config.os.path, 'getsize')
+    @mock.patch.object(batchapps.config.shutil, 'move')
     def test_config_configure_logging_c(self,
                                         mock_move,
                                         mock_size,
@@ -337,6 +339,9 @@ class TestConfiguration(unittest.TestCase):
     def test_config_set_default_application(self, mock_save):
         """Test set_default_application"""
 
+        if not self.use_test_files:
+            self.skipTest("No test files present")
+      
         _cfg = configparser.RawConfigParser()
         _cfg.read(os.path.join(self.test_dir, "batch_apps.ini"))
         cfg = mock.create_autospec(Configuration)
@@ -375,8 +380,8 @@ class TestConfiguration(unittest.TestCase):
         save = Configuration.save_config(cfg)
         self.assertFalse(save)
 
-    @mock.patch.object(batch_apps.config.os, 'remove')
-    @mock.patch.object(batch_apps.config.Configuration, 'save_config')
+    @mock.patch.object(batchapps.config.os, 'remove')
+    @mock.patch.object(batchapps.config.Configuration, 'save_config')
     def test_config_clear_config(self, mock_save, mock_rem):
         """Test clear_config"""
 

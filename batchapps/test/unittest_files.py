@@ -45,13 +45,13 @@ except ImportError:
     BUILTIN = "__builtin__"
 
 import os
-import batch_apps
-from batch_apps.api import Response
-from batch_apps.files import (
+import batchapps
+from batchapps.api import Response
+from batchapps.files import (
     UserFile,
     FileCollection)
 
-from batch_apps.exceptions import (
+from batchapps.exceptions import (
     FileMissingException,
     FileInvalidException,
     RestCallException)
@@ -73,7 +73,7 @@ class TestFileCollection(unittest.TestCase):
     """Unit tests for FileCollection"""
 
     @mock.patch.object(FileCollection, 'add')
-    @mock.patch('batch_apps.api.BatchAppsApi')
+    @mock.patch('batchapps.api.BatchAppsApi')
     def test_filecoll_create(self, mock_api, mock_add):
         """Test FileCollection object"""
 
@@ -98,7 +98,7 @@ class TestFileCollection(unittest.TestCase):
         mock_add.assert_any_call(None)
 
     @mock.patch.object(FileCollection, 'add')
-    @mock.patch('batch_apps.api.BatchAppsApi')
+    @mock.patch('batchapps.api.BatchAppsApi')
     def test_filecoll_str(self, mock_api, mock_add):
         """Test __str__"""
 
@@ -109,7 +109,7 @@ class TestFileCollection(unittest.TestCase):
         self.assertEqual(colstr, "['1', 'None', 'test', '[]', '{}']")
 
     @mock.patch.object(FileCollection, 'add')
-    @mock.patch('batch_apps.api.BatchAppsApi')
+    @mock.patch('batchapps.api.BatchAppsApi')
     def test_filecoll_len(self, mock_api, mock_add):
         """Test __len__"""
 
@@ -122,7 +122,7 @@ class TestFileCollection(unittest.TestCase):
         self.assertEqual(len(col), len(col._collection))
 
     @mock.patch.object(FileCollection, 'add')
-    @mock.patch('batch_apps.api.BatchAppsApi')
+    @mock.patch('batchapps.api.BatchAppsApi')
     def test_filecoll_iter(self, mock_api, mock_add):
         """Test __iter__"""
 
@@ -137,7 +137,7 @@ class TestFileCollection(unittest.TestCase):
             self.assertIsNone(ufile)
 
     @mock.patch.object(FileCollection, 'add')
-    @mock.patch('batch_apps.api.BatchAppsApi')
+    @mock.patch('batchapps.api.BatchAppsApi')
     def test_filecoll_getitem(self, mock_api, mock_add):
         """Test __getitem__"""
 
@@ -164,7 +164,7 @@ class TestFileCollection(unittest.TestCase):
             print(col[None])
 
     @mock.patch.object(FileCollection, 'add')
-    @mock.patch('batch_apps.api.BatchAppsApi')
+    @mock.patch('batchapps.api.BatchAppsApi')
     def test_filecoll_delitem(self, mock_api, mock_add):
         """Test __delitem__"""
 
@@ -191,7 +191,7 @@ class TestFileCollection(unittest.TestCase):
 
 
     @mock.patch.object(FileCollection, 'add')
-    @mock.patch('batch_apps.api.BatchAppsApi')
+    @mock.patch('batchapps.api.BatchAppsApi')
     def test_filecoll_get_message(self, mock_api, mock_add):
         """Test _get_message"""
 
@@ -215,7 +215,7 @@ class TestFileCollection(unittest.TestCase):
         specs = col._get_message("submit")
         self.assertEqual(specs, [{"test_submit":2}])
 
-    @mock.patch('batch_apps.api.BatchAppsApi')
+    @mock.patch('batchapps.api.BatchAppsApi')
     def test_filecoll_add(self, mock_api):
         """Test add"""
 
@@ -248,7 +248,7 @@ class TestFileCollection(unittest.TestCase):
         self.assertEqual(col._collection, [])
 
 
-    @mock.patch('batch_apps.api.BatchAppsApi')
+    @mock.patch('batchapps.api.BatchAppsApi')
     def test_filecoll_extend(self, mock_api):
         """Test extend"""
 
@@ -278,7 +278,7 @@ class TestFileCollection(unittest.TestCase):
         self.assertTrue(all(i in [test_file, test_file2]
                             for i in col._collection))
 
-    @mock.patch('batch_apps.api.BatchAppsApi')
+    @mock.patch('batchapps.api.BatchAppsApi')
     def test_filecoll_remove(self, mock_api):
         """Test remove"""
 
@@ -307,8 +307,8 @@ class TestFileCollection(unittest.TestCase):
         col.remove(["test2", "test3"])
         self.assertEqual(col._collection, [])
 
-    @mock.patch('batch_apps.api.BatchAppsApi')
-    @mock.patch('batch_apps.files.UserFile')
+    @mock.patch('batchapps.api.BatchAppsApi')
+    @mock.patch('batchapps.files.UserFile')
     @mock.patch.object(FileCollection, '_get_message')
     @mock.patch.object(FileCollection, 'remove')
     def test_filecoll_is_uploaded(self,
@@ -366,7 +366,7 @@ class TestFileCollection(unittest.TestCase):
         mock_rem.assert_called_with([])
         self.assertEqual(upl._collection, col._collection)
 
-    @mock.patch('batch_apps.api.BatchAppsApi')
+    @mock.patch('batchapps.api.BatchAppsApi')
     @mock.patch.object(FileCollection, '_upload_forced')
     @mock.patch.object(FileCollection, 'is_uploaded')
     def test_filecoll_upload(self, mock_isup, mock_upload, mock_api):
@@ -413,8 +413,8 @@ class TestFileCollection(unittest.TestCase):
         self.assertEqual(mock_upload.call_count, 4)
         self.assertEqual(failed, [])
 
-    @mock.patch('batch_apps.api.BatchAppsApi')
-    @mock.patch.object(batch_apps.files.pickle, 'dumps')
+    @mock.patch('batchapps.api.BatchAppsApi')
+    @mock.patch.object(batchapps.files.pickle, 'dumps')
     def test_filecoll_upload_thread(self, mock_pik, mock_api):
         """Test upload"""
 
@@ -475,16 +475,17 @@ class TestUserFile(unittest.TestCase):
 
     def setUp(self):
         self.cwd = os.path.dirname(os.path.abspath(__file__))
+        self.use_test_files = os.path.exists(os.path.join(self.cwd, "test_assets"))
         return super(TestUserFile, self).setUp()
 
-    @mock.patch('batch_apps.files.path')
+    @mock.patch('batchapps.files.path')
     @mock.patch.object(UserFile, '_verify_path')
     @mock.patch.object(UserFile, 'get_last_modified')
     @mock.patch.object(UserFile, 'get_checksum')
     def test_userfile_create(self, mock_sum, mock_mod, mock_verify, mock_path):
         """Test UserFile object"""
 
-        api = mock.create_autospec(batch_apps.api.BatchAppsApi)
+        api = mock.create_autospec(batchapps.api.BatchAppsApi)
         mock_sum.return_value = "check_sum"
         mock_verify.return_value = False
         mock_mod.return_value = "2014-06-04T03:48:40.909998Z"
@@ -511,12 +512,12 @@ class TestUserFile(unittest.TestCase):
         self.assertTrue(mock_verify.called)
         self.assertTrue(mock_mod.called)
 
-    @mock.patch.object(batch_apps.files.path, 'isfile')
-    @mock.patch.object(batch_apps.files.path, 'getsize')
+    @mock.patch.object(batchapps.files.path, 'isfile')
+    @mock.patch.object(batchapps.files.path, 'getsize')
     def test_userfile_exists(self, mock_size, mock_isfile):
         """Test _verify_path"""
 
-        api = mock.create_autospec(batch_apps.api.BatchAppsApi)
+        api = mock.create_autospec(batchapps.api.BatchAppsApi)
         mock_isfile.return_value = False
         u_file = UserFile(api, {})
         u_file.path = "c:\\test"
@@ -530,12 +531,12 @@ class TestUserFile(unittest.TestCase):
         u_file._exists = True
         self.assertTrue(u_file)
 
-    @mock.patch.object(batch_apps.files.path, 'getmtime')
+    @mock.patch.object(batchapps.files.path, 'getmtime')
     def test_userfile_last_modified(self, mock_mod):
         """Test get_last_modified"""
 
         mock_mod.return_value = 1407124410.692879
-        api = mock.create_autospec(batch_apps.api.BatchAppsApi)
+        api = mock.create_autospec(batchapps.api.BatchAppsApi)
         u_file = UserFile(api, {})
         u_file.path = "c:\\test"
         mod = u_file.get_last_modified()
@@ -549,7 +550,7 @@ class TestUserFile(unittest.TestCase):
     def test_userfile_get_windows_path(self):
         """Test _get_windows_path"""
 
-        api = mock.create_autospec(batch_apps.api.BatchAppsApi)
+        api = mock.create_autospec(batchapps.api.BatchAppsApi)
         u_file = UserFile(api, {})
         u_file.path = "c:\\test"
         w_path = u_file._get_windows_path()
@@ -559,11 +560,11 @@ class TestUserFile(unittest.TestCase):
         w_path = u_file._get_windows_path()
         self.assertEqual(w_path, "\\user\\test")
 
-    @mock.patch.object(batch_apps.files.path, 'getsize')
+    @mock.patch.object(batchapps.files.path, 'getsize')
     def test_userfile_len(self, mock_size):
         """Test __len__"""
 
-        api = mock.create_autospec(batch_apps.api.BatchAppsApi)
+        api = mock.create_autospec(batchapps.api.BatchAppsApi)
         mock_size.return_value = 1024
         u_file = UserFile(api, {})
         u_file.path = "c:\\test"
@@ -575,8 +576,11 @@ class TestUserFile(unittest.TestCase):
     def test_userfile_checksum(self):
         """Test get_checksum"""
 
+        if not self.use_test_files:
+            self.skipTest("No test files present")
+
         test_path = os.path.join(self.cwd, "test_assets", "star.png")
-        api = mock.create_autospec(batch_apps.api.BatchAppsApi)
+        api = mock.create_autospec(batchapps.api.BatchAppsApi)
         u_file = UserFile(api, {'name':'star.png'})
         u_file.path = test_path
         chsum = u_file.get_checksum()
@@ -608,7 +612,7 @@ class TestUserFile(unittest.TestCase):
     def test_userfile_compare_lastmodified(self, mock_mod):
         """Test compare_lastmodified"""
 
-        api = mock.create_autospec(batch_apps.api.BatchAppsApi)
+        api = mock.create_autospec(batchapps.api.BatchAppsApi)
         mock_mod.return_value = "2014-08-04T03:53:30Z"
         u_file = UserFile(api, {'name':'star.png'})
         u_file._last_modified = "2014-08-04T03:53:30Z"
@@ -624,7 +628,7 @@ class TestUserFile(unittest.TestCase):
     def test_userfile_create_query_specifier(self, mock_path):
         """Test create_query_specifier"""
 
-        api = mock.create_autospec(batch_apps.api.BatchAppsApi)
+        api = mock.create_autospec(batchapps.api.BatchAppsApi)
         u_file = UserFile(api, {})
         mock_path.return_value = "new_path"
 
@@ -640,7 +644,7 @@ class TestUserFile(unittest.TestCase):
     def test_userfile_create_submit_specifier(self, mock_path):
         """Test create_submit_specifier"""
 
-        api = mock.create_autospec(batch_apps.api.BatchAppsApi)
+        api = mock.create_autospec(batchapps.api.BatchAppsApi)
         u_file = UserFile(api, {})
         mock_path.return_value = "new_path"
 
@@ -655,7 +659,7 @@ class TestUserFile(unittest.TestCase):
     def test_userfile_upload(self, mock_isup):
         """Test upload"""
 
-        api = mock.create_autospec(batch_apps.api.BatchAppsApi)
+        api = mock.create_autospec(batchapps.api.BatchAppsApi)
         resp = mock.create_autospec(Response)
         resp.success = False
         resp.result = RestCallException(None, "Boom", None)
@@ -672,7 +676,7 @@ class TestUserFile(unittest.TestCase):
         self.assertEqual(ufile.upload(), resp)
         self.assertEqual(ufile.upload(force=True), resp)
 
-    @mock.patch('batch_apps.files.UserFile')
+    @mock.patch('batchapps.files.UserFile')
     @mock.patch.object(UserFile, 'create_query_specifier')
     @mock.patch.object(UserFile, 'compare_lastmodified')
     def test_userfile_is_uploaded(self, mock_mod, mock_query, mock_ufile):
@@ -682,7 +686,7 @@ class TestUserFile(unittest.TestCase):
         result = mock.create_autospec(UserFile)
         result.name = "1"
         mock_ufile.return_value = result
-        api = mock.create_autospec(batch_apps.api.BatchAppsApi)
+        api = mock.create_autospec(batchapps.api.BatchAppsApi)
 
         ufile = UserFile(api, {'name':'1'})
 
@@ -706,12 +710,12 @@ class TestUserFile(unittest.TestCase):
         self.assertIsNone(ufile.is_uploaded())
 
     @mock.patch.object(UserFile, "is_uploaded")
-    @mock.patch.object(batch_apps.files.path, "getsize")
+    @mock.patch.object(batchapps.files.path, "getsize")
     def test_userfile_download(self, mock_size, mock_is_uploaded):
         """Test download"""
 
         mock_size.return_value = 0
-        api = mock.create_autospec(batch_apps.api.BatchAppsApi)
+        api = mock.create_autospec(batchapps.api.BatchAppsApi)
         ufile = UserFile(api, {})
         download_dir = "test"
 

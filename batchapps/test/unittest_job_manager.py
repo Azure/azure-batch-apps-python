@@ -38,11 +38,11 @@ try:
 except ImportError:
     import mock
 
-from batch_apps.job_manager import JobManager
-from batch_apps.api import Response
-from batch_apps.exceptions import RestCallException
-from batch_apps.files import FileCollection
-from batch_apps.job import (
+from batchapps.job_manager import JobManager
+from batchapps.api import Response
+from batchapps.exceptions import RestCallException
+from batchapps.files import FileCollection
+from batchapps.job import (
     JobSubmission,
     SubmittedJob)
 
@@ -50,10 +50,10 @@ from batch_apps.job import (
 class TestJobManager(unittest.TestCase):
     """Unit tests for JobManager"""
 
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
-    @mock.patch('batch_apps.job_manager.BatchAppsApi')
-    @mock.patch('batch_apps.job_manager.SubmittedJob')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
+    @mock.patch('batchapps.job_manager.BatchAppsApi')
+    @mock.patch('batchapps.job_manager.SubmittedJob')
     def test_jobmgr_get_job(self, mock_job, mock_api, mock_creds, mock_cfg):
         """Test get_job"""
 
@@ -93,10 +93,10 @@ class TestJobManager(unittest.TestCase):
         job = mgr.get_job(job=sub)
         self.assertEqual(job, sub)
 
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
-    @mock.patch('batch_apps.job_manager.BatchAppsApi')
-    @mock.patch('batch_apps.job_manager.SubmittedJob')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
+    @mock.patch('batchapps.job_manager.BatchAppsApi')
+    @mock.patch('batchapps.job_manager.SubmittedJob')
     def test_jobmgr_get_jobs(self, mock_job, mock_api, mock_creds, mock_cfg):
         """Test get_jobs"""
 
@@ -132,10 +132,10 @@ class TestJobManager(unittest.TestCase):
         mock_job.assert_called_with(mgr._client, '1', '2', '3', other='4')
         self.assertEqual(len(jobs), 1)
 
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
-    @mock.patch('batch_apps.job_manager.BatchAppsApi')
-    @mock.patch('batch_apps.job_manager.JobSubmission')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
+    @mock.patch('batchapps.job_manager.BatchAppsApi')
+    @mock.patch('batchapps.job_manager.JobSubmission')
     def test_jobmgr_create_job(self, mock_job, mock_api, mock_creds, mock_cfg):
         """Test create_job"""
 
@@ -151,9 +151,9 @@ class TestJobManager(unittest.TestCase):
         mgr.create_job(None)
         mock_job.assert_called_with(mgr._client, "None")
 
-    @mock.patch('batch_apps.credentials.Configuration')
-    @mock.patch('batch_apps.credentials.Credentials')
-    @mock.patch('batch_apps.job_manager.BatchAppsApi')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
+    @mock.patch('batchapps.job_manager.BatchAppsApi')
     def test_jobmgr_submit(self, mock_api, mock_creds, mock_cfg):
         """Test submit"""
 
