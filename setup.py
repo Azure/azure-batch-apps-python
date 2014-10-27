@@ -43,7 +43,7 @@ setup(
         'samples/BatchAppsExample-task_thumbnail.py',
         'samples/BatchAppsExample-update_job.py',
         'samples/BatchAppsExample-upload_files.py'],
-    url='http://github.com/WindowsAzure/azure-batch-apps-python',
+    url='https://github.com/Azure/azure-batch-apps-python',
     license='MIT License',
     description='Batch Apps Python Client',
     long_description=open('README.rst').read(),

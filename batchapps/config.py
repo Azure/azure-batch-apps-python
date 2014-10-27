@@ -215,10 +215,10 @@ class Configuration(object):
             if not os.path.isdir(test_dir):
                 os.mkdir(test_dir)
 
-            with open(os.path.join(test_dir, "gb_test"), 'w') as test_file:
+            with open(os.path.join(test_dir, "aba_test"), 'w') as test_file:
                 test_file.write("All good to go!")
 
-            os.remove(os.path.join(test_dir, "gb_test"))
+            os.remove(os.path.join(test_dir, "aba_test"))
             return True
 
         except (IOError, OSError, EnvironmentError) as exp:
