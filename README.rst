@@ -20,11 +20,11 @@ This package has been tested with Python 2.6, 2.7, 3.2, 3.3 and 3.4
 
 Required packages:
 
-* `Requests 2.3.0 <http://docs.python-requests.org/en/latest/>`_
+* `Requests <http://docs.python-requests.org/en/latest/>`_
 
-* `Keyring 3.8 <https://bitbucket.org/kang/python-keyring-lib>`_
+* `Keyring <https://bitbucket.org/kang/python-keyring-lib>`_
 
-* `Requests-OAuthlib 0.4.1 <http://requests-oauthlib.readthedocs.org/en/latest/>`_
+* `Requests-OAuthlib <http://requests-oauthlib.readthedocs.org/en/latest/>`_
 
 
 Documentation
@@ -49,7 +49,7 @@ Authentication
 The module authenticates with Azure Active Directory (an implementation of OAuth2).
 The batchapps module provides a helper class to assist in retrieving an AAD token 
 using Requests-OAuthlib. However if you have a preferred OAuth implementation, you 
-authenticate with this instead::
+can authenticate with this instead::
 
 	from batchapps import AzureOAuth
 	import webbrowser
@@ -80,7 +80,7 @@ Then you can authenticate with these credentials::
 
 	creds = AzureOAuth.get_principal_token()
 
-Once you have logged in for the first time, your session will be auth-refreshed 
+Once you have logged in for the first time, your session will be auto-refreshed 
 for a limited time, so you will not need to re-authenticate. If you have a 
 stored session, you can authenticate with::
 
@@ -117,8 +117,8 @@ through the JobManager class::
 File Management
 ----------------
 
-File management, including job source files and dependencies can by synced to 
-the cloud using the FileManager class::
+File management, including syncing job source files and dependencies to 
+the cloud can be done using the FileManager class::
 
 	from batchapps import AzureOAuth, FileManager
 
