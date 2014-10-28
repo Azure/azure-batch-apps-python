@@ -39,7 +39,8 @@
     <Folder Include="tests\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="README.txt" />
+    <Content Include="LICENSE.txt" />
+    <Content Include="README.rst" />
     <Content Include="requirements.txt" />
   </ItemGroup>
   <PropertyGroup>
