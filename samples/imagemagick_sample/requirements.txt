@@ -1,0 +1,5 @@
+keyring==3.8
+oauthlib==0.6.3
+requests==2.3.0
+requests-oauthlib==0.4.1
+azure-batch-apps==0.1.0
