@@ -24,7 +24,7 @@ For details see LICENSE.txt or visit `<http://opensource.org/licenses/MIT>`_
 What is ImageMagick?
 =====================
 ImageMagick is an open-source command line tool used for manipulating images. See more at 
-http://www.imagemagick.org/.
+`imagemagick.org <http://www.imagemagick.org/>`_.
 In this sample, ImageMagick is used simply as an example of a JobType that can be run on the Batch 
 Apps platform.
 Any type of application that can be made to run in parallel has the potential to use the Batch Apps 
@@ -77,15 +77,11 @@ Running the Project
 ===================
 	1. Set the appropriate global variables in the script.
 
-		* TIMEOUT: The length of time you would like the script to continue monitoring a job once it's 
-		   submitted, until it completes. The default is set to an hour.
+		* TIMEOUT: The length of time you would like the script to continue monitoring a job once it's submitted, until it completes. The default is set to an hour.
 		* DOWNLOAD_DIR: The path to the output location.
 		* ASSET_DIR: The path to the folder containing the images you want to upload.
-		* ENDPOINT: Login to MissionControl https://manage.batchapps.windows.net/ with your Microsoft
-		   Account. Select your service under the Services page. Copy the service URL from the clipboard.
-		* CLIENT_ID & REDIRECT_URI: Navigate, and sign in to the Azure Management Portal. Click Active 
-		   Directory, click the directory, click the application you have registered. The client_id and 
-		   redirect_uri can be found under the 'Configure' tab.
+		* ENDPOINT: Login to `MissionControl <https://manage.batchapps.windows.net/>`_ with your Microsoft Account. Select your service under the Services page. Copy the service URL from the clipboard.
+		* CLIENT_ID & REDIRECT_URI: Navigate, and sign in to the Azure Management Portal. Click Active Directory, click the directory, click the application you have registered. The client_id and redirect_uri can be found under the 'Configure' tab.
 	2. Optional: By default, this sample downloads tasks as they complete. If you would like to also 
 	   download the final job output once the the job has completed, ensure the appropriate line of 
 	   code has been uncommented in the _check_job_stopped() function.
