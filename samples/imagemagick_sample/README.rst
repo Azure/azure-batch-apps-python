@@ -9,10 +9,10 @@ using the Batch apps service and the python client.
  
 The sample covers:
 -------------------
-How to create and submit the Job to the Batch apps service using the BatchApps Client python package.
-How to monitor a submitted job.
-How to download any outputs created by the running Job.
-How to download the final outputs of the Job.
+* How to create and submit the Job to the Batch apps service using the BatchApps Client python package.
+* How to monitor a submitted job.
+* How to download any outputs created by the running Job.
+* How to download the final outputs of the Job.
 
 License
 ========
@@ -59,7 +59,8 @@ environment needs to be set up. To create such an environment:
 
 	1. Create a python environment by right-clicking 'Python Environments' in the Solution Explorer 
 	   and 'Add Virtual Environment'.
-	2. Install the BatchApps Client python package, which can be done in several different ways:
+	2. Install the BatchApps Client python package, which can be done in several different ways.
+
 		a. Right-click on your newly created python environment in the solution explorer. Click 'Install 
 		   from requirements.txt'.
 		   Pip will use the requirements.txt provided with the project to install all necessary packages, 
@@ -74,14 +75,15 @@ environment needs to be set up. To create such an environment:
 
 Running the Project
 ===================
-	1. Set the appropriate global variables in the script:
-		a. TIMEOUT: The length of time you would like the script to continue monitoring a job once it's 
+	1. Set the appropriate global variables in the script.
+
+		* TIMEOUT: The length of time you would like the script to continue monitoring a job once it's 
 		   submitted, until it completes. The default is set to an hour.
-		b. DOWNLOAD_DIR: The path to the output location.
-		c. ASSET_DIR: The path to the folder containing the images you want to upload.
-		a. ENDPOINT: Login to MissionControl https://manage.batchapps.windows.net/ with your Microsoft
+		* DOWNLOAD_DIR: The path to the output location.
+		* ASSET_DIR: The path to the folder containing the images you want to upload.
+		* ENDPOINT: Login to MissionControl https://manage.batchapps.windows.net/ with your Microsoft
 		   Account. Select your service under the Services page. Copy the service URL from the clipboard.
-		b. CLIENT_ID & REDIRECT_URI: Navigate, and sign in to the Azure Management Portal. Click Active 
+		* CLIENT_ID & REDIRECT_URI: Navigate, and sign in to the Azure Management Portal. Click Active 
 		   Directory, click the directory, click the application you have registered. The client_id and 
 		   redirect_uri can be found under the 'Configure' tab.
 	2. Optional: By default, this sample downloads tasks as they complete. If you would like to also 
