@@ -191,8 +191,8 @@ class TestConfiguration(unittest.TestCase):
         check = Configuration._check_directory(cfg, "c:\\my_dir")
         mock_isdir.assert_called_with("c:\\my_dir\\BatchAppsData")
         mock_mkdir.assert_called_with("c:\\my_dir\\BatchAppsData")
-        mock_open.assert_called_with("c:\\my_dir\\BatchAppsData\\gb_test", 'w')
-        mock_rem.assert_called_with("c:\\my_dir\\BatchAppsData\\gb_test")
+        mock_open.assert_called_with("c:\\my_dir\\BatchAppsData\\aba_test", 'w')
+        mock_rem.assert_called_with("c:\\my_dir\\BatchAppsData\\aba_test")
         self.assertTrue(check)
 
     @mock.patch.object(batchapps.config.os.path, 'isdir')
