@@ -230,7 +230,7 @@ def post(auth, url, headers, message=None):
                                 "Response object has no text attribute.",
                                 exp)
 
-def put(auth, url, headers, userfile, description, file_data):
+def put(auth, url, headers, userfile, params):
     """
     Call PUT.
     This call is only used to upload files.
@@ -240,10 +240,7 @@ def put(auth, url, headers, userfile, description, file_data):
         - headers (dict): The headers to be used in the request.
         - userfile (:class:`.UserFile`): The :class:`.UserFile`
           reference of the file to be uploaded.
-        - description (dict): The file data
-        - file_data (dict): A dictionary containing the open file handle
-          from which the data will be streamed.
-          Format: ``{'Filename': open(file_path, 'rb')}``
+        - params (dict): The file path and timestamp parameters.
 
     :Returns:
         - The raw server response.
@@ -256,25 +253,31 @@ def put(auth, url, headers, userfile, description, file_data):
         url = url.format(name=url_from_filename(userfile.name))
 
         put_headers = dict(headers)
-        put_headers.pop("Content-Type")
+        put_headers["Content-Type"] = "application/octet-stream"
 
         LOG.info("url={0}, headers={1}".format(url, put_headers))
         LOG.debug("Put call url: {0}, headers: {1}, "
-                  "file: {2}, description: {3}".format(url,
-                                                       put_headers,
-                                                       userfile,
-                                                       description))
+                  "file: {2}, parameters: {3}".format(url,
+                                                      put_headers,
+                                                      userfile,
+                                                      params))
 
-        response = _call(auth,
-                         'PUT',
-                         url,
-                         data=description,
-                         files=file_data,
-                         headers=put_headers)
+        with open(userfile.path, 'rb') as file_data:
+            response = _call(auth,
+                             'PUT',
+                             url,
+                             params=params,
+                             data=file_data,
+                             headers=put_headers)
         return response
 
     except RestCallException:
         raise
+
+    except EnvironmentError as exp:
+        raise RestCallException(EnvironmentError,
+                                "Error reading from file.",
+                                exp)
 
     except IndexError as exp:
         raise RestCallException(IndexError,

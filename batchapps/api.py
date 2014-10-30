@@ -1089,27 +1089,18 @@ class BatchAppsApi(object):
 
         try:
             file_spec = userfile.create_query_specifier()
-            file_desc = {"OriginalFilePath": file_spec['OriginalPath'],
-                         "ContentLength": len(userfile),
-                         "ContentType": "application/octet-stream",
-                         "LastModifiedTime": file_spec['Timestamp']}
+            params = {'timestamp':file_spec['Timestamp'],
+                      'originalFilePath':file_spec['OriginalPath']}
 
-            self._log.debug("File description: {0}".format(file_desc))
+            self._log.debug("File description: {0}".format(params))
 
-            with open(userfile.path, 'rb') as file_data:
-                files = {"Filename": file_data}
-                put_resp = rest_client.put(self._auth,
-                                           url,
-                                           self.headers,
-                                           userfile,
-                                           file_desc,
-                                           files)
+            put_resp = rest_client.put(self._auth,
+                                        url,
+                                        self.headers,
+                                        userfile,
+                                        params)
 
         except (RestCallException, FileMissingException) as exp:
-            return Response(False, exp)
-
-        except EnvironmentError as exp:
-            self._log.error("Error reading from file: {0}".format(str(exp)))
             return Response(False, exp)
 
         else:

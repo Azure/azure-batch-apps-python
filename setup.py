@@ -30,7 +30,7 @@ from distutils.core import setup
 
 setup(
     name='azure-batch-apps',
-    version='0.1.0',
+    version='0.1.1',
     author='Microsoft Corporation',
     author_email='BigCompute@microsoft.com',
     packages=['batchapps',
@@ -62,6 +62,5 @@ setup(
     install_requires=[
         "requests>=2.3.0",
         "keyring>=3.8",
-        "requests_oauthlib>=0.4.1"
-    ],
+        "requests_oauthlib>=0.4.1"],
 )

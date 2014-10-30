@@ -45,7 +45,9 @@ except ImportError:
     BUILTIN_OPEN = "__builtin__.open"
 
 from batchapps import api
-from batchapps.exceptions import RestCallException
+from batchapps.exceptions import (
+    RestCallException,
+    FileMissingException)
 from batchapps.files import UserFile
 from batchapps.api import (
     BatchAppsApi,
@@ -789,9 +791,7 @@ class TestBatchAppsApi(unittest.TestCase):
     @mock.patch('batchapps.credentials.Configuration')
     @mock.patch('batchapps.credentials.Credentials')
     @mock.patch.object(BatchAppsApi, 'url')
-    @mock.patch(BUILTIN_OPEN)
     def test_api_send_file(self,
-                           mock_open,
                            mock_url,
                            mock_creds,
                            mock_config,
@@ -802,30 +802,27 @@ class TestBatchAppsApi(unittest.TestCase):
         mock_url.return_value = "https://test.com"
 
         val = _api.send_file("file")
-        self.assertFalse(mock_open.called)
+        self.assertFalse(mock_url.called)
         self.assertFalse(val.success)
 
         test_file = mock.create_autospec(UserFile)
         test_file.path = "c:\\file.txt"
         val = _api.send_file(test_file)
-        self.assertTrue(mock_open.called)
-        spec = {"OriginalFilePath": mock.ANY,
-                "ContentLength": 0,
-                "ContentType": "application/octet-stream",
-                "LastModifiedTime": mock.ANY}
+        self.assertTrue(test_file.create_query_specifier.called)
+        spec = {"timestamp": mock.ANY,
+                "originalFilePath": mock.ANY}
         mock_put.assert_called_with(mock_creds,
                                     "https://test.com",
                                     self.headers,
                                     test_file,
-                                    spec,
-                                    {'Filename':mock.ANY})
+                                    spec)
         self.assertTrue(val.success)
-
-        mock_open.side_effect = OSError("test")
+        test_file.create_query_specifier.side_effect = FileMissingException("no file")
         val = _api.send_file(test_file)
         self.assertFalse(val.success)
-        mock_open.side_effect = None
+        self.assertEqual(val.result, test_file.create_query_specifier.side_effect)
 
+        test_file.create_query_specifier.side_effect = None
         mock_put.side_effect = RestCallException(None, "test", None)
         val = _api.send_file(test_file)
         self.assertFalse(val.success)
