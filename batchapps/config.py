@@ -181,7 +181,7 @@ class Configuration(object):
 
         self._config.set("Authentication",
                          "resource",
-                         "batchapps.core.windows.net/")
+                         "https://batchapps.core.windows.net/")
 
         self._config.set("Authentication",
                          "token_uri",
@@ -434,6 +434,7 @@ class Configuration(object):
                                          "{type}".format(type=self.job_type))
         if end_p.startswith("http://"):
             end_p = end_p[7:]
+
         elif end_p.startswith("https://"):
             end_p = end_p[8:]
 

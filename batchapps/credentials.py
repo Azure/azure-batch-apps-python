@@ -54,7 +54,7 @@ def _http(base_uri, *extra):
         return "{0}{1}".format(str_base, str_parts)
 
     elif str_base.startswith("https://"):
-        return "{0}{1}".format(str_base.replace("https:","http:"), str_parts)
+        return "{0}{1}".format(str_base.replace("https:","http:", 1), str_parts)
 
     else:
         return "http://{0}{1}".format(str_base, str_parts)
@@ -70,7 +70,7 @@ def _https(base_uri, *extra):
         return "{0}{1}".format(str_base, str_parts)
 
     elif str_base.startswith("http://"):
-        return "{0}{1}".format(str_base.replace("http:","https:"), str_parts)
+        return "{0}{1}".format(str_base.replace("http:","https:", 1), str_parts)
 
     else:
         return "https://{0}{1}".format(str_base, str_parts)
