@@ -55,7 +55,8 @@ can authenticate with this instead::
 	from batchapps import AzureOAuth
 	import webbrowser
 
-	webbrowser.open(AzureOAuth.get_authorization_url())
+	auth_url, state = AzureOAuth.get_authorization_url()
+	webbrowser.open(auth_url)
 	redirect_url = input("Please paste the redirect url here: ")
 
 	creds = AzureOAuth.get_authorization_token(redirect_url)
