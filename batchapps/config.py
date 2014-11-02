@@ -178,12 +178,11 @@ class Configuration(object):
         self._config.set("Authentication",
                          "auth_uri",
                          "login.windows.net/common/oauth2/authorize")
-        #self._config.set("Authentication",
-        #                 "resource",
-        #                 "batchapps.core.windows.net/")
+
         self._config.set("Authentication",
                          "resource",
-                         "greenbuttonapps.onmicrosoft.com/GreenbuttonApi")
+                         "batchapps.core.windows.net/")
+
         self._config.set("Authentication",
                          "token_uri",
                          "login.windows.net/common/oauth2/token")
@@ -417,6 +416,7 @@ class Configuration(object):
               have an endpoint configured.
 
         """
+        end_p = ""
         if len(endpoint) > 0 and self._config.has_section(self.job_type):
             self._log.info("Redirecting endpoint for application {app} "
                            "from {old} to {new}".format(app=self.job_type,
@@ -424,14 +424,21 @@ class Configuration(object):
                                                         new=endpoint))
 
             self._config.set(self.job_type, 'endpoint', str(endpoint[0]))
-            return str(endpoint[0])
+            end_p = str(endpoint[0])
 
         elif self._config.has_option(self.job_type, "endpoint"):
-            return self._config.get(self.job_type, "endpoint")
+            end_p = self._config.get(self.job_type, "endpoint")
 
         else:
             raise InvalidConfigException("No valid endpoint value for "
                                          "{type}".format(type=self.job_type))
+        if end_p.startswith("http://"):
+            end_p = end_p[7:]
+        elif end_p.startswith("https://"):
+            end_p = end_p[8:]
+
+        return end_p
+
 
     def logging_level(self, *level):
         """Gets and sets the current logging level.

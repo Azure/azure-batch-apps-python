@@ -54,7 +54,8 @@ can authenticate with this instead::
 	from batchapps import AzureOAuth
 	import webbrowser
 
-	webbrowser.open(AzureOAuth.get_authorization_url())
+	auth_url, state = AzureOAuth.get_authorization_url()
+	webbrowser.open(auth_url)
 	redirect_url = input("Please paste the redirect url here: ")
 
 	creds = AzureOAuth.get_authorization_token(redirect_url)
@@ -67,11 +68,11 @@ Or alternatively, if you use a different AAD implementation::
 	aad_token = my_oauth.get_token()
 	creds = Credentials(aad_token)
 
-If you have Service Principal access credentials, you can also authenticate 
+If you have Unattended Account credentials, you can also authenticate 
 with these. You will need to add the crdentials to the batch_apps.ini configuration 
 file::
 
-	service_principal = my_service_client_id@my_tenant
+	service_principal = ClientId=abc;TenantId=abc
 	service_principal_key = my_service_password
 
 Then you can authenticate with these credentials::
