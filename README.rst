@@ -37,8 +37,8 @@ root. It is also hosted online `here <http://dl.windowsazure.com/batchapps/pytho
 Release History
 ================
 
-* 03.11.2014	- 0.1.1 - Authentication bug fixes
-* 28.10.2014	- 0.1.0	- Beta Release
+* 2014-11-03	- 0.1.1 - Authentication bug fixes
+* 2014-10-28	- 0.1.0	- Beta Release
 
 
 Usage
