@@ -44,5 +44,5 @@ __all__ = ["job_manager",
            "config"]
 
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __author__ = 'Microsoft Corp. <bigcompute@microsoft.com>'

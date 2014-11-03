@@ -30,7 +30,7 @@ from distutils.core import setup
 
 setup(
     name='azure-batch-apps',
-    version='0.1.0',
+    version='0.1.1',
     author='Microsoft Corporation',
     author_email='BigCompute@microsoft.com',
     packages=['batchapps',
