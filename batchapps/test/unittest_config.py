@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------
-# The Azure Batch Apps Python Client ver. 0.1.0
+# The Azure Batch Apps Python Client
 #
 # Copyright (c) Microsoft Corporation. All rights reserved. 
 #
@@ -418,11 +418,11 @@ class TestConfiguration(unittest.TestCase):
         cfg.job_type = "TestApp"
         ept = Configuration.endpoint(cfg)
         self.assertEqual(_cfg.get('TestApp', 'endpoint'), 'http://test')
-        self.assertEqual(ept, 'http://test')
+        self.assertEqual(ept, 'test')
 
-        ept = Configuration.endpoint(cfg, "http://new_test")
-        self.assertEqual(_cfg.get('TestApp', 'endpoint'), 'http://new_test')
-        self.assertEqual(ept, 'http://new_test')
+        ept = Configuration.endpoint(cfg, "https://new_test/")
+        self.assertEqual(_cfg.get('TestApp', 'endpoint'), 'https://new_test/')
+        self.assertEqual(ept, 'new_test/')
 
     def test_config_logging_level(self):
         """Test logging_level"""

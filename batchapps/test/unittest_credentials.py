@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------
-# The Azure Batch Apps Python Client ver. 0.1.0
+# The Azure Batch Apps Python Client
 #
 # Copyright (c) Microsoft Corporation. All rights reserved. 
 #
@@ -185,7 +185,7 @@ class TestAzureOAuth(unittest.TestCase):
 
         with self.assertRaises(InvalidConfigException):
             AzureOAuth.get_principal_token(mock_config)
-        mock_config.aad_config.return_value = {'service_principal':'1@2',
+        mock_config.aad_config.return_value = {'service_principal':'ClientId=1;TenantId=2',
                                                'service_principal_key':'3',
                                                'token_uri':'common',
                                                'resource':'test'}

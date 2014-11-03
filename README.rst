@@ -37,8 +37,9 @@ root. It is also hosted online `here <http://dl.windowsazure.com/batchapps/pytho
 Release History
 ================
 
-* 0.1.1 - xx.xx.2014 - Changed file upload format
-* 0.1.0 - 28.10.2014 - Beta Release
+* 2014-11-xx	- 0.1.2 - Changed file upload format
+* 2014-11-03	- 0.1.1 - Authentication bug fixes
+* 2014-10-28	- 0.1.0	- Beta Release
 
 
 Usage
@@ -55,7 +56,8 @@ can authenticate with this instead::
 	from batchapps import AzureOAuth
 	import webbrowser
 
-	webbrowser.open(AzureOAuth.get_authorization_url())
+	auth_url, state = AzureOAuth.get_authorization_url()
+	webbrowser.open(auth_url)
 	redirect_url = input("Please paste the redirect url here: ")
 
 	creds = AzureOAuth.get_authorization_token(redirect_url)
@@ -68,11 +70,11 @@ Or alternatively, if you use a different AAD implementation::
 	aad_token = my_oauth.get_token()
 	creds = Credentials(aad_token)
 
-If you have Service Principal access credentials, you can also authenticate 
+If you have Unattended Account credentials, you can also authenticate 
 with these. You will need to add the crdentials to the batch_apps.ini configuration 
 file::
 
-	service_principal = my_service_client_id@my_tenant
+	service_principal = ClientId=abc;TenantId=abc
 	service_principal_key = my_service_password
 
 Then you can authenticate with these credentials::

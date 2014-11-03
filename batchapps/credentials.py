@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------
-# The Azure Batch Apps Python Client ver. 0.1.0
+# The Azure Batch Apps Python Client
 #
 # Copyright (c) Microsoft Corporation. All rights reserved. 
 #
@@ -44,16 +44,36 @@ CRED_STORE = 'AzureBatchApps'
 
 
 def _http(base_uri, *extra):
-    """Combine URL components in the an http url"""
+    """Combine URL components into an http URL"""
 
     parts = [str(e) for e in extra]
-    return "http://{0}{1}".format(str(base_uri), ''.join(parts))
+    str_parts = ''.join(parts)
+    str_base = str(base_uri)
+
+    if str_base.startswith("http://"):
+        return "{0}{1}".format(str_base, str_parts)
+
+    elif str_base.startswith("https://"):
+        return "{0}{1}".format(str_base.replace("https:","http:", 1), str_parts)
+
+    else:
+        return "http://{0}{1}".format(str_base, str_parts)
 
 def _https(base_uri, *extra):
-    """Combine URL components in the an https url"""
+    """Combine URL components into an https URL"""
 
     parts = [str(e) for e in extra]
-    return "https://{0}{1}".format(str(base_uri), ''.join(parts))
+    str_parts = ''.join(parts)
+    str_base = str(base_uri)
+
+    if str_base.startswith("https://"):
+        return "{0}{1}".format(str_base, str_parts)
+
+    elif str_base.startswith("http://"):
+        return "{0}{1}".format(str_base.replace("http:","https:", 1), str_parts)
+
+    else:
+        return "https://{0}{1}".format(str_base, str_parts)
 
 
 class AzureOAuth(object):
@@ -268,9 +288,9 @@ class AzureOAuth(object):
 
         try:
             secret = auth['service_principal_key']
-            service = auth['service_principal'].split('@')
-            client_id = service[0]
-            tenant = service[1]
+            service = auth['service_principal'].split(';')
+            client_id = service[0].split('=')[1]
+            tenant = service[1].split('=')[1]
             token_uri = auth['token_uri'].replace("common", tenant)
 
         except KeyError:
@@ -279,7 +299,7 @@ class AzureOAuth(object):
 
         except (AttributeError, IndexError):
             raise InvalidConfigException(
-                "service_principal must be in the format {client_id}@{tenant}")
+                "service_principal must be in the format ClientId=abc;TenantId=abc")
 
         silent_session = requests_oauthlib.OAuth2Session(
             client_id,
