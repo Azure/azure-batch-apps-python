@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------
-# The Azure Batch Apps Python Client
+# The Azure Batch Apps Python Client ver. 0.1.0
 #
 # Copyright (c) Microsoft Corporation. All rights reserved. 
 #
@@ -61,17 +61,19 @@ else:
                           "the mock package to run on Python 3.2 and below.\n"
                           "Please install this package to continue.")
 
-def run_unit_tests():
-    """
-    Discover all unit test cases located in the test directory and run
-    """
-    test_dir = os.path.dirname(__file__)
-    top_dir = os.path.dirname(os.path.dirname(test_dir))
-
-    test_loader = TestLoader()
-    run_unittest(test_loader.discover(test_dir,
-                                      pattern="unittest_*.py",
-                                      top_level_dir=top_dir))
+from teamcity import is_running_under_teamcity
+from teamcity.unittestpy import TeamcityTestRunner
 
 if __name__ == '__main__':
-    run_unit_tests()
+    if is_running_under_teamcity():
+        runner = TeamCityTestRunner()
+    else:
+        runner = unittest.TextTestRunner(verbosity=2)
+
+    test_dir = os.path.dirname(__file__)
+    top_dir = os.path.dirname(os.path.dirname(test_dir))
+    test_loader = TestLoader()
+    suite = test_loader.discover(test_dir,
+                                 pattern="unittest_*.py",
+                                 top_level_dir=top_dir)
+    runner.run(suite)
