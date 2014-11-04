@@ -217,3 +217,4 @@ BatchApplications.Client/pylintrc
 BatchApplications.Client/MANIFEST
 MANIFEST
 pylintrc
+*.sln

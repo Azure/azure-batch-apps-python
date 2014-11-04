@@ -5,6 +5,12 @@ Azure Batch Apps Python Client
 The package is to enable Azure Batch Apps customers to interact with the
 Management API using Python.
 
+This client module is designed to work with the applications set up within an 
+existing Batch Apps service.
+You can upload your Application Image and Cloud Assembly via the `Batch Apps Portal <https://manage.batchapps.windows.net/>`_.
+For more information on setting this up, `check out this article <http://azure.microsoft.com/en-us/documentation/articles/batch-dotnet-get-started/#tutorial2>`_.
+
+
 License
 ========
 
@@ -45,35 +51,53 @@ Release History
 Usage
 ============
 
+Application Configuration
+--------------------------
+
+In order to interact with the applications set up in your services in your Batch Apps 
+account, you will need to configure the python client.
+
+To set up a new job type reference you can add it to the configuration file, 
+along with any custom parameters you want associated with it.
+
+When you instantiate a Configuration object for the first time, the configuration 
+file will be created by default as::
+	$HOME/BatchAppsData/batch_apps.ini
+
+You can edit the file directly, or via the Configuration class::
+
+	from batchapps import Configuration
+
+	cfg = Configuration(log_level='debug', default=True)
+	cfg.add_application('my_app', 'my.endpoint.com', 'client_id')
+
+	# Set this application as the current job type
+	cfg.application('my_app')
+
+	# Set this as the default application for all future jobs
+	cfg.set_default_application()
+
+	# Add some custom parameters
+	cfg.set('start_val') = 1
+	cfg.set('end_val') = 100
+	cfg.set('timeout') = 500
+
+	# Save additional parameters to file
+	cfg.save_config()
+
 Authentication
 ---------------
 
 The module authenticates with Azure Active Directory (an implementation of OAuth2).
 The batchapps module provides a helper class to assist in retrieving an AAD token 
 using Requests-OAuthlib. However if you have a preferred OAuth implementation, you 
-can authenticate with this instead::
+can authenticate with this instead.
 
-	from batchapps import AzureOAuth
-	import webbrowser
-
-	auth_url, state = AzureOAuth.get_authorization_url()
-	webbrowser.open(auth_url)
-	redirect_url = input("Please paste the redirect url here: ")
-
-	creds = AzureOAuth.get_authorization_token(redirect_url)
-
-Or alternatively, if you use a different AAD implementation::
-
-	from batchapps import Credentials
-	import my_oauth
-
-	aad_token = my_oauth.get_token()
-	creds = Credentials(aad_token)
-
-If you have Unattended Account credentials, you can also authenticate 
-with these. You will need to add the crdentials to the batch_apps.ini configuration 
+You can create a set of "Unattended Account" credentials in your `Batch Apps account <https://manage.batchapps.windows.net/>`_.
+Once you have these credentials, you can authenticate the python client by adding them to the batch_apps.ini configuration 
 file::
 
+	[Authentication]
 	service_principal = ClientId=abc;TenantId=abc
 	service_principal_key = my_service_password
 
@@ -83,13 +107,16 @@ Then you can authenticate with these credentials::
 
 	creds = AzureOAuth.get_principal_token()
 
-Once you have logged in for the first time, your session will be auto-refreshed 
-for a limited time, so you will not need to re-authenticate. If you have a 
-stored session, you can authenticate with::
 
-	from batchapps import AzureOAuth
+Or alternatively, if you use a different AAD implementation to retrieve a token::
 
-	creds = AzureOAuth.get_session()
+	from batchapps import Credentials
+	import my_oauth
+
+	aad_token = my_oauth.get_token()
+	creds = Credentials(aad_token)
+
+Authentication via logging into a Web UI will be supported soon.
 
 
 Job Management
@@ -141,29 +168,3 @@ the cloud can be done using the FileManager class::
 	mgr.list_files()
 
 
-Application Configuration
---------------------------
-
-To set up a new application type, and any custom parameters you want associated 
-with it, it can be added to the configuration file.
-You can edit the file directly, or via the Configuration class.
-By default the configuration file will be created in the user directory::
-
-	from batchapps import Configuration
-
-	cfg = Configuration(log_level='debug', default=True)
-	cfg.add_application('my_app', 'my.endpoint.com', 'client_id')
-
-	# Set this application as the current job type
-	cfg.application('my_app')
-
-	# Set this as the default application for all future jobs
-	cfg.set_default_application()
-
-	# Add some custom parameters
-	cfg.set('start_val') = 1
-	cfg.set('end_val') = 100
-	cfg.set('timeout') = 500
-
-	# Save additional parameters to file
-	cfg.save_config()
