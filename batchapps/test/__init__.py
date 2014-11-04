@@ -30,17 +30,10 @@
 import sys
 import os
 
-try:
-    from test.support import run_unittest
-except ImportError:
-    from test.test_support import run_unittest
-
-
-
 if sys.version_info[:2] < (2, 7, ):
     try:
         import unittest2
-        from unittest2 import TestLoader
+        from unittest2 import TestLoader, TextTestRunner
 
     except ImportError:
         raise ImportError("The BatchApps Python Client test suite requires "
@@ -48,7 +41,7 @@ if sys.version_info[:2] < (2, 7, ):
                           "below.\nPlease install this package to continue.")
 else:
     import unittest
-    from unittest import TestLoader
+    from unittest import TestLoader, TextTestRunner
 
 if sys.version_info[:2] >= (3, 3, ):
     from unittest import mock
@@ -61,14 +54,20 @@ else:
                           "the mock package to run on Python 3.2 and below.\n"
                           "Please install this package to continue.")
 
-from teamcity import is_running_under_teamcity
-from teamcity.unittestpy import TeamcityTestRunner
+try:
+    from teamcity import is_running_under_teamcity
+    from teamcity.unittestpy import TeamcityTestRunner
+    TC_BUILD = is_running_under_teamcity()
+
+except ImportError:
+    TC_BUILD = False
 
 if __name__ == '__main__':
-    if is_running_under_teamcity():
+
+    if TC_BUILD:
         runner = TeamcityTestRunner()
     else:
-        runner = unittest.TextTestRunner(verbosity=2)
+        runner = TextTestRunner(verbosity=2)
 
     test_dir = os.path.dirname(__file__)
     top_dir = os.path.dirname(os.path.dirname(test_dir))
