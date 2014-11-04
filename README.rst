@@ -7,8 +7,8 @@ Management API using Python.
 
 This client module is designed to work with the applications set up within an 
 existing Batch Apps service.
-You can upload your Application Image and Cloud Assembly via the `Batch Apps Portal <https://manage.batchapps.windows.net/>_`.
-For more information on setting this up, `check out this article <http://azure.microsoft.com/en-us/documentation/articles/batch-dotnet-get-started/#tutorial2>_`.
+You can upload your Application Image and Cloud Assembly via the `Batch Apps Portal <https://manage.batchapps.windows.net/>`_.
+For more information on setting this up, `check out this article <http://azure.microsoft.com/en-us/documentation/articles/batch-dotnet-get-started/#tutorial2>`_.
 
 
 License
