@@ -68,14 +68,13 @@ You can edit the file directly, or via the Configuration class::
 
 	from batchapps import Configuration
 
-	# This will be configured in your Azure AAD portal, or can be retrieved
-	# when creating an unattended account in the Batch Apps portal.
+	# This can be retrieved when creating an unattended account in the Batch Apps portal.
 	client_id = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
 
 	cfg = Configuration(log_level='debug', default=True)
 	cfg.add_application('my_job_type', 'https://myservice.batchapps.core.windows.net', client_id)
 
-	# Set this application as the current job type
+	# Set this job type as the current job type
 	cfg.application('my_job_type')
 
 	# Set the current job type as the default job type for future jobs
