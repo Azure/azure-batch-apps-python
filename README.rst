@@ -67,13 +67,17 @@ You can edit the file directly, or via the Configuration class::
 
 	from batchapps import Configuration
 
+	# This will be configured in your Azure AAD portal, or can be retrieved
+	# when creating an unattended account in the Batch Apps portal.
+	client_id = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+
 	cfg = Configuration(log_level='debug', default=True)
-	cfg.add_application('my_app', 'my.endpoint.com', 'client_id')
+	cfg.add_application('my_job_type', 'https://myservice.batchapps.core.windows.net', client_id)
 
 	# Set this application as the current job type
-	cfg.application('my_app')
+	cfg.application('my_job_type')
 
-	# Set this as the default application for all future jobs
+	# Set the current job type as the default job type for future jobs
 	cfg.set_default_application()
 
 	# Add some custom parameters
@@ -132,9 +136,12 @@ through the JobManager class::
 	my_job = mgr.create_job("First Job")
 	
 	# Apply any custom parameters and source files here
-	job_id = my_job.submit()['jobid']
+	my_job.example_parameter = "test123"
 
-	job_progress = mgr.get_job(jobid=job_id)
+	# Then submit the job
+	new_job = my_job.submit()
+
+	job_progress = mgr.get_job(url=new_job['link'])
 	
 	if job_progress.status == 'Complete':
 		job_progress.get_output('c:\\my_download_dir')
