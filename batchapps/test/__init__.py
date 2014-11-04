@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------
-# The Azure Batch Apps Python Client ver. 0.1.0
+# The Azure Batch Apps Python Client
 #
 # Copyright (c) Microsoft Corporation. All rights reserved. 
 #
@@ -66,7 +66,7 @@ from teamcity.unittestpy import TeamcityTestRunner
 
 if __name__ == '__main__':
     if is_running_under_teamcity():
-        runner = TeamCityTestRunner()
+        runner = TeamcityTestRunner()
     else:
         runner = unittest.TextTestRunner(verbosity=2)
 
