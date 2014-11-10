@@ -80,9 +80,9 @@ You can edit the file directly, or via the Configuration class::
 	cfg.set_default_application()
 
 	# Add some custom parameters
-	cfg.set('start_val') = 1
-	cfg.set('end_val') = 100
-	cfg.set('timeout') = 500
+	cfg.set('start_val', 1)
+	cfg.set('end_val', 100)
+	cfg.set('timeout', 500)
 
 	# Save additional parameters to file
 	cfg.save_config()
