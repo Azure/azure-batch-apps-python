@@ -73,7 +73,7 @@ class TestBatchAppsApi(unittest.TestCase):
 
         _api = BatchAppsApi(mock_creds, mock_config)
         _api.app()
-        self.assertTrue(mock_config.application.called)
+        self.assertTrue(mock_config.current_jobtype.called)
 
     @mock.patch('batchapps.credentials.Configuration')
     @mock.patch('batchapps.credentials.Credentials')

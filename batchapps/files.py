@@ -292,6 +292,24 @@ class FileCollection(object):
             self._log.error(msg)
             raise AttributeError(msg)
 
+    def index(self, userfile):
+        """Retrieve the index of a userfile
+
+        :Args:
+            - userfile (:class:`.UserFile`): The userfile object whose index will be
+              retrieved.
+
+        :Raises:
+            - TypeError if ``userfile`` is not a
+              :class:`.UserFile`
+            - ValueError if ``userfile`` is not in the :class:`.FileCollection` object
+        """
+
+        if not hasattr(userfile, "create_query_specifier"):
+            raise TypeError("File to index must be userfile object")
+
+        return self._collection.index(userfile)
+
     def remove(self, userfile):
         """
         Remove a userfile from the collection, via index or name.
@@ -359,7 +377,7 @@ class FileCollection(object):
               ``[(UserFile(), ExceptionStr), (UserFile(), ExceptionStr)..]``
               If all files successfully uploaded this list will be empty.
 
-        :: warning ::
+        .. warning ::
             During parallel uploads, messages will only be logged to the
             console, not to file.
         """
@@ -783,7 +801,7 @@ class UserFile(object):
         """Check if a file has already been uploaded.
 
         :Returns:
-            - :class:.`.UserFile` if file has already been uploaded, else ``None``.
+            - :class:`.UserFile` if file has already been uploaded, else ``None``.
 
         :Raises:
             - :class:`.RestCallException` if any errors occured in the API

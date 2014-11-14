@@ -135,13 +135,13 @@ class TestConfiguration(unittest.TestCase):
         self.assertTrue(mock_read.called)
         self.assertEqual(cfg.job_type, "Blender")
 
-        cfg = Configuration(data_path=self.test_dir, application=None)
+        cfg = Configuration(data_path=self.test_dir, job_type=None)
         self.assertEqual(cfg.job_type, "Blender")
 
         with self.assertRaises(InvalidConfigException):
             Configuration(application='TestApp', default=True)
         with self.assertRaises(InvalidConfigException):
-            Configuration(application=42, default=True)
+            Configuration(job_type=42, default=True)
 
     @mock.patch.object(Configuration, '_check_directory')
     @mock.patch.object(Configuration, '_configure_logging')
@@ -337,7 +337,16 @@ class TestConfiguration(unittest.TestCase):
 
     @mock.patch.object(Configuration, 'save_config')
     def test_config_set_default_application(self, mock_save):
-        """Test set_default_application"""
+        """Test deprecated method set_default_application"""
+
+        cfg = mock.create_autospec(Configuration)
+        cfg._log = logging.getLogger("set_default_application")
+        Configuration.set_default_application(cfg)
+        self.assertTrue(cfg.set_default_jobtype.called)
+
+    @mock.patch.object(Configuration, 'save_config')
+    def test_config_set_default_jobtype(self, mock_save):
+        """Test set_default_jobtype"""
 
         if not self.use_test_files:
             self.skipTest("No test files present")
@@ -348,15 +357,16 @@ class TestConfiguration(unittest.TestCase):
         cfg._config = _cfg
         cfg.job_type = "Test"
         cfg._write_file = True
+        cfg._log = logging.getLogger("set_default_jobtype")
 
-        Configuration.set_default_application(cfg)
-        self.assertFalse(cfg._config.has_option('Blender', 'default_app'))
-        self.assertTrue(cfg._config.has_option('Test', 'default_app'))
+        Configuration.set_default_jobtype(cfg)
+        self.assertFalse(cfg._config.has_option('Blender', 'default_jobtype'))
+        self.assertTrue(cfg._config.has_option('Test', 'default_jobtype'))
 
         cfg.job_type = "Test"
-        Configuration.set_default_application(cfg)
-        self.assertFalse(cfg._config.has_option('Blender', 'default_app'))
-        self.assertTrue(cfg._config.has_option('Test', 'default_app'))
+        Configuration.set_default_jobtype(cfg)
+        self.assertFalse(cfg._config.has_option('Blender', 'default_jobtype'))
+        self.assertTrue(cfg._config.has_option('Test', 'default_jobtype'))
 
     @mock.patch(BUILTIN_OPEN)
     def test_config_save_config(self, mock_open):
@@ -412,8 +422,10 @@ class TestConfiguration(unittest.TestCase):
 
         with self.assertRaises(InvalidConfigException):
             Configuration.endpoint(cfg)
+
+        _cfg.add_section('Authentication')
         with self.assertRaises(InvalidConfigException):
-            Configuration.endpoint(cfg, "test")
+            Configuration.endpoint(cfg)
 
         cfg.job_type = "TestApp"
         ept = Configuration.endpoint(cfg)
@@ -421,7 +433,8 @@ class TestConfiguration(unittest.TestCase):
         self.assertEqual(ept, 'test')
 
         ept = Configuration.endpoint(cfg, "https://new_test/")
-        self.assertEqual(_cfg.get('TestApp', 'endpoint'), 'https://new_test/')
+        self.assertEqual(_cfg.get('TestApp', 'endpoint'), 'http://test')
+        self.assertEqual(_cfg.get('Authentication', 'endpoint'), 'https://new_test/')
         self.assertEqual(ept, 'new_test/')
 
     def test_config_logging_level(self):
@@ -447,40 +460,61 @@ class TestConfiguration(unittest.TestCase):
         cfg._set_logging_level.assert_called_with("warning")
 
     def test_config_application(self):
-        """Test application"""
+        """Test depcrecated method application"""
+        cfg = mock.create_autospec(Configuration)
+        cfg._log = logging.getLogger("application")
+        Configuration.application(cfg)
+        self.assertTrue(cfg.current_jobtype.called)
+
+        Configuration.application(cfg, "test")
+        cfg.current_jobtype.assert_called_with("test")
+
+    def test_config_current_jobtype(self):
+        """Test current_jobtype"""
 
         _cfg = configparser.RawConfigParser()
         cfg = mock.create_autospec(Configuration)
-        cfg._log = logging.getLogger("application")
+        cfg._log = logging.getLogger("jobtype")
         cfg._config = _cfg
         cfg.job_type = "TestApp"
 
-        app = Configuration.application(cfg)
+        app = Configuration.current_jobtype(cfg)
         self.assertEqual(app, cfg.job_type)
 
         _cfg.add_section('TestApp2')
         with self.assertRaises(InvalidConfigException):
-            Configuration.application(cfg, 'DifferentApp')
+            Configuration.current_jobtype(cfg, 'DifferentApp')
 
-        app = Configuration.application(cfg, "TestApp2")
+        app = Configuration.current_jobtype(cfg, "TestApp2")
         self.assertEqual(app, 'TestApp2')
         self.assertEqual(cfg.job_type, 'TestApp2')
 
     def test_config_applications(self):
-        """Test applications"""
+        """Test deprecated method applications"""
+        cfg = mock.create_autospec(Configuration)
+        cfg._log = logging.getLogger("applications")
+        Configuration.applications(cfg)
+        self.assertTrue(cfg.list_jobtypes.called)
+
+    def test_config_list_jobtypes(self):
+        """Test list_jobtypes"""
 
         _cfg = configparser.RawConfigParser()
         _cfg.add_section("Logging")
         cfg = mock.create_autospec(Configuration)
-        cfg._log = logging.getLogger("applications")
+        cfg._log = logging.getLogger("list_jobtypes")
         cfg._config = _cfg
 
-        apps = Configuration.applications(cfg)
+        with self.assertRaises(InvalidConfigException):
+            apps = Configuration.list_jobtypes(cfg)
+
+        _cfg.add_section("Authentication")
+        apps = Configuration.list_jobtypes(cfg)
         self.assertEqual(apps, [])
 
         _cfg.add_section("Blender")
         _cfg.add_section("NewTestApp")
-        apps = Configuration.applications(cfg)
+        apps = Configuration.list_jobtypes(cfg)
         self.assertEqual(sorted(apps), sorted(['Blender', 'NewTestApp']))
 
     def test_config_default_params(self):
@@ -504,34 +538,38 @@ class TestConfiguration(unittest.TestCase):
         self.assertEqual(params, {'1':'teST', '2':None, '3':[]})
 
     def test_config_add_application(self):
-        """Test add_application"""
+        """Testing deprecated method add_application"""
+
+        cfg = mock.create_autospec(Configuration)
+        cfg._log = logging.getLogger("add_application")
+        Configuration.add_application(cfg, "1", "2", three="3")
+        cfg.add_jobtype.assert_called_with("1", three="3")
+
+    def test_config_add_jobtype(self):
+        """Test add_jobtype"""
 
         _cfg = configparser.RawConfigParser()
         _cfg.add_section("TestApp")
         cfg = mock.create_autospec(Configuration)
-        cfg._log = logging.getLogger("add_application")
+        cfg._log = logging.getLogger("add_jobtype")
         cfg._config = _cfg
 
-        Configuration.add_application(cfg,
-                                      "TestApp",
-                                      "http://endpoint",
-                                      "test_id")
+        Configuration.add_jobtype(cfg,
+                                  "TestApp",
+                                  "http://endpoint",
+                                  "test_id")
         self.assertEqual(cfg._config.sections(), ['TestApp'])
-        self.assertEqual(dict(cfg._config.items('TestApp')),
-                         {'endpoint':"http://endpoint", 'client_id':'test_id'})
+        self.assertEqual(dict(cfg._config.items('TestApp')), {})
 
-        Configuration.add_application(cfg,
-                                      "TestApp2",
-                                      "http://endpoint",
-                                      "test_id",
-                                      a="1",
-                                      b=2,
-                                      c=None)
+        Configuration.add_jobtype(cfg,
+                                  "TestApp2",
+                                  "test_id",
+                                  a="1",
+                                  b=2,
+                                  c=None)
         self.assertEqual(cfg._config.sections(), ['TestApp', 'TestApp2'])
         self.assertEqual(dict(cfg._config.items('TestApp2')),
-                         {'endpoint':"http://endpoint",
-                          'client_id':'test_id',
-                          'a':'1',
+                         {'a':'1',
                           'b':2,
                           'c':None})
 
@@ -586,8 +624,8 @@ class TestConfiguration(unittest.TestCase):
         cfg._config = _cfg
         cfg.job_type = "TestApp"
 
-        with self.assertRaises(ValueError):
-            Configuration.remove(cfg, "TestApp")
+        rem = Configuration.remove(cfg, "TestApp")
+        self.assertFalse(rem)
 
         rem = Configuration.remove(cfg, "TestApp2")
         self.assertFalse(rem)
@@ -600,17 +638,10 @@ class TestConfiguration(unittest.TestCase):
 
         cfg._config.set("TestApp", "1", 1)
         cfg._config.set("TestApp", "2", 2)
-        cfg._config.set("TestApp", "endpoint", 3)
 
         rem = Configuration.remove(cfg, "1")
         self.assertTrue(rem)
-        self.assertEqual(dict(cfg._config.items('TestApp')),
-                         {'2':2, 'endpoint':3})
-
-        rem = Configuration.remove(cfg, "endpoint")
-        self.assertFalse(rem)
-        self.assertEqual(dict(cfg._config.items('TestApp')),
-                         {'2':2, 'endpoint':3})
+        self.assertEqual(dict(cfg._config.items('TestApp')), {'2':2})
 
         _cfg.add_section("Logging")
         rem = Configuration.remove(cfg, "Logging")
@@ -628,10 +659,127 @@ class TestConfiguration(unittest.TestCase):
         cfg = mock.create_autospec(Configuration)
         cfg._log = logging.getLogger("aad")
         cfg._config = _cfg
+        cfg._reformat_config.return_value = {"a":1, "b":2}
+        cfg._validate_auth = lambda a: dict(_cfg.items("Authentication"))
 
         with self.assertRaises(InvalidConfigException):
             Configuration.aad_config(cfg)
 
         _cfg.add_section("Authentication")
         aad = Configuration.aad_config(cfg)
-        self.assertEqual(aad, {})
+        self.assertEqual(aad, {"a":1, "b":2})
+
+        aad = Configuration.aad_config(cfg, client_id="a", tenant="b",
+                                       endpoint="c")
+        self.assertEqual(aad, {"a":1, "b":2, "client_id":"a", "tenant":"b",
+                               "endpoint":"c"})
+        _cfg.remove_section("Authentication")
+        _cfg.add_section("Authentication")
+
+        _cfg.set("Authentication", "root", "test")
+        aad = Configuration.aad_config(cfg, key=3, redirect=4)
+        self.assertEqual(aad, {"root":"test", "unattended_key":"3",
+                               "redirect_uri":"4"})
+
+    def test_config_validate_auth(self):
+        """Test validate_auth"""
+        _cfg = configparser.RawConfigParser()
+        cfg = mock.create_autospec(Configuration)
+        cfg._valid_data = lambda s: Configuration._valid_data(None, s)
+        _cfg.add_section("Authentication")
+        cfg._config = _cfg
+        
+        with self.assertRaises(InvalidConfigException):
+            Configuration._validate_auth(cfg, False)
+
+        _cfg.set("Authentication", "auth_uri", "a")
+        _cfg.set("Authentication", "resource", "b")
+        _cfg.set("Authentication", "token_uri", "c")
+        _cfg.set("Authentication", "endpoint", "d")
+        _cfg.set("Authentication", "client_id", "e")
+        _cfg.set("Authentication", "tenant", "f")
+        _cfg.set("Authentication", "root", "g")
+        _cfg.set("Authentication", "redirect_uri", "{redirect}")
+
+        with self.assertRaises(InvalidConfigException):
+            Configuration._validate_auth(cfg, False)
+
+        _cfg.set("Authentication", "redirect_uri", "h")
+        auth = Configuration._validate_auth(cfg, False)
+
+        with self.assertRaises(InvalidConfigException):
+            Configuration._validate_auth(cfg, True)
+
+        _cfg.remove_option("Authentication", "redirect_uri")
+        _cfg.set("Authentication", "unattended_key", "i")
+        auth = Configuration._validate_auth(cfg, True)
+
+    def test_config_reformat_config(self):
+        """Test reformat_config"""
+
+        old_cfg = configparser.RawConfigParser()
+        old_cfg.add_section("Authentication")
+        old_cfg.set("Authentication", "auth_uri",
+                    "login.windows.net/common/oauth2/authorize")
+        old_cfg.set("Authentication", "resource", "batchapps.core.windows.net/")
+        old_cfg.set("Authentication", "token_uri", "login.windows.net/common/oauth2/token")
+        
+        old_cfg.add_section("TestJob")
+        old_cfg.set("TestJob", "endpoint", "test.com")
+        old_cfg.set("TestJob", "client_id", "abc")
+        old_cfg.set("TestJob", "redirect_uri", "redirect.com")
+
+        cfg = mock.create_autospec(Configuration)
+        cfg._log = logging.getLogger("aad")
+        cfg._config = old_cfg
+        cfg.job_type = "TestJob"
+
+        aad = Configuration._reformat_config(
+            cfg, dict(cfg._config.items("Authentication")))
+
+        self.assertEqual(aad, {"endpoint":"test.com", "client_id":"abc",
+                               "auth_uri":"/oauth2/authorize",
+                               "root":"login.windows.net/",
+                               "token_uri":"/oauth2/token",
+                               "redirect_uri":"redirect.com",
+                               "unattended_key":"",
+                               "tenant":"common",
+                               "resource":"batchapps.core.windows.net/"})
+
+        old_cfg.set("Authentication", "service_principal", "")
+        old_cfg.set("Authentication", "service_principal_key", "")
+
+        aad = Configuration._reformat_config(
+            cfg, dict(cfg._config.items("Authentication")))
+
+        self.assertEqual(aad, {"endpoint":"test.com", "client_id":"abc",
+                               "auth_uri":"/oauth2/authorize",
+                               "root":"login.windows.net/",
+                               "token_uri":"/oauth2/token",
+                               "redirect_uri":"redirect.com",
+                               "unattended_key":"",
+                               "tenant":"common",
+                               "resource":"batchapps.core.windows.net/"})
+
+        old_cfg.set("Authentication", "service_principal", "xy@z")
+        old_cfg.set("Authentication", "service_principal_key", "%&#5$#")
+
+        with self.assertRaises(InvalidConfigException):
+            aad = Configuration._reformat_config(
+                cfg, dict(cfg._config.items("Authentication")))
+
+        old_cfg.set("Authentication", "service_principal",
+                    "ClientId=xyz;TenantId=greenbuttontest.onmicrosoft.com")
+
+        aad = Configuration._reformat_config(
+            cfg, dict(cfg._config.items("Authentication")))
+
+        self.assertEqual(aad, {"endpoint":"test.com", "client_id":"xyz",
+                               "auth_uri":"/oauth2/authorize",
+                               "root":"login.windows.net/",
+                               "token_uri":"/oauth2/token",
+                               "redirect_uri":"",
+                               "unattended_key":"%&#5$#",
+                               "tenant":"greenbuttontest.onmicrosoft.com",
+                               "resource":"batchapps.core.windows.net/"})
+

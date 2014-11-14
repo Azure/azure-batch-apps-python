@@ -78,7 +78,7 @@ class BatchAppsApi(object):
             - credentials (:class:`.Credentials`): Credentials with which all
               API calls will be authenticated.
             - config (:class:`.Configuration`): Configuration of the
-              application the jobs will be submitted as, as well as endpoint
+              job type the jobs will be submitted as, as well as endpoint
               and logging configuration.
         """
         self._config = config
@@ -90,12 +90,26 @@ class BatchAppsApi(object):
                         "Content-Type": "application/json"}
 
     def app(self):
-        """Retrieve the current jobtype from the :class:`.Configuration`.
+        """
+        .. warning:: Deprecated. Use :meth:`.jobtype()`.
+        Retrieve the current jobtype from the :class:`.Configuration`.
 
         :Returns:
-            - The current application from the configuration (str).
+            - The current job type from the configuration (str).
         """
-        return self._config.application()
+        self._log.warning("app() is deprecated. "
+                          "Please use jobtype().")
+        return self._config.current_jobtype()
+
+    def jobtype(self):
+        """
+        Retrieve the current jobtype from the :class:`.Configuration`.
+
+        :Returns:
+            - The current jobtype from the configuration (str).
+
+        """
+        return self._config.current_jobtype()
 
     def url(self, api_call):
         """Format API endpoint URL.
@@ -118,8 +132,8 @@ class BatchAppsApi(object):
 
     def default_params(self):
         """
-        Get the default parameters for the application.
-        Retrieves the parameters tied to the application from the
+        Get the default parameters for the job type.
+        Retrieves the parameters tied to the job type from the
         :class:`.Configuration`
 
         :Returns:

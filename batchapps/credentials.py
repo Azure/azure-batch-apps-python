@@ -87,30 +87,23 @@ class AzureOAuth(object):
     LOG = logging.getLogger('batch_apps')
 
     @staticmethod
-    def _setup_session(auth, client, state=None):
+    def _setup_session(auth, state=None):
         """Apply configuration info to set up a new OAuth2 session."""
 
-        AzureOAuth.LOG.debug("Configuring session. Client: {0}, Cfg: "
-                  "{1}".format(str(client), str(auth)))
-
-        if (not utils.valid_keys(client, ['client_id', 'redirect_uri']) or
-            not 'token_uri' in auth):
-
-            raise InvalidConfigException(
-                "Correct authentication configuration not found")
+        AzureOAuth.LOG.debug("Configuring session with {0}".format(str(auth)))
 
         if not AzureOAuth.session:
-            redirect = _http(client.get('redirect_uri'))
+            redirect = _http(auth.get('redirect_uri'))
 
             if isinstance(state, str):
                 AzureOAuth.session = requests_oauthlib.OAuth2Session(
-                    client.get('client_id'),
+                    auth.get('client_id'),
                     redirect_uri=redirect,
                     state=state)
 
             else:
                 AzureOAuth.session = requests_oauthlib.OAuth2Session(
-                    client.get('client_id'),
+                    auth.get('client_id'),
                     redirect_uri=redirect)
 
     @staticmethod
@@ -129,15 +122,14 @@ class AzureOAuth(object):
             - A :class:`.InvalidConfigException` if the supplied,
               or default configuration does not contain the necessary
               authentication data.
-            - A :class:`.AuthenticationException` if there's not existing
+            - A :class:`.AuthenticationException` if there's no existing
               stored session or the token is invalid.
         """
         AzureOAuth.config = config if config else Configuration()
-        return Credentials(AzureOAuth.config,
-                           AzureOAuth.config.get('client_id'))
+        return Credentials(AzureOAuth.config)
 
     @staticmethod
-    def get_authorization_url(config=None, prompt=False, **additional_args):
+    def get_authorization_url(config=None, msa=False, prompt=False, **additional_args):
         """
         Construct client-specific authentication URL. This URL can be used
         in a web browser to direct the user to log in and authenticate
@@ -147,6 +139,7 @@ class AzureOAuth(object):
             - config (:class:`.Configuration`): A custom configuration object.
               Default is `None` where a default :class:`.Configuration` will
               be created.
+            - msa (bool): Authenticate by MSA. Default is ``False``.
             - prompt (bool): Force login prompt regardless of existing session.
               Default is ``False``.
             - additional_args (dict): Any additional AAD parameters to include
@@ -172,18 +165,22 @@ class AzureOAuth(object):
                 "Correct authentication configuration not found")
 
         auth = AzureOAuth.config.aad_config()
-        AzureOAuth._setup_session(auth, AzureOAuth.config.default_params())
+        AzureOAuth._setup_session(auth)
 
-        #if msa:
-        #    additional_args['domain_hint'] = 'live.com'
+        if msa:
+            additional_args['domain_hint'] = 'live.com'
 
         if prompt:
             additional_args['prompt'] = 'login'
 
         try:
+            auth_uri = _https(auth['root'], auth['tenant'], auth['auth_uri'])
+            AzureOAuth.LOG.debug("Generating URL with {0}, {1}, {2}".format(
+                auth_uri, _https(auth['resource']), additional_args))
+
             auth_url, state = AzureOAuth.session.authorization_url(
-                _https(auth['auth_uri']),
-                resource=_https(auth['resource']),
+                auth_uri,
+                resource=_https(auth['resource']), #DEP
                 **additional_args)
 
             return auth_url, state
@@ -224,24 +221,22 @@ class AzureOAuth(object):
                 "Correct authentication configuration not found")
 
         auth = AzureOAuth.config.aad_config()
-        AzureOAuth._setup_session(auth,
-                                  AzureOAuth.config.default_params(),
-                                  state=state)
+        AzureOAuth._setup_session(auth, state=state)
 
-        redirect = AzureOAuth.config.get('redirect_uri')
+        redirect = auth.get('redirect_uri')
 
         if auth_url.startswith(_http(redirect)):
-            auth_url = auth_url.replace('http', 'https')
+            auth_url = _https(auth_url)
 
         elif not auth_url.startswith(_https(redirect)):
             auth_url = _https(redirect) + auth_url
 
+        token_uri = _https(auth['root'], auth['tenant'], auth['token_uri'])
         try:
             AzureOAuth.LOG.debug("Fetching token with token_uri: "
-                                 "{0}".format(_https(auth['token_uri'])))
+                                 "{0}".format(token_uri))
 
-            token = AzureOAuth.session.fetch_token(
-                _https(auth['token_uri']),
+            token = AzureOAuth.session.fetch_token(token_uri,
                 authorization_response=auth_url)
 
         except oauth2.rfc6749.errors.InvalidGrantError as excp:
@@ -253,14 +248,37 @@ class AzureOAuth(object):
         except oauth2.rfc6749.errors.MismatchingStateError as excep:
             raise AuthenticationException(excp.description)
 
-        authorized_creds = Credentials(AzureOAuth.config,
-                                       AzureOAuth.config.get('client_id'),
-                                       token=token)
+        authorized_creds = Credentials(AzureOAuth.config, token=token)
         return authorized_creds
 
     @staticmethod
     def get_principal_token(config=None):
-        """Retrieve a Service Principal access token from AAD server.
+        """
+        .. warning:: Deprecated. Please use :meth:`.get_unattended_session()`.
+        Retrieve a Unattended Account access token from AAD server.
+
+        :Kwargs:
+            - config (:class:`.Configuration`): A custom configuration object.
+              Default is `None` where a default :class:`.Configuration`
+              will be created.
+
+        :Returns:
+            - An authenticated :class:`.Credentials` object.
+
+        :Raises:
+            - A :class:`.InvalidConfigException` if the supplied, or default
+              configuration does not contain the necessary authentication
+              data.
+            - A :class:`.AuthenticationException` if the supplied credentials
+              are invalid (e.g. have expired).
+        """
+        AzureOAuth.LOG.warning("get_principal_token() is deprecated. "
+                               "Please use get_unattended_session().")
+        return AzureOAuth.get_unattended_session(config=config)
+
+    @staticmethod
+    def get_unattended_session(config=None):
+        """Retrieve a Unattended Account access token from AAD server.
 
         :Kwargs:
             - config (:class:`.Configuration`): A custom configuration object.
@@ -284,22 +302,12 @@ class AzureOAuth(object):
             raise InvalidConfigException(
                 "Correct authentication configuration not found")
 
-        auth = AzureOAuth.config.aad_config()
+        auth = AzureOAuth.config.aad_config(unattended=True)
 
-        try:
-            secret = auth['service_principal_key']
-            service = auth['service_principal'].split(';')
-            client_id = service[0].split('=')[1]
-            tenant = service[1].split('=')[1]
-            token_uri = auth['token_uri'].replace("common", tenant)
-
-        except KeyError:
-            raise InvalidConfigException(
-                "Supplied config does not contain Service Principal auth.")
-
-        except (AttributeError, IndexError):
-            raise InvalidConfigException(
-                "service_principal must be in the format ClientId=abc;TenantId=abc")
+        secret = auth['unattended_key']
+        client_id = auth['client_id']
+        tenant = auth['tenant']
+        token_uri = _https(auth['root'], tenant, auth['token_uri'])
 
         silent_session = requests_oauthlib.OAuth2Session(
             client_id,
@@ -307,12 +315,12 @@ class AzureOAuth(object):
 
         try:
             AzureOAuth.LOG.debug("Fetching token with token_uri: "
-                                 "{0}".format(_https(token_uri)))
+                                 "{0}".format(token_uri))
 
             token = silent_session.fetch_token(
-                _https(token_uri),
+                token_uri,
                 client_id=client_id,
-                resource=_https(auth['resource']),
+                resource=_https(auth['resource']), #DEP
                 client_secret=secret,
                 response_type="client_credentials")
 
@@ -322,9 +330,7 @@ class AzureOAuth(object):
         except oauth2.rfc6749.errors.OAuth2Error as excp:
             raise AuthenticationException(excp.description)
 
-        authorized_creds = Credentials(AzureOAuth.config,
-                                       client_id,
-                                       token=token)
+        authorized_creds = Credentials(AzureOAuth.config, token=token)
         return authorized_creds
 
 
@@ -335,7 +341,7 @@ class Credentials(object):
     system. See: https://pypi.python.org/pypi/keyring
     """
 
-    def __init__(self, config, client_id, token=None):
+    def __init__(self, config, *args, **kwargs): #DEP
         """
         New credentials object. Preferably this class is instantiated by
         :class:`.AzureOAuth` rather than called directly.
@@ -343,8 +349,6 @@ class Credentials(object):
         :Args:
             - config (:class:`.Configuration`): A configuration object to
               define the client session.
-            - client_id (str): The client ID for the application as defined
-              in the Configuration.
 
         :Kwargs:
             - token (dict): An authentication token, if not provided will try
@@ -357,19 +361,24 @@ class Credentials(object):
         """
 
         self._log = logging.getLogger('batch_apps')
+        token = kwargs.get('token')
 
         if not hasattr(config, "aad_config"):
             raise InvalidConfigException(
                 "Correct authentication configuration not found")
 
-        self.cfg = config.aad_config()
-        self._id = client_id
-
         if not token:
             self._log.debug("No token supplied, attempting to "
                             "retrieve previous session.")
 
+            self.cfg = config.aad_config(unattended=False)
+            self._id = self.cfg.get('client_id')
             token = self.get_stored_auth()
+
+        else:
+            unattended = 'refresh_token' not in token
+            self.cfg = config.aad_config(unattended=unattended)
+            self._id = self.cfg.get('client_id')
 
         self.token = token
 
@@ -391,9 +400,10 @@ class Credentials(object):
             - :class:`.AuthenticationException` if the token is invalid
               or expired.
         """
-        resource = _https(self.cfg['resource'])
-        refresh = _https(self.cfg['token_uri'])
+        resource = _https(self.cfg['resource']) #DEP
         countdown = float(self.token['expires_at']) - time.time()
+        refresh = _https(self.cfg['root'], self.cfg['tenant'],
+                         self.cfg['token_uri'])
 
         self.token['expires_in'] = countdown
         self._log.debug("Token expires in: {0}".format(countdown))
@@ -420,7 +430,7 @@ class Credentials(object):
                 "Token expired: {0}".format(excp.description))
 
     def get_stored_auth(self):
-        """Retrieve a previous stored access token for refreshing
+        """Retrieve a previously stored access token for refreshing
 
         :Returns:
             - The token as a dictionary.

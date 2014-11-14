@@ -43,6 +43,7 @@ from .exceptions import InvalidConfigException
 from . import utils
 
 LOGGERS = {}
+API_RESOURCE = "https://batchapps.core.windows.net/"
 
 class Configuration(object):
     """
@@ -54,10 +55,11 @@ class Configuration(object):
     def __init__(self,
                  data_path=None,
                  log_level=None,
-                 application=None,
+                 job_type=None,
                  name="batch_apps.ini",
                  datadir="BatchAppsData",
-                 default=False):
+                 default=False,
+                 **kwargs):
         """
         A new :class:`.Configuration` will attempt to use an existing saved
         config, and if one is not found default configuration will be used.
@@ -71,11 +73,11 @@ class Configuration(object):
             - log_level (str): The level of logging during Batch Apps session.
               Must be a string in ``['debug', 'info', 'warning', 'error',
               'critical']``. If not set default is 'warning'.
-            - application (str): The application job type, used to determine
+            - job_type (str): The application job type, used to determine
               how a job will be processed in the cloud. The list of available
               job types will depend on the configuration and can checked
-              using the :meth:`.applications()` method.
-              Default application is 'Blender', unless overridden in config.
+              using the :meth:`.list_jobtypes()` method.
+              Default job type is 'Blender', unless overridden in config.
             - name (str): The name of the configuration file to read from and
               save to. Unless set, the default 'batch_apps.ini' will be used.
             - datadir (str): The name of the directory that will be created to
@@ -87,7 +89,7 @@ class Configuration(object):
               (unless an alternative config ``name`` is set).
 
         :Raises:
-            - :exc:`.InvalidConfigException` if the specified application is
+            - :exc:`.InvalidConfigException` if the specified job type is
               not defined in the config.
 
         """
@@ -111,8 +113,17 @@ class Configuration(object):
                 self._config.read(self._cfg_file)
                 for sec in self._config.sections():
 
-                    if (self._config.has_option(sec, "default_app") and
+                    if (self._config.has_option(sec, "default_jobtype") and
+                    self._config.get(sec, "default_jobtype") == "True"):
+                        self.job_type = sec
+                        break
+
+                    if (self._config.has_option(sec, "default_app") and #DEP
                     self._config.get(sec, "default_app") == "True"):
+                        self._log.warning(
+                            "Use of setting 'default_app' is"
+                            "deprecated. Please use 'default_jobtype.'")
+
                         self.job_type = sec
                         break
 
@@ -129,13 +140,18 @@ class Configuration(object):
 
         self._set_logging_level(log_level if log_level else current_level)
 
-        if application:
-            self.job_type = application
+        if job_type:
+            self.job_type = job_type
+
+        elif kwargs.get('application'): #DEP
+            self._log.warning("Use of kwarg 'application' is deprecated. "
+                              "Please replace with 'job_type'.")
+            self.job_type = kwargs.get('application')
 
         if not self._config.has_section(self.job_type):
             raise InvalidConfigException(
-                "Config file has no parameters for application: {type}. "
-                "Please specify alternative config or application.".format(
+                "Config file has no setting for job type: {type}. "
+                "Please specify alternative config or job type.".format(
                     type=self.job_type))
 
     def _set_defaults(self):
@@ -145,49 +161,40 @@ class Configuration(object):
         It will also set global logging variables to be used throughout the
         session unless overridden.
         """
-        self._config.add_section("Blender") # Sample Application Config
-        self._config.set("Blender", "client_id", "{client_id}")
-        self._config.set("Blender", "endpoint", "{endpoint}")
-        self._config.set("Blender", "redirect_uri", "{redirect}")
-        self._config.set("Blender", "filename", "")
-        self._config.set("Blender", "SubstLocalStoragePath", "True")
-        self._config.set("Blender", "format", "")
-        self._config.set("Blender", "useoriginalpaths", "True")
-        self._config.set("Blender", "start", "")
-        self._config.set("Blender", "end", "")
-        self._config.set("Blender", "command", "")
-        self._config.set("Blender", "VhdVersionOverride", "")
-        self._config.set("Blender", "default_app", "True")
+        self._config.add_section("Blender") # Sample Job Type Config
+        self._config.set("Blender", "filename", "output")
+        self._config.set("Blender", "format", "png")
+        self._config.set("Blender", "start", "1")
+        self._config.set("Blender", "end", "10")
+        self._config.set("Blender", "command", "PNG")
+        self._config.set("Blender", "default_jobtype", "True")
 
         self._config.add_section("Test")
-        self._config.set("Test", "client_id", "{client_id}")
-        self._config.set("Test", "endpoint", "{endpoint}")
-        self._config.set("Test", "redirect_uri", "{redirect}")
+        self._config.set("Test", "param1", "abc")
+        self._config.set("Test", "param2", "xyz")
 
         if not self._config.has_section('Logging'):
             self._config.add_section("Logging")
 
-        gb_log = os.path.join(os.path.dirname(self._cfg_file),
-                              "batch_apps.log")
+        log_dir = os.path.dirname(self._cfg_file)
+        gb_log = os.path.join(log_dir, "batch_apps.log")
 
         self._config.set("Logging", "output", gb_log)
         self._config.set("Logging", "level", 30)
         LOGGERS.update({'level':30})
 
         self._config.add_section("Authentication")
-        self._config.set("Authentication",
-                         "auth_uri",
-                         "login.windows.net/common/oauth2/authorize")
+        self._config.set("Authentication", "client_id", "")
+        self._config.set("Authentication", "endpoint", "")
+        self._config.set("Authentication", "unattended_key", "")
+        self._config.set("Authentication", "redirect_uri", "")
+        self._config.set("Authentication", "tenant", "common")
 
-        self._config.set("Authentication",
-                         "resource",
-                         "https://batchapps.core.windows.net/")
-
-        self._config.set("Authentication",
-                         "token_uri",
-                         "login.windows.net/common/oauth2/token")
-        self._config.set("Authentication", "service_principal", "")
-        self._config.set("Authentication", "service_principal_key", "")
+        self._config.set("Authentication", "auth_uri", "/oauth2/authorize")
+        self._config.set("Authentication", "token_uri", "/oauth2/token")
+        self._config.set("Authentication", "root", "login.windows.net/")
+        self._config.set("Authentication", "resource", API_RESOURCE)
+        
 
         self.save_config()
 
@@ -323,20 +330,88 @@ class Configuration(object):
         self._log.debug("Logging level set to {0}".format(level))
         return logging.getLevelName(level)
 
+    def _reformat_config(self, old_auth):
+        """
+        Reformat a depricated config to allow for backwards
+        compatibility with v0.1.1.
+
+        :Args:
+            - old_auth (dict): Authentication config setting.
+
+        :Returns:
+            - A dictionary containing compatible auth config.
+
+        :Raises:
+            - :class:`.InvalidConfigException` if unable to reformat
+              auth into correct format.
+        """
+        self._log.warning("Configuration file format is deprecated. "
+                          "Please regenerate.")
+
+        new_auth = {}
+        new_auth["resource"] = old_auth.get("resource")
+        new_auth["root"] = "login.windows.net/"
+        new_auth["auth_uri"] = "/oauth2/authorize"
+        new_auth["token_uri"] = "/oauth2/token"
+
+        try:
+            old_job =  dict(self._config.items(self.job_type))
+            new_auth["endpoint"] = old_job.get("endpoint")
+
+            if not old_auth.get("service_principal"):
+                new_auth["client_id"] = old_job.get("client_id")
+                new_auth["redirect_uri"] = old_job.get("redirect_uri")
+
+                auth_uri = old_auth.get("auth_uri").split("/")
+                tenant_index = auth_uri.index("login.windows.net") + 1
+                new_auth["tenant"] = auth_uri[tenant_index]
+                new_auth["unattended_key"] = ""
+
+
+            else:
+                unattended = old_auth["service_principal"].split(";")
+                new_auth["tenant"] = unattended[1].split('=')[1]
+                new_auth["client_id"] = unattended[0].split('=')[1]
+                new_auth["unattended_key"] = old_auth.get("service_principal_key")
+                new_auth["redirect_uri"] = ""
+
+        except(ValueError, KeyError, IndexError):
+            raise InvalidConfigException(
+                "Configuration file is out-of-date and "
+                "unable to be reconciled. Please regenerate")
+
+        return new_auth
+
     def set_default_application(self):
         """
-        Set the application to be used by default when createing a
+        .. warning:: Deprecated. Use :meth:`.set_default_jobtype()`.
+        Set the job type to be used by default when creating a
         :class:`.Configuration` object. This method will set the current
-        application to be the default, and will save the changes.
+        job type to be the default, and will save the changes.
+        """
+        self._log.warning("set_default_application() has been deprecated. "
+                          "Please use set_default_jobtype()")
+        return self.set_default_jobtype()
+
+    def set_default_jobtype(self):
+        """
+        Set the job type to be used by default when creating a
+        :class:`.Configuration` object. This method will set the current
+        job type to be the default, and will save the changes.
         """
         for sec in self._config.sections():
 
-            if (self._config.has_option(sec, "default_app") and
+            if (self._config.has_option(sec, "default_app") and #DEP
             self._config.get(sec, "default_app") == "True"):
 
                 self._config.remove_option(sec, "default_app")
 
-        self._config.set(self.job_type, "default_app", "True")
+            if (self._config.has_option(sec, "default_jobtype") and
+            self._config.get(sec, "default_jobtype") == "True"):
+
+                self._config.remove_option(sec, "default_jobtype")
+
+        self._config.set(self.job_type, "default_jobtype", "True")
 
         if self._write_file:
             self.save_config()
@@ -399,34 +474,39 @@ class Configuration(object):
             return False
 
     def endpoint(self, *endpoint):
-        """Get and sets the endpoint associated with the current application.
+        """Get and set the endpoint for the Batch Apps service.
 
         :Args:
             - endpoint (str): *optional* A new endpoint, if supplied, will
-              redirect job submission for the current application. To persist
-              changes :meth:`.save_config()` must be called.
+              redirect the configured endpoint. To persist changes
+              :meth:`.save_config()` must be called.
 
         :Returns:
-            - If ``endpoint`` is not supplied, the endpoint for the current
-              application will be returned (str). Otherwise the new
-              endpoint (str).
+            - If ``endpoint`` is not supplied, the current endpoint will
+              be returned (str). Otherwise the new endpoint (str).
 
         :Raises:
-            - :exc:`.InvalidConfigException` if current application does not
-              have an endpoint configured.
+            - :exc:`.InvalidConfigException` if no endpoint found in the
+              configuration.
 
         """
         end_p = ""
-        if len(endpoint) > 0 and self._config.has_section(self.job_type):
-            self._log.info("Redirecting endpoint for application {app} "
-                           "from {old} to {new}".format(app=self.job_type,
-                                                        old=self.endpoint(),
-                                                        new=endpoint))
+        if not self._config.has_section("Authentication"):
+            raise InvalidConfigException("Config has no Authentication")
 
-            self._config.set(self.job_type, 'endpoint', str(endpoint[0]))
+        elif len(endpoint) > 0:
+            self._log.info("Redirecting endpoint from {old} to {new}".format(
+                old=self.endpoint(), new=endpoint))
+
+            self._config.set("Authentication", 'endpoint', str(endpoint[0]))
             end_p = str(endpoint[0])
 
-        elif self._config.has_option(self.job_type, "endpoint"):
+        elif self._config.has_option("Authentication", "endpoint"):
+            end_p = self._config.get("Authentication", "endpoint")
+
+        elif self._config.has_option(self.job_type, "endpoint"): #DEP
+            self._log.warning("Job type config in deprecated format. "
+                              "Please regenerate.")
             end_p = self._config.get(self.job_type, "endpoint")
 
         else:
@@ -439,7 +519,6 @@ class Configuration(object):
             end_p = end_p[8:]
 
         return end_p
-
 
     def logging_level(self, *level):
         """Gets and sets the current logging level.
@@ -472,93 +551,139 @@ class Configuration(object):
             raise InvalidConfigException(
                 "No valid logging level found. Please set.")
 
-    def application(self, *application):
+    def application(self, *jobtype):
         """
-        Gets and sets the current job application.
-        If setting a new application, this will also change all associated
-        parameters and the endpoint to those configured to the new application.
+        .. warning:: Deprecated. Please use :meth:`.current_jobtype()`.
+        Gets and sets the current job type.
 
         :Args:
-            - application (str): *optional* A new application, if supplied,
+            - jobtype (str): *optional* A job type, if supplied,
               will update the current job type and job configuration for new
               job submissions.
 
         :Returns:
-            - The current application (str)
+            - The current job type (str)
 
         :Raises:
-            - :exc:`.InvalidConfigException` if the supplied application has no
+            - :exc:`.InvalidConfigException` if the supplied job type has no
               associated configuration.
 
         """
-        if application and self._config.has_section(str(application[0])):
-            self._log.info("Setting application from {0} to {1}".format(
+        self._log.warning("application() has been deprecated. "
+                          "Please use current_jobtype()")
+        return self.current_jobtype(*jobtype)
+
+    def current_jobtype(self, *jobtype):
+        """
+        Gets and sets the current job type.
+
+        :Args:
+            - jobtype (str): *optional* A job type, if supplied,
+              will update the current job type and job configuration for new
+              job submissions.
+
+        :Returns:
+            - The current job type (str)
+
+        :Raises:
+            - :exc:`.InvalidConfigException` if the supplied job type has no
+              associated configuration.
+
+        """
+        if jobtype and self._config.has_section(str(jobtype[0])):
+            self._log.info("Setting job type from {0} to {1}".format(
                 self.job_type,
-                str(application[0])))
+                str(jobtype[0])))
 
-            self.job_type = str(application[0])
+            self.job_type = str(jobtype[0])
 
-        elif application and not self._config.has_section(str(application[0])):
+        elif jobtype and not self._config.has_section(str(jobtype[0])):
             raise InvalidConfigException(
                 "No configuration for '{type}' found."
-                " Please add it.".format(type=application))
+                " Please add it.".format(type=jobtype))
 
         return self.job_type
 
     def applications(self):
-        """Gets a list of all the applications defined in the configuration.
+        """
+        .. warning:: Deprecated. Please use :meth:`.list_jobtypes()`.
+        Gets a list of all the job types defined in the configuration.
 
         :Returns:
-            - A list of strings of the application options configured.
+            - A list of strings of the job types options configured.
 
         """
-        apps = list(self._config.sections())
-        apps.remove("Logging")
-        return apps
+        self._log.warning("applications() is deprecated. "
+                          "Please use list_jobtypes().")
+        return self.list_jobtypes()
 
-    def default_params(self):
-        """Gets the default parameters for the current application.
+    def list_jobtypes(self):
+        """Gets a list of all the job types defined in the configuration.
 
         :Returns:
-            - A dictionary of all the string parameters tied to the application.
-              This includes the application endpoint.
+            - A list of strings of the job types options configured.
+
+        :Raises:
+            - :class:`.InvalidConfigException` if either Logging or
+              Authentication sections are missing from the config.
+        """
+        types = list(self._config.sections())
+        try:
+            types.remove("Logging")
+            types.remove("Authentication")
+        except ValueError:
+            raise InvalidConfigException("Config missing key element")
+        return types
+
+    def default_params(self):
+        """Gets the default parameters for the current job type.
+
+        :Returns:
+            - A dictionary of all the string parameters tied to the job type.
 
         """
         return dict(self._config.items(self.job_type))
 
-    def add_application(self, application, endpoint, client_id, **params):
-        """Add a new application section to the configuration.
+    def add_application(self, jobtype, *args, **params):
+        """
+        .. warning:: Deprecated. Please use :meth:`.add_jobtype()`.
+        Add a new job type section to the configuration.
 
         :Args:
-            - application (str): The name of the application / job type to be
-              added.
-            - endpoint (str): The api endpoint for all server communication for
-              this application.
-            - client_id (str): The client id of the application registered in
-              Azure Active Directory.
+            - jobtype (str): The name of the job type to be added.
 
         :Kwargs:
-            - params: *optional* Any additional parameters to be associated
-              with the application and to be submitted with a job of this
-              type can be added as keyword arguments.
+            - params: *optional* Any additional parameters to be submitted
+              with a job of this type can be added as keyword arguments.
 
         """
-        self._log.debug("Configuring new application: "
-                        "{app} with endpoint {end}".format(app=application,
-                                                           end=endpoint))
+        self._log.warning("add_application() is deprecated. "
+                          "Please use add_jobtype().")
+        return self.add_jobtype(jobtype, **params)
 
-        if not self._config.has_section(application):
-            self._config.add_section(application)
+    def add_jobtype(self, jobtype, *args, **params):
+        """Add a new job type section to the configuration.
 
-        self._config.set(application, "endpoint", endpoint)
-        self._config.set(application, "client_id", client_id)
+        :Args:
+            - jobtype (str): The name of the job type to be added.
+
+        :Kwargs:
+            - params: *optional* Any additional parameters to be submitted
+              with a job of this type can be added as keyword arguments.
+
+        """
+        self._log.debug("Configuring new job type: {type}".format(
+            type=jobtype))
+
+        if not self._config.has_section(jobtype):
+            self._config.add_section(jobtype)
 
         for (option, value) in params.items():
-            self._config.set(application, option, value)
+            self._config.set(jobtype, option, value)
 
     def set(self, param, value):
         """Set or add a parameter to the configuration of the current
-        application.
+        job type.
 
         :Args:
             - param (str): The parameter to set, either new or already
@@ -566,8 +691,8 @@ class Configuration(object):
             - value (str): The value to assign to the given parameter.
 
         """
-        self._log.debug("Setting {app} parameter {prm} to {val}".format(
-            app=self.job_type,
+        self._log.debug("Setting {jt} parameter {prm} to {val}".format(
+            jt=self.job_type,
             prm=param,
             val=value))
 
@@ -576,11 +701,11 @@ class Configuration(object):
 
         except configparser.NoSectionError:
             raise InvalidConfigException(
-                "Current application {0} has no valid"
+                "Current job type {0} has no valid"
                 " configuration to set to.".format(self.job_type))
 
     def get(self, param):
-        """Get a parameter from the current application configuration.
+        """Get a parameter from the current job type configuration.
 
         :Args:
             - param (str): The parameter to retrieve.
@@ -595,79 +720,198 @@ class Configuration(object):
 
         except (AttributeError, configparser.Error) as exp:
             self._log.warning(
-                "Couldn't get {prm} parameter for {app}. Error: "
-                "{err}".format(prm=param, app=self.job_type, err=exp))
+                "Couldn't get {prm} parameter for {jt}. Error: "
+                "{err}".format(prm=param, jt=self.job_type, err=exp))
 
             return None
 
     def remove(self, setting):
         """
-        Remove a parameter or whole section from the config.
+        Remove a parameter or job type from the config.
         For these changes to be persisted :meth:`.save_config()`
         must be called.
 
         :Args:
-            - setting (str): Application or parameter to be removed from
-              the config. If the supplied setting is not an application or
-              current application parameter, nothing will happen. The
-              'Logging' and 'Authentication' sections cannot be removed.
-              Likewise, the 'endpoint' parameter for an application cannot
-              be removed.
+            - setting (str): Job type or parameter to be removed from
+              the config. If the supplied setting is not a job type or
+              current job type parameter, nothing will happen. The
+              current job type, or 'Logging' and 'Authentication' sections
+              cannot be removed.
+        
+        :Returns:
+            - ``True`` if the parameter of section was found as removed.
+            - ``False`` if the selected section was the current job type
+              or "Authentication" or "Logging". Will also be ``False`` if
+              the job type or parameter were not found.
 
-        :Raises:
-            - :exc:`ValueError` if the section to be removed is the current
-              application. The current application will need to be changed before
-              the section can be removed.
         """
         setting = str(setting)
-        if (self._config.has_section(str(setting)) and
-            setting not in ['Logging', 'Authentication']):
 
-            if setting == self.job_type:
-                self._log.warning(
-                    "The configuration for current application "
-                    "{app} cannot be removed".format(app=self.job_type))
+        if setting in ['Logging', 'Authentication', self.job_type]:
+            self._log.warning("Cannot remove config for {0}".format(setting))
+            return False
 
-                raise ValueError(
-                    "Cannot remove section for current application.")
+        elif self._config.has_section(setting):
 
-            self._log.debug("Removing {app} from "
-                            "configuration".format(app=self.job_type))
+            self._log.debug("Removing {jt} from "
+                            "configuration".format(jt=self.job_type))
 
             self._config.remove_section(setting)
             return True
 
-        elif (self._config.has_option(self.job_type, setting) and
-              setting not in ['endpoint']):
+        elif self._config.has_option(self.job_type, setting):
 
-            self._log.debug("Removing {app} parameter {prm}".format(
-                app=self.job_type,
+            self._log.debug("Removing {jt} parameter {prm}".format(
+                jt=self.job_type,
                 prm=setting))
 
             self._config.remove_option(self.job_type, setting)
             return True
 
         else:
-            self._log.info("Configuration has no application or "
+            self._log.info("Configuration has no job type or "
                            "parameter {0}".format(setting))
             return False
 
-    def aad_config(self):
-        """Retrieve the authentication details from the configuration.
-        Used by the :mod:`.credentials` module.
+    def aad_config(self, client_id=None, tenant=None, key=None,
+                  redirect=None, endpoint=None, unattended=False, **kwargs):
+        """Configure AAD authentication parameters to accompany an existing
+        Batch Apps Service.
+        If new values are set, :meth:`.save_config()` must be called for
+        changes to be persisted.
+        Backwards compatible with v0.1.1.
+
+        :Kwargs:
+            - client_id (str): The client GUID, this can be retrieved when
+              creating an Unattended Account in the Batch Apps portal.
+            - tenant (str): The auth tenant, this can be retrieved when
+              creating an Unattended Account in the Batch Apps portal.
+            - key (str): An Unattended Account key. This can be created in
+              the Batch Apps portal.
+            - redirect (str): The redirect url used for web UI login. This
+              can be configured in the AAD portal (not required if using an
+              Unattended Account)
+            - endpoint (str): The Batch Apps service endpoint. Can be found
+              in the service details in the Batch Apps Portal.
+            - unattended (bool): Whether the intended authentication method
+              will be unattended. Default is ``False``.
 
         :Returns:
             - dict containing the authentication parameters.
 
         :Raises:
-            - :class:`.InvalidConfigException` is the authentication defaults
-              are not found in the configuration.
+            - :class:`.InvalidConfigException` if the authentication defaults
+              are not found in the configuration or if any required information
+              is missing. This will be raised after any new values passed in
+              have been set.
         """
-        try:
-            return dict(self._config.items("Authentication"))
 
-        except configparser.NoSectionError:
+        if not self._config.has_section("Authentication"):
+            raise InvalidConfigException("Config file has no Auth details.")
+
+        if not self._config.has_option("Authentication", "root"): # old config
+
+            auth_cfg = dict(self._config.items("Authentication"))
+            auth_cfg = self._reformat_config(auth_cfg)
+
+            self._config.remove_section("Authentication")
+            self._config.add_section("Authentication")
+
+            for setting in auth_cfg:
+                self._config.set("Authentication", setting, auth_cfg[setting])
+
+        if client_id:
+            self._config.set("Authentication", "client_id", str(client_id))
+
+        if tenant:
+            self._config.set("Authentication", "tenant", str(tenant))
+
+        if key:
+            self._config.set("Authentication", "unattended_key", str(key))
+
+        if redirect:
+            self._config.set("Authentication", "redirect_uri", str(redirect))
+
+        if endpoint:
+            self._config.set("Authentication", "endpoint", str(endpoint))
+
+        auth_dict = self._validate_auth(unattended)
+        return auth_dict
+
+    def _valid_data(self, value):
+        """
+        Check that config value is neither ``None`` or empty.
+
+        :Args:
+            - value (str): The config value to check.
+
+        :Returns:
+            - ``True`` if value is invalid, else ``False``.
+        """
+        if not value or value == "":
+            return True
+
+        if '{' in value:
+            return True
+
+        return False
+
+    def _validate_auth(self, unattended):
+        """
+        Check all the authentication settings in the config for
+        valid entries based on auth type.
+
+        :Args:
+            - unattended (bool): ``True`` if authenticating via unattended
+              account, else ``False``.
+
+        :Returns:
+            - Dictionary of all values in the Authentication config.
+
+        :Raises:
+            - :class:`.InvalidConfigException` if any required values are
+              ``None`` or empty.
+        """
+
+        auth = dict(self._config.items("Authentication"))
+        required = ['endpoint',
+                    'client_id',
+                    'tenant',
+                    'resource',
+                    'root',
+                    'auth_uri',
+                    'token_uri']
+
+        if unattended:
+            required.append("unattended_key")
+        else:
+            required.append("redirect_uri")
+
+        valid_data = []
+        for req_key in required:
+            valid_data.append(auth.get(req_key))
+
+        validated = [self._valid_data(d) for d in valid_data]
+        if any(validated):
+            missing_val = required[validated.index(True)]
             raise InvalidConfigException(
-                "No valid authentication configuration found.")
+                "Authentication configuration incomplete. "
+                "Missing data for: {0}".format(missing_val))
+
+        return auth
+
+    #    TODO: Handle additional auth kwargs
+
+    #    if domain_hint:
+    #        self._config.set("Authentication", "domain_hint", domain_hint)
+
+    #    if login_hint:
+    #        self._config.set("Authentication", "login_hint", login_hint)
+
+    #    if prompt:
+    #        self._config.set("Authentication", "prompt", prompt)
+
+    #    for setting in kwargs:
+    #        self._config.set("Authentication", setting, kwargs[setting])
 
         

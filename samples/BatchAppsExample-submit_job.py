@@ -50,10 +50,11 @@ from batchapps.exceptions import (
 LOG_LEVEL = "debug" 
 ASSET_DIR = "C:\\Path\\To\\Assets\\Directory"
 
-# These settings will be specific to a users batch apps application.
-ENDPOINT = "my-endpoint.com"
+# These settings will be specific to a users Batch Apps service.
+ENDPOINT = "myservice.batchapps.core.windows.net"
 CLIENT_ID = "abcd-1234-efgh-5678"
-REDIRECt_URI = "my-redirect-uri.net"
+TENANT = "wxzy-8765-tuv-4321"
+ACCOUNT_KEY = "********"
 
 def authentication(mode):
     """
@@ -69,7 +70,7 @@ def authentication(mode):
     """
 
     try:
-        return AzureOAuth.get_session(config=mode)
+        return AzureOAuth.get_unattended_session(config=mode)
 
     except (AuthenticationException, InvalidConfigException) as e:
         print("Could not get existing session: {0}".format(e))
@@ -83,7 +84,7 @@ def authentication(mode):
                                                   state=None)
 
     except (AuthenticationException, InvalidConfigException) as e:
-        print("Failed to get authorization: {0}".format(e))
+        raise RuntimeError("Failed to authenticate: {0}".format(e))
 
 def create_config():
     """
@@ -101,26 +102,30 @@ def create_config():
 
     try:
         # Look for application in existing config file
-        config = Configuration(log_level=LOG_LEVEL, application="MyApp")
+        config = Configuration(log_level=LOG_LEVEL, job_type="MyApp")
         print("Config Accepted")
+        return config
 
     except InvalidConfigException:
         print("Valid config not found. Attempting to create new config.")
 
     try:  
         config = Configuration(log_level=LOG_LEVEL)
-        config.add_application("MyApp", ENDPOINT, CLIENT_ID)
-        config.application("MyApp")
+        config.aad_config(client_id=CLIENT_ID,
+                          endpoint=ENDPOINT,
+                          key=ACCOUNT_KEY,
+                          tenant=TENANT,
+                          unattended=True)
+
+        config.add_jobtype("MyApp")
+        config.current_jobtype("MyApp")
         
-        # Examples of additional config settings for your app
-        config.set("redirect_uri", REDIRECT_URI)
-        config.set("SubstLocalStoragePath", "True")
-        config.set("useoriginalpaths", "False")
+        # Examples of additional config settings for your job
         config.set("width", "500")
         config.set("height", "500")
 
-        # Set MyApp to be the default application
-        config.set_default_application()
+        # Set MyApp to be the default job type
+        config.set_default_jobtype()
 
     except InvalidConfigException as e:
          raise RuntimeError("Invalid Configuration: {0}".format(e))
@@ -148,8 +153,8 @@ def submit_job(auth, config):
 
     new_job = job_mgr.create_job("Test Job", files=file_collection)
 
-    # Set various job parameters. The default parameters for the job type can
-    # be found using new_job.get_default_params().
+    # Set various job parameters. The pre-configured parameters for the
+    # job type can be found using new_job.get_default_params().
 
     new_job.instances = 5 # Number of machines to work on the job.
     new_job.start = 1
@@ -172,6 +177,10 @@ def submit_job(auth, config):
 
 
 if __name__ == "__main__":
-    cfg = create_config()
-    creds = authentication(cfg)
-    submit_job(creds, cfg)
+    try:
+        cfg = create_config()
+        creds = authentication(cfg)
+        submit_job(creds, cfg)
+
+    except RuntimeError as exp:
+        print("Job failed: {0}".format(exp))
