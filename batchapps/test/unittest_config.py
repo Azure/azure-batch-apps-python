@@ -685,7 +685,7 @@ class TestConfiguration(unittest.TestCase):
         """Test validate_auth"""
         _cfg = configparser.RawConfigParser()
         cfg = mock.create_autospec(Configuration)
-        cfg._valid_data = lambda s: Configuration._valid_data(None, s)
+        cfg._invalid_data = lambda s: Configuration._invalid_data(None, s)
         _cfg.add_section("Authentication")
         cfg._config = _cfg
         

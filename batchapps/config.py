@@ -332,7 +332,7 @@ class Configuration(object):
 
     def _reformat_config(self, old_auth):
         """
-        Reformat a depricated config to allow for backwards
+        Reformat a deprecated config to allow for backwards
         compatibility with v0.1.1.
 
         :Args:
@@ -478,7 +478,7 @@ class Configuration(object):
 
         :Args:
             - endpoint (str): *optional* A new endpoint, if supplied, will
-              redirect the configured endpoint. To persist changes
+              change the configured endpoint. To persist changes
               :meth:`.save_config()` must be called.
 
         :Returns:
@@ -495,7 +495,7 @@ class Configuration(object):
             raise InvalidConfigException("Config has no Authentication")
 
         elif len(endpoint) > 0:
-            self._log.info("Redirecting endpoint from {old} to {new}".format(
+            self._log.info("Changing endpoint from {old} to {new}".format(
                 old=self.endpoint(), new=endpoint))
 
             self._config.set("Authentication", 'endpoint', str(endpoint[0]))
@@ -838,7 +838,7 @@ class Configuration(object):
         auth_dict = self._validate_auth(unattended)
         return auth_dict
 
-    def _valid_data(self, value):
+    def _invalid_data(self, value):
         """
         Check that config value is neither ``None`` or empty.
 
@@ -891,7 +891,7 @@ class Configuration(object):
         for req_key in required:
             valid_data.append(auth.get(req_key))
 
-        validated = [self._valid_data(d) for d in valid_data]
+        validated = [self._invalid_data(d) for d in valid_data]
         if any(validated):
             missing_val = required[validated.index(True)]
             raise InvalidConfigException(
