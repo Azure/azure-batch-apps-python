@@ -12,7 +12,8 @@ v0.2.0, 2014-11-xx	- Changed file upload format
 							- Configuration.applications() -> Configuration.list_jobtypes()
 							- Configuration.add_application() -> Configuration.add_jobtype()
 						Related changes:
-							- Configuration object takes kwarg "job_type" rather than "application"
+							- Configuration.job_type -> Configuration.jobtype
+							- Configuration object takes kwarg "jobtype" rather than "application"
 							- Default job type now indicated by config setting "default_jobtype" rather than "default_app"
 					- Changed terminology regarding service principal -> unattended account
 						Deprecated methods:
@@ -23,6 +24,7 @@ v0.2.0, 2014-11-xx	- Changed file upload format
 							- Configuration setting "service_principal_key" deprecated, replaced by "unattended_key"
 					- Added FileCollection.index() method
 					- Added better handling for missing auth values in Configuration
+					- Deprecated JobManager.create_file, replaced with JobManager.file_from_path()
 
 v0.1.1, 2014-11-03	- Authentication bug fixes, changed config settings and url handling.
 						- Changed Configuration setting "service_principal_key" to format "ClientID=abc;TenantID=xyz"

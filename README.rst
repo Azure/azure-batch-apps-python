@@ -1,3 +1,5 @@
+.. include:: <isoamsa.txt>
+
 ===============================
 Azure Batch Apps Python Client
 ===============================
@@ -48,8 +50,8 @@ For full summary of changes, see CHANGES.txt
 * 2014-11-xx	- 0.2.0	
 	- Changed file upload format
 	- Changed Authentication config format
-	- Changed terminology regarding application -> jobtype
-	- Changed terminology regarding service principal -> unattended account
+	- Changed terminology regarding application |srarr| jobtype
+	- Changed terminology regarding service principal |srarr| unattended account
 	- Added FileCollection.index method
 	- Added better handling for missing auth values in Configuration
 * 2014-11-03	- 0.1.1 
@@ -83,13 +85,12 @@ You can edit the file directly, or via the Configuration class::
 
 	# These can be retrieved when creating an unattended account in the Batch Apps portal.
 	# See the authentication section below for more details.
-	client_id = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
-	tenant_id = 'abcdefg'
 	endpoint = 'myservice.batchapps.core.windows.net'
+	account_details = 'ClientID=xxxxxxxx;TenantID=abcdefg'
 	account_key = '12345'
 
 	cfg = Configuration(log_level='debug', default=True)
-	cfg.aad_config(client_id=client_id, tenant=tenant_id, key=account_key,
+	cfg.aad_config(account=account_details, key=account_key,
 		endpoint=endpoint, unattended=True)
 
 	cfg.add_jobtype('my_job_type')
@@ -101,8 +102,7 @@ You can edit the file directly, or via the Configuration class::
 	cfg.set_default_jobtype()
 
 	# Add some custom parameters
-	cfg.set('start_val', 1)
-	cfg.set('end_val', 100)
+	cfg.set('quality', 10)
 	cfg.set('timeout', 500)
 
 	# Save additional parameters to file
@@ -158,6 +158,7 @@ Job management, including submission, monitoring, and accessing outputs is done
 through the JobManager class::
 
 	from batchapps import AzureOAuth, JobManager
+	import time
 
 	creds = AzureOAuth.get_unattended_session()
 	mgr = JobManager(creds)
@@ -172,9 +173,20 @@ through the JobManager class::
 
 	job_progress = mgr.get_job(url=new_job['link'])
 	
-	if job_progress.status == 'Complete':
-		job_progress.get_output('c:\\my_download_dir')
+	timeout = time.time() + 600 # Timeout in 10 minutes
 
+	while time.time() < timeout:
+
+		if job_progress.status is 'Complete':
+			job_progress.get_output('c:\\my_download_dir')
+			break
+
+		if job_progress.status is 'Error':
+			break
+
+		time.sleep(30)
+		job_progress.update()
+	
 	else:
 		job_progress.cancel()
 
@@ -190,8 +202,8 @@ the cloud can be done using the FileManager class::
 	creds = AzureOAuth.get_unattended_session()
 	mgr = FileManager(creds)
 
-	job_source = mgr.create_file('C:\\start_job.bat')
 	file_collection = mgr.files_from_dir('c:\\my_job_assets')
+	job_source = mgr.file_from_path('C:\\start_job.bat')
 	file_collection.add(job_source)
 
 	file_collection.upload()

@@ -133,15 +133,17 @@ class TestConfiguration(unittest.TestCase):
         cfg = Configuration(data_path=self.test_dir, application='Blender')
         self.assertTrue(mock_save.called)
         self.assertTrue(mock_read.called)
+        self.assertEqual(cfg.jobtype, "Blender")
         self.assertEqual(cfg.job_type, "Blender")
 
-        cfg = Configuration(data_path=self.test_dir, job_type=None)
+        cfg = Configuration(data_path=self.test_dir, jobtype=None)
+        self.assertEqual(cfg.jobtype, "Blender")
         self.assertEqual(cfg.job_type, "Blender")
 
         with self.assertRaises(InvalidConfigException):
             Configuration(application='TestApp', default=True)
         with self.assertRaises(InvalidConfigException):
-            Configuration(job_type=42, default=True)
+            Configuration(jobtype=42, default=True)
 
     @mock.patch.object(Configuration, '_check_directory')
     @mock.patch.object(Configuration, '_configure_logging')
@@ -167,7 +169,7 @@ class TestConfiguration(unittest.TestCase):
         mock_file.assert_called_with(
             os.path.join(self.test_dir, "batch_apps.ini"))
 
-        self.assertEqual(cfg.job_type, "Blender")
+        self.assertEqual(cfg.jobtype, "Blender")
 
     @mock.patch.object(batchapps.config.os.path, 'isdir')
     @mock.patch.object(batchapps.config.os, 'mkdir')
@@ -355,7 +357,7 @@ class TestConfiguration(unittest.TestCase):
         _cfg.read(os.path.join(self.test_dir, "batch_apps.ini"))
         cfg = mock.create_autospec(Configuration)
         cfg._config = _cfg
-        cfg.job_type = "Test"
+        cfg.jobtype = "Test"
         cfg._write_file = True
         cfg._log = logging.getLogger("set_default_jobtype")
 
@@ -363,7 +365,7 @@ class TestConfiguration(unittest.TestCase):
         self.assertFalse(cfg._config.has_option('Blender', 'default_jobtype'))
         self.assertTrue(cfg._config.has_option('Test', 'default_jobtype'))
 
-        cfg.job_type = "Test"
+        cfg.jobtype = "Test"
         Configuration.set_default_jobtype(cfg)
         self.assertFalse(cfg._config.has_option('Blender', 'default_jobtype'))
         self.assertTrue(cfg._config.has_option('Test', 'default_jobtype'))
@@ -418,7 +420,7 @@ class TestConfiguration(unittest.TestCase):
         cfg = mock.create_autospec(Configuration)
         cfg._log = logging.getLogger("endpoint")
         cfg._config = _cfg
-        cfg.job_type = "SomeApp"
+        cfg.jobtype = "SomeApp"
 
         with self.assertRaises(InvalidConfigException):
             Configuration.endpoint(cfg)
@@ -427,7 +429,7 @@ class TestConfiguration(unittest.TestCase):
         with self.assertRaises(InvalidConfigException):
             Configuration.endpoint(cfg)
 
-        cfg.job_type = "TestApp"
+        cfg.jobtype = "TestApp"
         ept = Configuration.endpoint(cfg)
         self.assertEqual(_cfg.get('TestApp', 'endpoint'), 'http://test')
         self.assertEqual(ept, 'test')
@@ -476,10 +478,10 @@ class TestConfiguration(unittest.TestCase):
         cfg = mock.create_autospec(Configuration)
         cfg._log = logging.getLogger("jobtype")
         cfg._config = _cfg
-        cfg.job_type = "TestApp"
+        cfg.jobtype = "TestApp"
 
         app = Configuration.current_jobtype(cfg)
-        self.assertEqual(app, cfg.job_type)
+        self.assertEqual(app, cfg.jobtype)
 
         _cfg.add_section('TestApp2')
         with self.assertRaises(InvalidConfigException):
@@ -487,6 +489,7 @@ class TestConfiguration(unittest.TestCase):
 
         app = Configuration.current_jobtype(cfg, "TestApp2")
         self.assertEqual(app, 'TestApp2')
+        self.assertEqual(cfg.jobtype, 'TestApp2')
         self.assertEqual(cfg.job_type, 'TestApp2')
 
     def test_config_applications(self):
@@ -525,7 +528,7 @@ class TestConfiguration(unittest.TestCase):
         cfg = mock.create_autospec(Configuration)
         cfg._log = logging.getLogger("default_params")
         cfg._config = _cfg
-        cfg.job_type = "TestApp"
+        cfg.jobtype = "TestApp"
 
         params = Configuration.default_params(cfg)
         self.assertEqual(params, {})
@@ -581,12 +584,12 @@ class TestConfiguration(unittest.TestCase):
         cfg = mock.create_autospec(Configuration)
         cfg._log = logging.getLogger("config_set")
         cfg._config = _cfg
-        cfg.job_type = "TestApp"
+        cfg.jobtype = "TestApp"
 
         Configuration.set(cfg, "key", "value")
         self.assertEqual(dict(cfg._config.items('TestApp')), {'key':'value'})
 
-        cfg.job_type = "TestApp2"
+        cfg.jobtype = "TestApp2"
         with self.assertRaises(InvalidConfigException):
             Configuration.set(cfg, "key", "value")
 
@@ -598,12 +601,12 @@ class TestConfiguration(unittest.TestCase):
         cfg = mock.create_autospec(Configuration)
         cfg._log = logging.getLogger("config_get")
         cfg._config = _cfg
-        cfg.job_type = "TestApp2"
+        cfg.jobtype = "TestApp2"
 
         param = Configuration.get(cfg, "endpoint")
         self.assertIsNone(param)
 
-        cfg.job_type = "TestApp"
+        cfg.jobtype = "TestApp"
         param = Configuration.get(cfg, "endpoint")
         self.assertIsNone(param)
 
@@ -622,7 +625,7 @@ class TestConfiguration(unittest.TestCase):
         cfg = mock.create_autospec(Configuration)
         cfg._log = logging.getLogger("config_remove")
         cfg._config = _cfg
-        cfg.job_type = "TestApp"
+        cfg.jobtype = "TestApp"
 
         rem = Configuration.remove(cfg, "TestApp")
         self.assertFalse(rem)
@@ -647,7 +650,7 @@ class TestConfiguration(unittest.TestCase):
         rem = Configuration.remove(cfg, "Logging")
         self.assertFalse(rem)
 
-        cfg.job_type = "TestApp2"
+        cfg.jobtype = "TestApp2"
         rem = Configuration.remove(cfg, "TestApp")
         self.assertTrue(rem)
         self.assertEqual(cfg._config.sections(), ['Logging'])
@@ -680,6 +683,25 @@ class TestConfiguration(unittest.TestCase):
         aad = Configuration.aad_config(cfg, key=3, redirect=4)
         self.assertEqual(aad, {"root":"test", "unattended_key":"3",
                                "redirect_uri":"4"})
+
+        _cfg.remove_section("Authentication")
+        _cfg.add_section("Authentication")
+        _cfg.set("Authentication", "root", "test")
+        with self.assertRaises(ValueError):
+            aad = Configuration.aad_config(cfg, account=3)
+        with self.assertRaises(ValueError):
+            aad = Configuration.aad_config(cfg, account="test;test")
+
+        aad = Configuration.aad_config(cfg, account="ClientID=abc;TenantID=xyz")
+        self.assertEqual(aad, {"root":"test", "client_id":"abc", "tenant":"xyz"})
+
+        _cfg.remove_section("Authentication")
+        _cfg.add_section("Authentication")
+        _cfg.set("Authentication", "root", "test")
+
+        aad = Configuration.aad_config(cfg, account="ClientID=abc;TenantID=xyz",
+                                       client_id="foo", tenant="bar")
+        self.assertEqual(aad, {"root":"test", "client_id":"foo", "tenant":"bar"})
 
     def test_config_validate_auth(self):
         """Test validate_auth"""
@@ -732,7 +754,7 @@ class TestConfiguration(unittest.TestCase):
         cfg = mock.create_autospec(Configuration)
         cfg._log = logging.getLogger("aad")
         cfg._config = old_cfg
-        cfg.job_type = "TestJob"
+        cfg.jobtype = "TestJob"
 
         aad = Configuration._reformat_config(
             cfg, dict(cfg._config.items("Authentication")))

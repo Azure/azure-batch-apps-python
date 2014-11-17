@@ -72,7 +72,8 @@ class TestJobSubmission(unittest.TestCase):
         job = JobSubmission(api, "test_job")
 
         self.assertEqual(job.name, "test_job")
-        self.assertEqual(job.type, "")
+        self.assertFalse("type" in job.__dict__)
+        self.assertTrue("params" in job.__dict__)
         self.assertEqual(job.required_files, None)
         self.assertEqual(job.source, "")
         self.assertEqual(job.instances, 0)
@@ -82,7 +83,7 @@ class TestJobSubmission(unittest.TestCase):
                             job_file="test.bat",
                             job_type="Animation")
 
-        self.assertEqual(job.type, "Animation")
+        self.assertFalse("type" in job.__dict__)
         self.assertEqual(job.required_files, None)
         self.assertEqual(job.source, "test.bat")
         self.assertEqual(job.instances, 10)
@@ -155,7 +156,7 @@ class TestJobSubmission(unittest.TestCase):
         """Test _create_job_message"""
 
         api = mock.create_autospec(BatchAppsApi)
-        api.app.return_value = "TestApp"
+        api.jobtype.return_value = "TestApp"
         files = mock.create_autospec(FileCollection)
         files._get_message.return_value = ["file1", "file2"]
         files.__len__.return_value = 2
@@ -196,7 +197,7 @@ class TestJobSubmission(unittest.TestCase):
         job.instances = "100"
         msg = job._create_job_message()
         self.assertEqual(msg, {'Name':'{}',
-                               'Type': 'TestApp42',
+                               'Type': 'TestApp',
                                'RequiredFiles':["file1", "file2"],
                                'Pool': {'InstanceCount':'100'},
                                'Parameters':[{"Name":"k1", "Value":"v1"}],

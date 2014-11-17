@@ -102,7 +102,7 @@ def create_config():
 
     try:
         # Look for application in existing config file
-        config = Configuration(log_level=LOG_LEVEL, job_type="MyApp")
+        config = Configuration(log_level=LOG_LEVEL, jobtype="MyApp")
         print("Config Accepted")
         return config
 

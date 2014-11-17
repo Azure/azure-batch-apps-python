@@ -56,22 +56,8 @@ class FileManager(object):
         self._log = logging.getLogger('batch_apps')
         self._client = BatchAppsApi(credentials, cfg)
 
-    def create_file(self, fullpath):
-        """Create a userfile object.
-
-        :Args:
-            - fullpath (str): Full path to the file
-
-        :Returns:
-            - :class:`.UserFile`: The file object reference for the
-              supplied file path. This will be returned regardless of
-              whether the file actually exists.
-        """
-        self._log.info("Creating new userfile at path: {0}".format(fullpath))
-        return UserFile(self._client, str(fullpath))
-
     def create_file_set(self, *files):
-        """Create an file collection to assign to job.
+        """Create a file collection to assign to job.
 
         :Args:
             - files (:class:`.UserFile`, list): *Optional*. Any files to be
@@ -101,8 +87,40 @@ class FileManager(object):
 
         return FileCollection(self._client, *list(set(file_list)))
 
+    def create_file(self, fullpath):
+        """
+        .. warning:: Deprecated. Use :meth:`.file_from_path()`.
+        Create a userfile object.
+
+        :Args:
+            - fullpath (str): Full path to the file
+
+        :Returns:
+            - :class:`.UserFile`: The file object reference for the
+              supplied file path. This will be returned regardless of
+              whether the file actually exists.
+        """
+        self._log.warning("create_file() has been deprecated. "
+                          "Please use file_from_path()")
+        return self.file_from_path(fullpath)
+
+    def file_from_path(self, fullpath):
+        """
+        Create a new userfile object.
+
+        :Args:
+            - fullpath (str): Full path to the file
+
+        :Returns:
+            - :class:`.UserFile`: The file object reference for the
+              supplied file path. This will be returned regardless of
+              whether the file actually exists.
+        """
+        self._log.info("Creating new userfile at path: {0}".format(fullpath))
+        return UserFile(self._client, str(fullpath))
+
     def files_from_dir(self, top_dir, recursive=False, pattern='*'):
-        """Create an file set from contents of a directory.
+        """Create a file set from contents of a directory.
 
         :Args:
             - top_dir (str): The full path to the directory, the contents

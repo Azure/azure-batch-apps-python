@@ -55,7 +55,7 @@ class Configuration(object):
     def __init__(self,
                  data_path=None,
                  log_level=None,
-                 job_type=None,
+                 jobtype=None,
                  name="batch_apps.ini",
                  datadir="BatchAppsData",
                  default=False,
@@ -73,7 +73,7 @@ class Configuration(object):
             - log_level (str): The level of logging during Batch Apps session.
               Must be a string in ``['debug', 'info', 'warning', 'error',
               'critical']``. If not set default is 'warning'.
-            - job_type (str): The application job type, used to determine
+            - jobtype (str): The application job type, used to determine
               how a job will be processed in the cloud. The list of available
               job types will depend on the configuration and can checked
               using the :meth:`.list_jobtypes()` method.
@@ -96,7 +96,7 @@ class Configuration(object):
         self._config = configparser.RawConfigParser()
         self._config.optionxform = str
         self._dir = datadir
-        self.job_type = 'Blender'
+        self.jobtype = 'Blender'
 
         if data_path and self._check_directory(data_path):
             self._write_file = True
@@ -115,7 +115,7 @@ class Configuration(object):
 
                     if (self._config.has_option(sec, "default_jobtype") and
                     self._config.get(sec, "default_jobtype") == "True"):
-                        self.job_type = sec
+                        self.jobtype = sec
                         break
 
                     if (self._config.has_option(sec, "default_app") and #DEP
@@ -124,7 +124,7 @@ class Configuration(object):
                             "Use of setting 'default_app' is"
                             "deprecated. Please use 'default_jobtype.'")
 
-                        self.job_type = sec
+                        self.jobtype = sec
                         break
 
             except EnvironmentError as exp:
@@ -140,19 +140,20 @@ class Configuration(object):
 
         self._set_logging_level(log_level if log_level else current_level)
 
-        if job_type:
-            self.job_type = job_type
+        if jobtype:
+            self.jobtype = jobtype
 
         elif kwargs.get('application'): #DEP
             self._log.warning("Use of kwarg 'application' is deprecated. "
-                              "Please replace with 'job_type'.")
-            self.job_type = kwargs.get('application')
+                              "Please replace with 'jobtype'.")
+            self.jobtype = kwargs.get('application')
 
-        if not self._config.has_section(self.job_type):
+        if not self._config.has_section(self.jobtype):
             raise InvalidConfigException(
                 "Config file has no setting for job type: {type}. "
                 "Please specify alternative config or job type.".format(
-                    type=self.job_type))
+                    type=self.jobtype))
+        self.job_type = self.jobtype #DEP
 
     def _set_defaults(self):
         """Create all default config data.
@@ -355,7 +356,7 @@ class Configuration(object):
         new_auth["token_uri"] = "/oauth2/token"
 
         try:
-            old_job =  dict(self._config.items(self.job_type))
+            old_job =  dict(self._config.items(self.jobtype))
             new_auth["endpoint"] = old_job.get("endpoint")
 
             if not old_auth.get("service_principal"):
@@ -411,7 +412,7 @@ class Configuration(object):
 
                 self._config.remove_option(sec, "default_jobtype")
 
-        self._config.set(self.job_type, "default_jobtype", "True")
+        self._config.set(self.jobtype, "default_jobtype", "True")
 
         if self._write_file:
             self.save_config()
@@ -474,7 +475,8 @@ class Configuration(object):
             return False
 
     def endpoint(self, *endpoint):
-        """Get and set the endpoint for the Batch Apps service.
+        """
+        Get and set the endpoint for the Batch Apps service.
 
         :Args:
             - endpoint (str): *optional* A new endpoint, if supplied, will
@@ -504,14 +506,14 @@ class Configuration(object):
         elif self._config.has_option("Authentication", "endpoint"):
             end_p = self._config.get("Authentication", "endpoint")
 
-        elif self._config.has_option(self.job_type, "endpoint"): #DEP
+        elif self._config.has_option(self.jobtype, "endpoint"): #DEP
             self._log.warning("Job type config in deprecated format. "
                               "Please regenerate.")
-            end_p = self._config.get(self.job_type, "endpoint")
+            end_p = self._config.get(self.jobtype, "endpoint")
 
         else:
             raise InvalidConfigException("No valid endpoint value for "
-                                         "{type}".format(type=self.job_type))
+                                         "{type}".format(type=self.jobtype))
         if end_p.startswith("http://"):
             end_p = end_p[7:]
 
@@ -592,17 +594,18 @@ class Configuration(object):
         """
         if jobtype and self._config.has_section(str(jobtype[0])):
             self._log.info("Setting job type from {0} to {1}".format(
-                self.job_type,
+                self.jobtype,
                 str(jobtype[0])))
 
-            self.job_type = str(jobtype[0])
+            self.jobtype = str(jobtype[0])
 
         elif jobtype and not self._config.has_section(str(jobtype[0])):
             raise InvalidConfigException(
                 "No configuration for '{type}' found."
                 " Please add it.".format(type=jobtype))
 
-        return self.job_type
+        self.job_type = self.jobtype
+        return self.jobtype
 
     def applications(self):
         """
@@ -642,7 +645,7 @@ class Configuration(object):
             - A dictionary of all the string parameters tied to the job type.
 
         """
-        return dict(self._config.items(self.job_type))
+        return dict(self._config.items(self.jobtype))
 
     def add_application(self, jobtype, *args, **params):
         """
@@ -692,17 +695,17 @@ class Configuration(object):
 
         """
         self._log.debug("Setting {jt} parameter {prm} to {val}".format(
-            jt=self.job_type,
+            jt=self.jobtype,
             prm=param,
             val=value))
 
         try:
-            self._config.set(self.job_type, str(param), str(value))
+            self._config.set(self.jobtype, str(param), str(value))
 
         except configparser.NoSectionError:
             raise InvalidConfigException(
                 "Current job type {0} has no valid"
-                " configuration to set to.".format(self.job_type))
+                " configuration to set to.".format(self.jobtype))
 
     def get(self, param):
         """Get a parameter from the current job type configuration.
@@ -716,12 +719,12 @@ class Configuration(object):
 
         """
         try:
-            return self._config.get(self.job_type, param)
+            return self._config.get(self.jobtype, param)
 
         except (AttributeError, configparser.Error) as exp:
             self._log.warning(
                 "Couldn't get {prm} parameter for {jt}. Error: "
-                "{err}".format(prm=param, jt=self.job_type, err=exp))
+                "{err}".format(prm=param, jt=self.jobtype, err=exp))
 
             return None
 
@@ -747,25 +750,25 @@ class Configuration(object):
         """
         setting = str(setting)
 
-        if setting in ['Logging', 'Authentication', self.job_type]:
+        if setting in ['Logging', 'Authentication', self.jobtype]:
             self._log.warning("Cannot remove config for {0}".format(setting))
             return False
 
         elif self._config.has_section(setting):
 
             self._log.debug("Removing {jt} from "
-                            "configuration".format(jt=self.job_type))
+                            "configuration".format(jt=self.jobtype))
 
             self._config.remove_section(setting)
             return True
 
-        elif self._config.has_option(self.job_type, setting):
+        elif self._config.has_option(self.jobtype, setting):
 
             self._log.debug("Removing {jt} parameter {prm}".format(
-                jt=self.job_type,
+                jt=self.jobtype,
                 prm=setting))
 
-            self._config.remove_option(self.job_type, setting)
+            self._config.remove_option(self.jobtype, setting)
             return True
 
         else:
@@ -773,7 +776,7 @@ class Configuration(object):
                            "parameter {0}".format(setting))
             return False
 
-    def aad_config(self, client_id=None, tenant=None, key=None,
+    def aad_config(self, client_id=None, tenant=None, key=None, account=None,
                   redirect=None, endpoint=None, unattended=False, **kwargs):
         """Configure AAD authentication parameters to accompany an existing
         Batch Apps Service.
@@ -786,6 +789,10 @@ class Configuration(object):
               creating an Unattended Account in the Batch Apps portal.
             - tenant (str): The auth tenant, this can be retrieved when
               creating an Unattended Account in the Batch Apps portal.
+            - account (str): The account string in the format as retrieved
+              from the Batch Apps portal: ClientID=abc;TenantID=xyz. If both
+              this and the client_id/tenant kwargs are set, the latter will
+              take precedence.
             - key (str): An Unattended Account key. This can be created in
               the Batch Apps portal.
             - redirect (str): The redirect url used for web UI login. This
@@ -819,6 +826,17 @@ class Configuration(object):
 
             for setting in auth_cfg:
                 self._config.set("Authentication", setting, auth_cfg[setting])
+
+        if account:
+            try:
+                account_str = str(account).split(';')
+                clientid = account_str[0].split('=')[1]
+                tenantid = account_str[1].split('=')[1]
+                self._config.set("Authentication", "client_id", clientid)
+                self._config.set("Authentication", "tenant", tenantid)
+            except IndexError as exp:
+                raise ValueError("Account details must be a string in the "
+                                 "format ClientID=abc;TenantID=xyz")
 
         if client_id:
             self._config.set("Authentication", "client_id", str(client_id))
