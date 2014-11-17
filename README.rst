@@ -126,8 +126,8 @@ or by editing the file directly::
 
 	[Authentication]
 	client_id = abc
-	endpoint = myservice.batchapps.core.windows.net
 	tenant = xyz
+	endpoint = myservice.batchapps.core.windows.net
 	unattended_key = ***********************
 
 Then you can authenticate with these credentials::
