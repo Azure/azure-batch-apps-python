@@ -48,8 +48,8 @@ For full summary of changes, see CHANGES.txt
 * 2014-11-xx	- 0.2.0	
 	- Changed file upload format
 	- Changed Authentication config format
-	- Changed terminology regarding application ? jobtype
-	- Changed terminology regarding service principal ? unattended account
+	- Changed terminology regarding application → jobtype
+	- Changed terminology regarding service principal → unattended account
 	- Added FileCollection.index method
 	- Added better handling for missing auth values in Configuration
 * 2014-11-03	- 0.1.1 
