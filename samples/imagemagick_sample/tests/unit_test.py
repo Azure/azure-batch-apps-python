@@ -200,10 +200,18 @@ class TestSample(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             client._download_job_output(job)
 
+    @mock.patch.object(client.AzureOAuth, 'get_unattended_session')
     @mock.patch.object(client.AzureOAuth, 'get_session')
     @mock.patch.object(client.AzureOAuth, 'get_authorization_url')
-    def test_authentication(self, mock_url, mock_session):
+    def test_authentication(self, mock_url, mock_session, mock_unattended):
         """Test authentication"""
+
+        mock_unattended.return_value = "Auth"
+        auth = client.authentication("test")
+        self.assertEqual(auth, "Auth")
+
+        mock_unattended.side_effect = InvalidConfigException(
+            "InvalidConfigExceptionTEST")
 
         mock_session.return_value = "Done!"
         auth = client.authentication("test")
