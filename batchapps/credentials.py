@@ -311,7 +311,7 @@ class AzureOAuth(object):
 
         except IndexError as exp:
             raise InvalidConfigException("Unattended Account must be in the "
-                                         "format ClientID=abc;TenantID=xyz")
+                                         "format 'ClientID=abc;TenantID=xyz'")
 
         secret = auth['unattended_key']
         token_uri = _https(auth['root'], tenant, auth['token_uri'])

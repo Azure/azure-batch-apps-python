@@ -780,7 +780,7 @@ class Configuration(object):
 
         :Kwargs:
             - account (str): The account string in the format as retrieved
-              from the Batch Apps portal: ClientID=abc;TenantID=xyz.
+              from the Batch Apps portal: "ClientID=abc;TenantID=xyz".
             - key (str): An Unattended Account key. This can be created in
               the Batch Apps portal.
             - client_id (str): The client GUID, this can be retrieved from
@@ -790,8 +790,8 @@ class Configuration(object):
             - redirect (str): The redirect url used for web UI login. This
               can be configured in the AAD portal (not required if using an
               Unattended Account).
-            - endpoint (str): The Batch Apps service endpoint. Can be found
-              in the service details in the Batch Apps Portal.
+            - endpoint (str): The Batch Apps service endpoint. This can be
+              found in the service details in the Batch Apps Portal.
             - unattended (bool): Whether the intended authentication method
               will be unattended. Default is ``False``.
 

@@ -750,7 +750,7 @@ class TestConfiguration(unittest.TestCase):
         old_cfg.add_section("Authentication")
         old_cfg.set("Authentication", "auth_uri",
                     "login.windows.net/common/oauth2/authorize")
-        old_cfg.set("Authentication", "resource", "batchapps.core.windows.net/")
+        old_cfg.set("Authentication", "resource", "https://batchapps.core.windows.net/")
         old_cfg.set("Authentication", "token_uri", "login.windows.net/common/oauth2/token")
         
         old_cfg.add_section("TestJob")
@@ -774,7 +774,7 @@ class TestConfiguration(unittest.TestCase):
                                "unattended_account":None,
                                "unattended_key":None,
                                "tenant":"common",
-                               "resource":"batchapps.core.windows.net/"})
+                               "resource":"https://batchapps.core.windows.net/"})
 
         old_cfg.set("Authentication", "service_principal", "")
         old_cfg.set("Authentication", "service_principal_key", "")
@@ -790,11 +790,11 @@ class TestConfiguration(unittest.TestCase):
                                "unattended_account":"",
                                "unattended_key":"",
                                "tenant":"common",
-                               "resource":"batchapps.core.windows.net/"})
+                               "resource":"https://batchapps.core.windows.net/"})
 
         old_cfg.set("Authentication", "service_principal_key", "%&#5$#")
         old_cfg.set("Authentication", "service_principal",
-                    "ClientId=xyz;TenantId=greenbuttontest.onmicrosoft.com")
+                    "ClientId=xyz;TenantId=test_account.onmicrosoft.com")
 
         aad = Configuration._reformat_config(
             cfg, dict(cfg._config.items("Authentication")))
@@ -804,8 +804,8 @@ class TestConfiguration(unittest.TestCase):
                                "root":"login.windows.net/",
                                "token_uri":"/oauth2/token",
                                "redirect_uri":"redirect.com",
-                               "unattended_account":"ClientId=xyz;TenantId=greenbuttontest.onmicrosoft.com",
+                               "unattended_account":"ClientId=xyz;TenantId=test_account.onmicrosoft.com",
                                "unattended_key":"%&#5$#",
                                "tenant":"common",
-                               "resource":"batchapps.core.windows.net/"})
+                               "resource":"https://batchapps.core.windows.net/"})
 
