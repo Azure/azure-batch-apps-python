@@ -99,11 +99,11 @@ You can edit the file directly, or via the Configuration class::
 	# Set the current job type as the default job type for future jobs
 	cfg.set_default_jobtype()
 
-	# Add some custom parameters
+	# Set up some default parameter values for the current job type
 	cfg.set('quality', 10)
 	cfg.set('timeout', 500)
 
-	# Save additional parameters to file
+	# Save updated configuration to file
 	cfg.save_config()
 
 Authentication
@@ -125,9 +125,8 @@ them to the batch_apps.ini configuration either with Python, as described above,
 or by editing the file directly::
 
 	[Authentication]
-	client_id = abc
-	tenant = xyz
 	endpoint = myservice.batchapps.core.windows.net
+	unattended_account = ClientID=abc;tenantID=xyz
 	unattended_key = ***********************
 
 Then you can authenticate with these credentials::
@@ -142,9 +141,11 @@ Or alternatively, if you use a different AAD implementation to retrieve a token:
 	from batchapps import Credentials, Configuration
 	import my_oauth
 
+	client_id = "abc"
 	cfg = Configuration()
-	aad_token = my_oauth.get_token()
-	creds = Credentials(cfg, token=aad_token)
+
+	aad_token = my_oauth.get_token(client_id)
+	creds = Credentials(cfg, client_id, token=aad_token)
 
 Authentication via logging into a Web UI will be supported soon.
 
@@ -171,7 +172,8 @@ through the JobManager class::
 
 	job_progress = mgr.get_job(url=new_job['link'])
 	
-	timeout = time.time() + 600 # Timeout in 10 minutes
+	 # Let's allow up to 30 minutes for the job to complete
+	timeout = time.time() + 1800
 
 	while time.time() < timeout:
 

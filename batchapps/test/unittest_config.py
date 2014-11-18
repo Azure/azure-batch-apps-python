@@ -687,13 +687,11 @@ class TestConfiguration(unittest.TestCase):
         _cfg.remove_section("Authentication")
         _cfg.add_section("Authentication")
         _cfg.set("Authentication", "root", "test")
-        with self.assertRaises(ValueError):
-            aad = Configuration.aad_config(cfg, account=3)
-        with self.assertRaises(ValueError):
-            aad = Configuration.aad_config(cfg, account="test;test")
-
+        
+        aad = Configuration.aad_config(cfg, account=3)
+        aad = Configuration.aad_config(cfg, account="test;test")
         aad = Configuration.aad_config(cfg, account="ClientID=abc;TenantID=xyz")
-        self.assertEqual(aad, {"root":"test", "client_id":"abc", "tenant":"xyz"})
+        self.assertEqual(aad, {"root":"test", "unattended_account":"ClientID=abc;TenantID=xyz"})
 
         _cfg.remove_section("Authentication")
         _cfg.add_section("Authentication")
@@ -701,7 +699,8 @@ class TestConfiguration(unittest.TestCase):
 
         aad = Configuration.aad_config(cfg, account="ClientID=abc;TenantID=xyz",
                                        client_id="foo", tenant="bar")
-        self.assertEqual(aad, {"root":"test", "client_id":"foo", "tenant":"bar"})
+        self.assertEqual(aad, {"root":"test", "client_id":"foo", "tenant":"bar",
+                               "unattended_account":"ClientID=abc;TenantID=xyz"})
 
     def test_config_validate_auth(self):
         """Test validate_auth"""
@@ -732,8 +731,16 @@ class TestConfiguration(unittest.TestCase):
         with self.assertRaises(InvalidConfigException):
             Configuration._validate_auth(cfg, True)
 
-        _cfg.remove_option("Authentication", "redirect_uri")
+        _cfg.set("Authentication", "unattended_account", None)
         _cfg.set("Authentication", "unattended_key", "i")
+
+        with self.assertRaises(InvalidConfigException):
+            Configuration._validate_auth(cfg, True)
+
+        _cfg.set("Authentication", "unattended_account", "j")
+        auth = Configuration._validate_auth(cfg, True)
+
+        _cfg.remove_option("Authentication", "redirect_uri")
         auth = Configuration._validate_auth(cfg, True)
 
     def test_config_reformat_config(self):
@@ -764,7 +771,8 @@ class TestConfiguration(unittest.TestCase):
                                "root":"login.windows.net/",
                                "token_uri":"/oauth2/token",
                                "redirect_uri":"redirect.com",
-                               "unattended_key":"",
+                               "unattended_account":None,
+                               "unattended_key":None,
                                "tenant":"common",
                                "resource":"batchapps.core.windows.net/"})
 
@@ -779,29 +787,25 @@ class TestConfiguration(unittest.TestCase):
                                "root":"login.windows.net/",
                                "token_uri":"/oauth2/token",
                                "redirect_uri":"redirect.com",
+                               "unattended_account":"",
                                "unattended_key":"",
                                "tenant":"common",
                                "resource":"batchapps.core.windows.net/"})
 
-        old_cfg.set("Authentication", "service_principal", "xy@z")
         old_cfg.set("Authentication", "service_principal_key", "%&#5$#")
-
-        with self.assertRaises(InvalidConfigException):
-            aad = Configuration._reformat_config(
-                cfg, dict(cfg._config.items("Authentication")))
-
         old_cfg.set("Authentication", "service_principal",
                     "ClientId=xyz;TenantId=greenbuttontest.onmicrosoft.com")
 
         aad = Configuration._reformat_config(
             cfg, dict(cfg._config.items("Authentication")))
 
-        self.assertEqual(aad, {"endpoint":"test.com", "client_id":"xyz",
+        self.assertEqual(aad, {"endpoint":"test.com", "client_id":"abc",
                                "auth_uri":"/oauth2/authorize",
                                "root":"login.windows.net/",
                                "token_uri":"/oauth2/token",
-                               "redirect_uri":"",
+                               "redirect_uri":"redirect.com",
+                               "unattended_account":"ClientId=xyz;TenantId=greenbuttontest.onmicrosoft.com",
                                "unattended_key":"%&#5$#",
-                               "tenant":"greenbuttontest.onmicrosoft.com",
+                               "tenant":"common",
                                "resource":"batchapps.core.windows.net/"})
 

@@ -185,9 +185,11 @@ class Configuration(object):
         LOGGERS.update({'level':30})
 
         self._config.add_section("Authentication")
-        self._config.set("Authentication", "client_id", "")
+
         self._config.set("Authentication", "endpoint", "")
+        self._config.set("Authentication", "unattended_account", "")
         self._config.set("Authentication", "unattended_key", "")
+        self._config.set("Authentication", "client_id", "")
         self._config.set("Authentication", "redirect_uri", "")
         self._config.set("Authentication", "tenant", "common")
 
@@ -358,23 +360,15 @@ class Configuration(object):
         try:
             old_job =  dict(self._config.items(self.jobtype))
             new_auth["endpoint"] = old_job.get("endpoint")
+            new_auth["client_id"] = old_job.get("client_id")
+            new_auth["redirect_uri"] = old_job.get("redirect_uri")
 
-            if not old_auth.get("service_principal"):
-                new_auth["client_id"] = old_job.get("client_id")
-                new_auth["redirect_uri"] = old_job.get("redirect_uri")
+            auth_uri = old_auth.get("auth_uri").split("/")
+            tenant_index = auth_uri.index("login.windows.net") + 1
+            new_auth["tenant"] = auth_uri[tenant_index]
 
-                auth_uri = old_auth.get("auth_uri").split("/")
-                tenant_index = auth_uri.index("login.windows.net") + 1
-                new_auth["tenant"] = auth_uri[tenant_index]
-                new_auth["unattended_key"] = ""
-
-
-            else:
-                unattended = old_auth["service_principal"].split(";")
-                new_auth["tenant"] = unattended[1].split('=')[1]
-                new_auth["client_id"] = unattended[0].split('=')[1]
-                new_auth["unattended_key"] = old_auth.get("service_principal_key")
-                new_auth["redirect_uri"] = ""
+            new_auth["unattended_account"] = old_auth.get("service_principal")
+            new_auth["unattended_key"] = old_auth.get("service_principal_key")
 
         except(ValueError, KeyError, IndexError):
             raise InvalidConfigException(
@@ -776,7 +770,7 @@ class Configuration(object):
                            "parameter {0}".format(setting))
             return False
 
-    def aad_config(self, client_id=None, tenant=None, key=None, account=None,
+    def aad_config(self, account=None, key=None, client_id=None, tenant=None,
                   redirect=None, endpoint=None, unattended=False, **kwargs):
         """Configure AAD authentication parameters to accompany an existing
         Batch Apps Service.
@@ -785,19 +779,17 @@ class Configuration(object):
         Backwards compatible with v0.1.1.
 
         :Kwargs:
-            - client_id (str): The client GUID, this can be retrieved when
-              creating an Unattended Account in the Batch Apps portal.
-            - tenant (str): The auth tenant, this can be retrieved when
-              creating an Unattended Account in the Batch Apps portal.
             - account (str): The account string in the format as retrieved
-              from the Batch Apps portal: ClientID=abc;TenantID=xyz. If both
-              this and the client_id/tenant kwargs are set, the latter will
-              take precedence.
+              from the Batch Apps portal: ClientID=abc;TenantID=xyz.
             - key (str): An Unattended Account key. This can be created in
               the Batch Apps portal.
+            - client_id (str): The client GUID, this can be retrieved from
+              the AAD portal (not required if using an Unattended Account).
+            - tenant (str): The auth tenant, this can be retrieved from
+              the AAD portal (not required if using an Unattended Account).
             - redirect (str): The redirect url used for web UI login. This
               can be configured in the AAD portal (not required if using an
-              Unattended Account)
+              Unattended Account).
             - endpoint (str): The Batch Apps service endpoint. Can be found
               in the service details in the Batch Apps Portal.
             - unattended (bool): Whether the intended authentication method
@@ -828,24 +820,16 @@ class Configuration(object):
                 self._config.set("Authentication", setting, auth_cfg[setting])
 
         if account:
-            try:
-                account_str = str(account).split(';')
-                clientid = account_str[0].split('=')[1]
-                tenantid = account_str[1].split('=')[1]
-                self._config.set("Authentication", "client_id", clientid)
-                self._config.set("Authentication", "tenant", tenantid)
-            except IndexError as exp:
-                raise ValueError("Account details must be a string in the "
-                                 "format ClientID=abc;TenantID=xyz")
+            self._config.set("Authentication", "unattended_account", str(account))
+
+        if key:
+            self._config.set("Authentication", "unattended_key", str(key))
 
         if client_id:
             self._config.set("Authentication", "client_id", str(client_id))
 
         if tenant:
             self._config.set("Authentication", "tenant", str(tenant))
-
-        if key:
-            self._config.set("Authentication", "unattended_key", str(key))
 
         if redirect:
             self._config.set("Authentication", "redirect_uri", str(redirect))
@@ -893,16 +877,17 @@ class Configuration(object):
 
         auth = dict(self._config.items("Authentication"))
         required = ['endpoint',
-                    'client_id',
-                    'tenant',
                     'resource',
                     'root',
                     'auth_uri',
                     'token_uri']
 
         if unattended:
+            required.append("unattended_account")
             required.append("unattended_key")
         else:
+            required.append("client_id")
+            required.append("tenant")
             required.append("redirect_uri")
 
         valid_data = []

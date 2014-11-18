@@ -126,7 +126,8 @@ class AzureOAuth(object):
               stored session or the token is invalid.
         """
         AzureOAuth.config = config if config else Configuration()
-        return Credentials(AzureOAuth.config)
+        auth = AzureOAuth.config.aad_config()
+        return Credentials(AzureOAuth.config, auth['client_id'])
 
     @staticmethod
     def get_authorization_url(config=None, msa=False, prompt=False, **additional_args):
@@ -248,7 +249,7 @@ class AzureOAuth(object):
         except oauth2.rfc6749.errors.MismatchingStateError as excep:
             raise AuthenticationException(excp.description)
 
-        authorized_creds = Credentials(AzureOAuth.config, token=token)
+        authorized_creds = Credentials(AzureOAuth.config, auth['client_id'], token=token)
         return authorized_creds
 
     @staticmethod
@@ -303,10 +304,16 @@ class AzureOAuth(object):
                 "Correct authentication configuration not found")
 
         auth = AzureOAuth.config.aad_config(unattended=True)
+        try:
+            account_id = auth['unattended_account'].split(';')
+            client_id = account_id[0].split('=')[1]
+            tenant = account_id[1].split('=')[1]
+
+        except IndexError as exp:
+            raise InvalidConfigException("Unattended Account must be in the "
+                                         "format ClientID=abc;TenantID=xyz")
 
         secret = auth['unattended_key']
-        client_id = auth['client_id']
-        tenant = auth['tenant']
         token_uri = _https(auth['root'], tenant, auth['token_uri'])
 
         silent_session = requests_oauthlib.OAuth2Session(
@@ -330,7 +337,8 @@ class AzureOAuth(object):
         except oauth2.rfc6749.errors.OAuth2Error as excp:
             raise AuthenticationException(excp.description)
 
-        authorized_creds = Credentials(AzureOAuth.config, token=token)
+        authorized_creds = Credentials(AzureOAuth.config, client_id,
+                                       token=token)
         return authorized_creds
 
 
@@ -341,7 +349,7 @@ class Credentials(object):
     system. See: https://pypi.python.org/pypi/keyring
     """
 
-    def __init__(self, config, *args, **kwargs): #DEP
+    def __init__(self, config, client_id, token=None):
         """
         New credentials object. Preferably this class is instantiated by
         :class:`.AzureOAuth` rather than called directly.
@@ -349,6 +357,7 @@ class Credentials(object):
         :Args:
             - config (:class:`.Configuration`): A configuration object to
               define the client session.
+            - client_id (str): The client ID as defined in the Configuration.
 
         :Kwargs:
             - token (dict): An authentication token, if not provided will try
@@ -361,7 +370,7 @@ class Credentials(object):
         """
 
         self._log = logging.getLogger('batch_apps')
-        token = kwargs.get('token')
+        self._id = str(client_id)
 
         if not hasattr(config, "aad_config"):
             raise InvalidConfigException(
@@ -372,13 +381,11 @@ class Credentials(object):
                             "retrieve previous session.")
 
             self.cfg = config.aad_config(unattended=False)
-            self._id = self.cfg.get('client_id')
             token = self.get_stored_auth()
 
         else:
             unattended = 'refresh_token' not in token
             self.cfg = config.aad_config(unattended=unattended)
-            self._id = self.cfg.get('client_id')
 
         self.token = token
 
@@ -387,7 +394,6 @@ class Credentials(object):
 
         self.store_auth(self.token)
         self.get_session()
-
 
     def get_session(self):
         """
@@ -402,14 +408,16 @@ class Credentials(object):
         """
         resource = _https(self.cfg['resource']) #DEP
         countdown = float(self.token['expires_at']) - time.time()
-        refresh = _https(self.cfg['root'], self.cfg['tenant'],
-                         self.cfg['token_uri'])
 
         self.token['expires_in'] = countdown
         self._log.debug("Token expires in: {0}".format(countdown))
 
         try:
             if 'refresh_token' in self.token:
+
+                refresh = _https(self.cfg['root'], self.cfg['tenant'],
+                         self.cfg['token_uri'])
+
                 return requests_oauthlib.OAuth2Session(
                     self._id,
                     token=self.token,

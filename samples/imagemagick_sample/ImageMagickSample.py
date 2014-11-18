@@ -55,7 +55,7 @@ DOWNLOAD_OUTPUT = False
 DOWNLOAD_DIR = "C:\\Path\\To\\Download\\Directory"
 ASSET_DIR = "C:\\Path\\To\\Files\\Directory"
 
-# Specify you account info here
+# Specify your account info here
 # - Copy BatchAppsServiceUrl value from the Batch Apps portal
 # - The account ID is specific to your BatchApps account, where you 
 #   can also create a new unattended account key.

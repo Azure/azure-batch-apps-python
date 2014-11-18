@@ -85,15 +85,17 @@ class TestAzureOAuth(unittest.TestCase):
         """Test get_session"""
 
         mock_config.return_value = mock.create_autospec(Configuration)
+        mock_config.return_value.aad_config.return_value = {'client_id':'abc'}
         AzureOAuth.get_session()
         self.assertTrue(mock_config.called)
-        mock_credentials.assert_called_with(mock_config.return_value)
+        mock_credentials.assert_called_with(mock_config.return_value, 'abc')
         mock_config.reset_mock()
 
         mock_cfg = mock.create_autospec(Configuration)
+        mock_cfg.aad_config.return_value = {'client_id':'abc'}
         AzureOAuth.get_session(config=mock_cfg)
         self.assertFalse(mock_config.called)
-        mock_credentials.assert_called_with(mock_cfg)
+        mock_credentials.assert_called_with(mock_cfg, 'abc')
 
     @mock.patch('batchapps.credentials.Configuration')
     @mock.patch.object(AzureOAuth, '_setup_session')
@@ -145,7 +147,7 @@ class TestAzureOAuth(unittest.TestCase):
         AzureOAuth.session.fetch_token.return_value = {}
         authed = AzureOAuth.get_authorization_token("test")
         mock_setup.assert_called_with(mock.ANY, state=None)
-        mock_creds.assert_called_with(mock.ANY, token={})
+        mock_creds.assert_called_with(mock.ANY, mock.ANY, token={})
         self.assertIsNotNone(authed)
 
         authed = AzureOAuth.get_authorization_token("test", state="test")
@@ -183,9 +185,12 @@ class TestAzureOAuth(unittest.TestCase):
                                                'unattended_key':'3',
                                                'token_uri':'/auth',
                                                'resource':'test',
-                                               'tenant':'common',
-                                               'client_id':'abc'}
+                                               'unattended_account':'abc'}
 
+        with self.assertRaises(InvalidConfigException):
+            AzureOAuth.get_unattended_session(mock_config)
+
+        mock_config.aad_config.return_value['unattended_account'] = 'ClientID=abc;TenantID=common'
         AzureOAuth.get_unattended_session(mock_config)
         mock_client.assert_called_with("abc")
         mock_req.OAuth2Session.assert_called_with("abc", client=mock.ANY)
@@ -200,8 +205,7 @@ class TestAzureOAuth(unittest.TestCase):
                                                'unattended_key':'3',
                                                'token_uri':'/auth',
                                                'resource':'https://test',
-                                               'tenant':'common',
-                                               'client_id':'abc'}
+                                               'unattended_account':'ClientID=abc;TenantID=common'}
 
         AzureOAuth.get_unattended_session(mock_config)
         mock_client.assert_called_with("abc")
@@ -237,8 +241,8 @@ class TestCredentials(unittest.TestCase):
         self.assertTrue(mock_get_stored_auth.called)
         mock_get_stored_auth.called = False
 
-        Credentials(mock_config, token={'token_type':'1',
-                                        'access_token':'2'})
+        Credentials(mock_config, "testID", token={'token_type':'1',
+                                                  'access_token':'2'})
         mock_store_auth.assert_called_with({'token_type':'1',
                                             'access_token':'2'})
         self.assertTrue(mock_get_session.called)
@@ -246,7 +250,7 @@ class TestCredentials(unittest.TestCase):
 
         mock_get_stored_auth.return_value = ({'token_type':'3',
                                               'access_token':'4'})
-        Credentials(mock_config)
+        Credentials(mock_config, "testID")
         mock_store_auth.assert_called_with({'token_type':'3',
                                             'access_token':'4'})
         self.assertTrue(mock_get_session.called)
