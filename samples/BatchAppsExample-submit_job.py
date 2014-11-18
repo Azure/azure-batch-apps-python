@@ -52,8 +52,7 @@ ASSET_DIR = "C:\\Path\\To\\Assets\\Directory"
 
 # These settings will be specific to a users Batch Apps service.
 ENDPOINT = "myservice.batchapps.core.windows.net"
-CLIENT_ID = "abcd-1234-efgh-5678"
-TENANT = "wxzy-8765-tuv-4321"
+ACCOUNT_ID = "ClientID=abcd-1234-efgh-5678;TenantID=wxzy-8765-tuv-4321"
 ACCOUNT_KEY = "********"
 
 def authentication(mode):
@@ -111,16 +110,15 @@ def create_config():
 
     try:  
         config = Configuration(log_level=LOG_LEVEL)
-        config.aad_config(client_id=CLIENT_ID,
-                          endpoint=ENDPOINT,
+        config.aad_config(endpoint=ENDPOINT,
+                          account=ACCOUNT_ID,
                           key=ACCOUNT_KEY,
-                          tenant=TENANT,
                           unattended=True)
 
         config.add_jobtype("MyApp")
         config.current_jobtype("MyApp")
         
-        # Examples of additional config settings for your job
+        # Examples of default config settings for your job
         config.set("width", "500")
         config.set("height", "500")
 

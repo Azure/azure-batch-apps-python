@@ -598,7 +598,7 @@ class Configuration(object):
                 "No configuration for '{type}' found."
                 " Please add it.".format(type=jobtype))
 
-        self.job_type = self.jobtype
+        self.job_type = self.jobtype #DEP
         return self.jobtype
 
     def applications(self):
@@ -658,7 +658,7 @@ class Configuration(object):
                           "Please use add_jobtype().")
         return self.add_jobtype(jobtype, **params)
 
-    def add_jobtype(self, jobtype, *args, **params):
+    def add_jobtype(self, jobtype, **params):
         """Add a new job type section to the configuration.
 
         :Args:
@@ -780,7 +780,7 @@ class Configuration(object):
 
         :Kwargs:
             - account (str): The account string in the format as retrieved
-              from the Batch Apps portal: "ClientID=abc;TenantID=xyz".
+              from the Batch Apps portal: ``ClientID=abc;TenantID=xyz``.
             - key (str): An Unattended Account key. This can be created in
               the Batch Apps portal.
             - client_id (str): The client GUID, this can be retrieved from
@@ -902,19 +902,5 @@ class Configuration(object):
                 "Missing data for: {0}".format(missing_val))
 
         return auth
-
-    #    TODO: Handle additional auth kwargs
-
-    #    if domain_hint:
-    #        self._config.set("Authentication", "domain_hint", domain_hint)
-
-    #    if login_hint:
-    #        self._config.set("Authentication", "login_hint", login_hint)
-
-    #    if prompt:
-    #        self._config.set("Authentication", "prompt", prompt)
-
-    #    for setting in kwargs:
-    #        self._config.set("Authentication", setting, kwargs[setting])
 
         

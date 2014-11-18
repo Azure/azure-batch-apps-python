@@ -230,7 +230,7 @@ def post(auth, url, headers, message=None):
                                 "Response object has no text attribute.",
                                 exp)
 
-def put(auth, url, headers, userfile, params):
+def put(auth, url, headers, userfile, params, *args):
     """
     Call PUT.
     This call is only used to upload files.

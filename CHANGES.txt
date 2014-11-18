@@ -3,7 +3,6 @@ v0.2.0, 2014-11-xx	- Changed file upload format
 					- Changed Authentication config format (old format still supported)
 						Service ID, Endpoint and redirect uri settings have been relocated to the "Authentication"
 						section. A single configuration now reflects a single Batch Apps service.
-						A Credentials object no longer takes client ID as argument.
 					- Changed terminology regarding application -> jobtype
 						Deprecated methods:
 							- BatchAppsApi.app() -> BatchAppsApi.jobtype()
@@ -19,8 +18,7 @@ v0.2.0, 2014-11-xx	- Changed file upload format
 						Deprecated methods:
 							- AzureOAuth.get_principal_token() -> AzureOAuth.get_unattended_session()
 						Related changes:
-							- Configuration setting "service_principal" deprecated, replaced by combination of
-							  "client_id" and "tenant"
+							- Configuration setting "service_principal" deprecated, replaced by "unattended_account"
 							- Configuration setting "service_principal_key" deprecated, replaced by "unattended_key"
 					- Added FileCollection.index() method
 					- Added better handling for missing auth values in Configuration
