@@ -126,7 +126,7 @@ or by editing the file directly::
 
 	[Authentication]
 	endpoint = myservice.batchapps.core.windows.net
-	unattended_account = ClientID=abc;tenantID=xyz
+	unattended_account = ClientID=abc;TenantID=xyz
 	unattended_key = ***********************
 
 Then you can authenticate with these credentials::
@@ -172,7 +172,7 @@ through the JobManager class::
 
 	job_progress = mgr.get_job(url=new_job['link'])
 	
-	 # Let's allow up to 30 minutes for the job to complete
+	# Let's allow up to 30 minutes for the job to complete
 	timeout = time.time() + 1800
 
 	while time.time() < timeout:
