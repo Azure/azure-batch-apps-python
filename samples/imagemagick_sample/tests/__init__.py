@@ -29,9 +29,6 @@
 import sys
 import os
 
-import sys
-import os
-
 try:
     from test.support import run_unittest
 except ImportError:

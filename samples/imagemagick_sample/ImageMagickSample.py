@@ -48,22 +48,26 @@ from batchapps.exceptions import (
 # The length of time to monitor the job. Defualt: 1 hour
 TIMEOUT = 3600
 
+# Set to True to download final job output as well as task outputs.
+DOWNLOAD_OUTPUT = False
+
 # Specify your data directories here
 DOWNLOAD_DIR = "C:\\Path\\To\\Download\\Directory"
 ASSET_DIR = "C:\\Path\\To\\Files\\Directory"
 
-# Spefify your application data here
-# - Copy BatchAppsServiceUrl value from MissionControl webportal
-# - The redirect_uri and client_id are specific to your BatchApps account
-ENDPOINT = "example-endpoint.com"  
-CLIENT_ID = "1234-abcd"
-REDIRECT_URI = "example-uri"
+# Specify your account info here
+# - Copy BatchAppsServiceUrl value from the Batch Apps portal
+# - The account ID is specific to your BatchApps account, where you 
+#   can also create a new unattended account key.
+ENDPOINT = "example.batchapps.core.windows.net"  
+ACCOUNT_ID = "ClientID=1234-abcd;TenantID=5678-wxyz"
+ACCOUNT_KEY = "********"
 
 def _check_valid_dir(directory):
     """
     Checks directory path is valid and throws a RuntimeError if not.
 
-    Args:
+    :Args:
         - directory (string): path to download or asset directory
     """
 
@@ -84,9 +88,9 @@ def _download_job_output(job):
     Downloads final job output when job has successfully completed and exits
     program.
 
-    Args:
-        - job (class'.SubmittedJob'): an instance of the current SubmittedJob
-        object
+    :Args:
+        - job (:class:`batchapps.SubmittedJob`): an instance of the current
+        SubmittedJob object
     """
 
     try:
@@ -103,15 +107,15 @@ def _download_job_output(job):
         raise RuntimeError("Failed to download job output: {0}".format(exp))
 
     except AttributeError as exp:
-        raise RuntimeError("Unexpected value passed. {0}".format(exp))
+        raise RuntimeError("Unexpected value passed: {0}".format(exp))
 
 def _download_task_outputs(task, output_list):
     """
     Loops through tasks and downloads outputs that have not already been
     downloaded.
 
-    Args:
-        - task (class'.Task'): the current task object.
+    :Args:
+        - task (:class:`batchapps.Task`): the current task object.
         - output_list (list): a list of task outputs as dictionaries.
     """
 
@@ -135,8 +139,9 @@ def _track_completed_tasks(job):
     """
     Gather and download outputs for tasks that have completed.
 
-    Args:
-        - job (class'.SubmittedJob'): the current submittedJob object.
+    :Args:
+        - job (:class:`batchapps.SubmittedJob`): the current submittedJob
+          object.
 
     """
 
@@ -163,9 +168,9 @@ def _retrieve_logs(job):
     """
     Retrieves system logs.
 
-    Args:
-        - job (class'.SubmittedJob'): an instance of the current SubmittedJob
-          object.
+    :Args:
+        - job (:class:`batchapps.SubmittedJob`): an instance of the current
+          SubmittedJob object.
     """
 
     try:
@@ -188,14 +193,14 @@ def _check_job_stopped(job):
     """
     Checks job for failure or completion.
 
-    Args:
-        - job (class'.SubmittedJob'): an instance of the current SubmittedJob
-          object.
+    :Args:
+        - job (:class:`batchapps.SubmittedJob`): an instance of the current
+          SubmittedJob object.
 
-    Returns:
+    :Returns:
         - A boolean indicating True if the job completed, or False if still in
           progress.
-    Raises:
+    :Raises:
         - RuntimeError if the job has failed, or been cancelled.
     """
 
@@ -216,12 +221,8 @@ def _check_job_stopped(job):
         elif job.status == "Complete":
             print("\n\n-------Job successfully completed--------")
 
-            # NOTE: By default, this script downloads tasks as they complete,
-            # however it is possible to also download the final job output
-            # once the the job has completed. To download the job output,
-            # uncomment the following line of code.
-
-            #_download_job_output(job)
+            if DOWNLOAD_OUTPUT:
+                _download_job_output(job)
 
             return True
 
@@ -238,17 +239,23 @@ def authentication(cfg):
     """
     Attempts to retrieve an existing session otherwise creates a new session.
 
-    Returns:
-        - An instance of the AzureOAuth() class.
+    :Returns:
+        - An instance of the :class:`batchapps.Credentials`.
     """
+
+    try:
+        return AzureOAuth.get_unattended_session(config=cfg)
+
+    except (AuthenticationException, InvalidConfigException) as exp:
+        print("Unable to authenticate via Unattended Acocunt: {0}".format(exp))
 
     try:
         return AzureOAuth.get_session(config=cfg)
 
-    except (AuthenticationException) as exp:
+    except AuthenticationException as exp:
         print("Could not get existing session: {0}".format(exp))
 
-    except (AttributeError, InvalidConfigException) as exp:
+    except InvalidConfigException as exp:
         raise RuntimeError("Failed to authenticate. {0}".format(exp))
 
     try:
@@ -264,15 +271,15 @@ def authentication(cfg):
 def generate_config():
     """
     Uses a current configuration if possible otherwise creates a new
-    configuration for the specified application.
+    configuration for the specified job type.
 
-    Returns:
-        - An instance of the Configuration() class.
+    :Returns:
+        - An instance of the :class:`batchapps.Configuration`.
     """
 
     try:
-        cfg = Configuration(log_level="info", application="ImageMagick")
-        print("Config Accepted")
+        cfg = Configuration(log_level="info", job_type="ImageMagick")
+        print("Existing config found.")
         return cfg
 
     except InvalidConfigException as exp:
@@ -281,12 +288,15 @@ def generate_config():
 
     try:
         cfg = Configuration(log_level="info")
-        cfg.add_application("ImageMagick", ENDPOINT, CLIENT_ID)
-        cfg.application("ImageMagick")
-        cfg.set("redirect_uri", REDIRECT_URI)
+
+        cfg.aad_config(account=ACCOUNT_ID, key=ACCOUNT_KEY,
+		    ENDPOINT=endpoint, unattended=True)
+
+        cfg.add_jobtype("ImageMagick")
+        cfg.current_jobtype("ImageMagick")
         cfg.set("width", "500")
         cfg.set("height", "500")
-        cfg.set_default_application()
+        cfg.set_default_jobtype()
 
     except InvalidConfigException as exp:
         raise RuntimeError("Invalid Configuration: {0}".format(exp))
@@ -297,15 +307,15 @@ def generate_config():
 
 def submit_job(configuration, creds, job_manager):
     """
-    Create a new job submission and submits it to the cloud.
+    Create a new job submission and submit it to the cloud.
 
-    Args:
-        - configuration (class'.Configuration'): The generated ImageMagick
-          config to apply to the session.
-        - creds (class'.Credentials'): The appropriate credentials to
-          access the session.
+    :Args:
+        - configuration (:class:`batchapps.Configuration`): The generated
+          ImageMagick config to apply to the session.
+        - creds (:class:`batchapps.Credentials`): The appropriate credentials
+          to access the session.
 
-    Returns:
+    :Returns:
         - A submission response.
     """
 
@@ -333,8 +343,8 @@ def track_job_progress(job_manager, job_submission):
     """
     Monitors the status of the job.
 
-    Args:
-        - job_manager (class'.JobManager'): a JobManager instance to provide
+    :Args:
+        - job_manager (:class:`batchapps.JobManager`): a JobManager instance to provide
           access to job manipulation.
         - job_submission (dict): the submission response after
           submit_job() is called holding the new job's ID and a url to get the
@@ -370,7 +380,7 @@ def track_job_progress(job_manager, job_submission):
         raise RuntimeError("Error occured: {0}".format(exp))
 
     except KeyboardInterrupt:
-        raise RuntimeError("Received Keyboard Interrupt.")
+        raise RuntimeError("Monitoring aborted.")
 
 if __name__ == "__main__":
 

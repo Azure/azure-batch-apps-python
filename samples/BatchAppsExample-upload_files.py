@@ -64,7 +64,7 @@ def authentication(mode):
     """
 
     try:
-        return AzureOAuth.get_session(config=mode)
+        return AzureOAuth.get_unattended_session(config=mode)
 
     except (AuthenticationException, InvalidConfigException) as e:
         print("Could not get existing session: {0}".format(e))
@@ -112,7 +112,7 @@ def upload_asset(auth, config):
     """
     
     asset_mgr = FileManager(auth, cfg=config)
-    asset_to_upload = asset_mgr.create_file(ASSET)
+    asset_to_upload = asset_mgr.file_from_path(ASSET)
 
     if asset_to_upload.is_uploaded():
         print("{0} already uploaded.".format(asset_to_upload))
@@ -146,7 +146,7 @@ def upload_assets(auth, config):
           class as returned by logging_mode()
     """
     asset_mgr = FileManager(auth, cfg=config)
-    asset_to_add = asset_mgr.create_file(ASSET)
+    asset_to_add = asset_mgr.file_from_path(ASSET)
 
     # Creates FileCollection object
     asset_set = asset_mgr.create_file_set(asset_to_add)

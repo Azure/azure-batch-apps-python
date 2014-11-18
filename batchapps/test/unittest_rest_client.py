@@ -183,33 +183,49 @@ class TestRestClient(unittest.TestCase):
             rest_client.post(auth, "http://test", {})
 
     @mock.patch.object(rest_client, '_call')
-    def test_rest_client_put(self, mock_call):
+    @mock.patch(BUILTIN_OPEN)
+    def test_rest_client_put(self, mock_open, mock_call):
         """Test put"""
 
         auth = mock.create_autospec(Credentials)
         u_file = mock.create_autospec(UserFile)
         u_file.name = "test.jpg"
+        u_file.path = "testfile"
 
         with self.assertRaises(RestCallException):
             rest_client.put(auth,
                             "http://test//{0}",
                             {"Content-Type": "application/json"},
                             u_file,
-                            {},
                             {})
+        with self.assertRaises(RestCallException):
+            rest_client.put(auth,
+                            "http://test//{0}",
+                            {"Content-Type": "application/json"},
+                            u_file,
+                            {'timestamp':'a', 'originalFilePath':'b'})
 
         val = rest_client.put(auth,
                               "http://test//{name}",
                               {"Content-Type": "application/json"},
                               u_file,
-                              {},
-                              {})
-
+                              {'timestamp':'a', 'originalFilePath':'b'})
+        mock_open.assert_called_with("testfile", 'rb')
         mock_call.assert_called_with(auth, 'PUT', "http://test//test.jpg",
-                                     data={},
-                                     files={},
-                                     headers={})
+                                     data=mock.ANY,
+                                     params={'timestamp':'a', 'originalFilePath':'b'},
+                                     headers={'Content-Type': 'application/octet-stream'})
         self.assertIsNotNone(val)
+
+        mock_open.side_effect = OSError("test")
+        with self.assertRaises(RestCallException):
+            rest_client.put(auth,
+                            "http://test//{name}",
+                            {"Content-Type": "application/json"},
+                            u_file,
+                            {'timestamp':'a', 'originalFilePath':'b'})
+
+        mock_open.side_effect = None
         mock_call.side_effect = RestCallException(None, "Boom!", None)
 
         with self.assertRaises(RestCallException):
@@ -217,7 +233,6 @@ class TestRestClient(unittest.TestCase):
                             "http://test//{name}",
                             {"Content-Type": "application/json"},
                             u_file,
-                            {},
                             {})
 
     @mock.patch.object(rest_client.os.path, 'exists')

@@ -279,6 +279,29 @@ class TestFileCollection(unittest.TestCase):
                             for i in col._collection))
 
     @mock.patch('batchapps.api.BatchAppsApi')
+    def test_filecoll_index(self, mock_api):
+        """Test index"""
+
+        col = FileCollection(mock_api)
+
+        test_file = mock.create_autospec(UserFile)
+        test_file2 = mock.create_autospec(UserFile)
+        test_file3 = mock.create_autospec(UserFile)
+
+        col._collection = [test_file, test_file2]
+
+        with self.assertRaises(TypeError):
+            col.index(None)
+        with self.assertRaises(TypeError):
+            col.index("test")
+
+        with self.assertRaises(ValueError):
+            col.index(test_file3)
+
+        self.assertEqual(col._collection.index(test_file2), 1)
+
+
+    @mock.patch('batchapps.api.BatchAppsApi')
     def test_filecoll_remove(self, mock_api):
         """Test remove"""
 

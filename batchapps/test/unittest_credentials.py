@@ -59,25 +59,22 @@ class TestAzureOAuth(unittest.TestCase):
     def test_azureoauth_setup_session(self, mock_requests):
         """Test _setup_session"""
 
-        with self.assertRaises(InvalidConfigException):
-            AzureOAuth._setup_session({}, None)
-
-        AzureOAuth._setup_session({'token_uri':'4'},
-                                  {'redirect_uri':'1', 'client_id':'3'},
-                                  None)
-        mock_requests.OAuth2Session.assert_called_with("3",
-                                                       redirect_uri="http://1")
+        AzureOAuth._setup_session({}, None)
+        mock_requests.OAuth2Session.assert_called_with(
+            None, redirect_uri="http://None")
 
         AzureOAuth.session = None
-        AzureOAuth._setup_session({'token_uri':'4'},
-                                  {'redirect_uri':'1', 'client_id':'3'},
-                                  state='4')
+        AzureOAuth._setup_session({'redirect_uri':'1', 'client_id':'3'})
+        mock_requests.OAuth2Session.assert_called_with("3",
+                                                       redirect_uri="http://1")
+        AzureOAuth.session = None
+        AzureOAuth._setup_session({'redirect_uri':'1', 'client_id':'3'},
+                                  state='2')
         mock_requests.OAuth2Session.assert_called_with("3",
                                                        redirect_uri="http://1",
-                                                       state='4')
+                                                       state='2')
         mock_requests.reset_mock()
-        AzureOAuth._setup_session({'token_uri':'4'},
-                                  {'redirect_uri':'1', 'client_id':'3'},
+        AzureOAuth._setup_session({'redirect_uri':'1', 'client_id':'3'},
                                   state='4')
         self.assertFalse(mock_requests.OAuth2Session.called)
         AzureOAuth.session = None
@@ -88,16 +85,17 @@ class TestAzureOAuth(unittest.TestCase):
         """Test get_session"""
 
         mock_config.return_value = mock.create_autospec(Configuration)
-        mock_config.return_value.get.return_value = "test"
+        mock_config.return_value.aad_config.return_value = {'client_id':'abc'}
         AzureOAuth.get_session()
         self.assertTrue(mock_config.called)
-        mock_credentials.assert_called_with(mock_config.return_value, "test")
+        mock_credentials.assert_called_with(mock_config.return_value, 'abc')
         mock_config.reset_mock()
 
         mock_cfg = mock.create_autospec(Configuration)
+        mock_cfg.aad_config.return_value = {'client_id':'abc'}
         AzureOAuth.get_session(config=mock_cfg)
         self.assertFalse(mock_config.called)
-        mock_credentials.assert_called_with(mock_cfg, mock.ANY)
+        mock_credentials.assert_called_with(mock_cfg, 'abc')
 
     @mock.patch('batchapps.credentials.Configuration')
     @mock.patch.object(AzureOAuth, '_setup_session')
@@ -127,7 +125,7 @@ class TestAzureOAuth(unittest.TestCase):
     @mock.patch('batchapps.credentials.Configuration')
     @mock.patch.object(AzureOAuth, '_setup_session')
     @mock.patch('batchapps.credentials.Credentials')
-    def test_get_authorization_token(self,
+    def test_azureoauth_get_authorization_token(self,
                                      mock_creds,
                                      mock_setup,
                                      mock_config):
@@ -136,66 +134,85 @@ class TestAzureOAuth(unittest.TestCase):
         AzureOAuth.session = mock.create_autospec(
             requests_oauthlib.OAuth2Session)
 
-        mock_config.aad_config.return_value = {'redirect_uri':'1',
-                                               'redirect_port':'2',
-                                               'token_uri':'3'}
+        mock_config.aad_config.return_value = {'root':'1/',
+                                               'unattended_key':'3',
+                                               'token_uri':'/auth',
+                                               'resource':'test',
+                                               'tenant':'common',
+                                               'client_id':'abc'}
+
         with self.assertRaises(InvalidConfigException):
             AzureOAuth.get_authorization_token("test", config="test")
 
         AzureOAuth.session.fetch_token.return_value = {}
         authed = AzureOAuth.get_authorization_token("test")
-        mock_setup.assert_called_with(mock.ANY, mock.ANY, state=None)
+        mock_setup.assert_called_with(mock.ANY, state=None)
         mock_creds.assert_called_with(mock.ANY, mock.ANY, token={})
         self.assertIsNotNone(authed)
 
         authed = AzureOAuth.get_authorization_token("test", state="test")
-        mock_setup.assert_called_with(mock.ANY, mock.ANY, state="test")
+        mock_setup.assert_called_with(mock.ANY, state="test")
+
+    @mock.patch.object(AzureOAuth, 'get_unattended_session')
+    def test_azureoauth_get_principal_token(self, mock_token):
+        """Test deprecated method get_principal_token"""
+
+        AzureOAuth.get_principal_token()
+        mock_token.assert_called_with(config=None)
+
+        AzureOAuth.get_principal_token("hello")
+        mock_token.assert_called_with(config="hello")
+
+        AzureOAuth.get_principal_token(config="world")
+        mock_token.assert_called_with(config="world")
 
     @mock.patch('batchapps.credentials.requests_oauthlib')
     @mock.patch('batchapps.credentials.BackendApplicationClient')
     @mock.patch('batchapps.credentials.Configuration')
     @mock.patch('batchapps.credentials.Credentials')
-    def test_get_principal_token(self,
+    def test_azureoauth_get_unattended_session(self,
                                  mock_creds,
                                  mock_config,
                                  mock_client,
                                  mock_req):
-        """Test get_principal_token"""
+        """Test get_unattended_session"""
 
         mock_session = mock.create_autospec(
             requests_oauthlib.OAuth2Session)
 
         mock_req.OAuth2Session.return_value = mock_session
-        mock_config.aad_config.return_value = {'token_uri':'http://common',
-                                               'resource':'test'}
+        mock_config.aad_config.return_value = {'root':'1/',
+                                               'unattended_key':'3',
+                                               'token_uri':'/auth',
+                                               'resource':'test',
+                                               'unattended_account':'abc'}
 
         with self.assertRaises(InvalidConfigException):
-            AzureOAuth.get_principal_token(mock_config)
-        mock_config.aad_config.return_value = {'service_principal':'1',
-                                               'service_principal_key':'3',
-                                               'token_uri':'http://common',
-                                               'resource':'test'}
+            AzureOAuth.get_unattended_session(mock_config)
 
-        with self.assertRaises(InvalidConfigException):
-            AzureOAuth.get_principal_token(mock_config)
-        mock_config.aad_config.return_value = {'service_principal':None,
-                                               'service_principal_key':None,
-                                               'token_uri':'http://common',
-                                               'resource':'test'}
-
-        with self.assertRaises(InvalidConfigException):
-            AzureOAuth.get_principal_token(mock_config)
-        mock_config.aad_config.return_value = {'service_principal':'ClientId=1;TenantId=2',
-                                               'service_principal_key':'3',
-                                               'token_uri':'common',
-                                               'resource':'test'}
-
-        AzureOAuth.get_principal_token(mock_config)
-        mock_client.assert_called_with("1")
-        mock_req.OAuth2Session.assert_called_with("1", client=mock.ANY)
+        mock_config.aad_config.return_value['unattended_account'] = 'ClientID=abc;TenantID=common'
+        AzureOAuth.get_unattended_session(mock_config)
+        mock_client.assert_called_with("abc")
+        mock_req.OAuth2Session.assert_called_with("abc", client=mock.ANY)
         mock_session.fetch_token.assert_called_with(
-            "https://2",
-            client_id='1',
+            "https://1/common/auth",
+            client_id='abc',
+            resource='https://test',
+            client_secret='3',
+            response_type='client_credentials')
+
+        mock_config.aad_config.return_value = {'root':'http://1/',
+                                               'unattended_key':'3',
+                                               'token_uri':'/auth',
+                                               'resource':'https://test',
+                                               'unattended_account':'ClientID=abc;TenantID=common'}
+
+        AzureOAuth.get_unattended_session(mock_config)
+        mock_client.assert_called_with("abc")
+        mock_req.OAuth2Session.assert_called_with("abc", client=mock.ANY)
+        mock_session.fetch_token.assert_called_with(
+            "https://1/common/auth",
+            client_id='abc',
             resource='https://test',
             client_secret='3',
             response_type='client_credentials')
@@ -219,8 +236,13 @@ class TestCredentials(unittest.TestCase):
         with self.assertRaises(InvalidConfigException):
             Credentials(None, None)
 
-        Credentials(mock_config, "test", token={'token_type':'1',
-                                                'access_token':'2'})
+        with self.assertRaises(AuthenticationException):
+            regression_test = Credentials(mock_config, "client_id")
+        self.assertTrue(mock_get_stored_auth.called)
+        mock_get_stored_auth.called = False
+
+        Credentials(mock_config, "testID", token={'token_type':'1',
+                                                  'access_token':'2'})
         mock_store_auth.assert_called_with({'token_type':'1',
                                             'access_token':'2'})
         self.assertTrue(mock_get_session.called)
@@ -228,7 +250,7 @@ class TestCredentials(unittest.TestCase):
 
         mock_get_stored_auth.return_value = ({'token_type':'3',
                                               'access_token':'4'})
-        Credentials(mock_config, "testId")
+        Credentials(mock_config, "testID")
         mock_store_auth.assert_called_with({'token_type':'3',
                                             'access_token':'4'})
         self.assertTrue(mock_get_session.called)
@@ -285,8 +307,13 @@ class TestCredentials(unittest.TestCase):
         """Test get_session"""
 
         creds = mock.create_autospec(Credentials)
-        creds._id = '1'
-        creds.cfg = {'resource':'2', 'token_uri':'3'}
+        creds._id = 'abc'
+        creds.cfg = {'root':'1/',
+                     'unattended_key':'3',
+                     'token_uri':'/auth',
+                     'resource':'https://test',
+                     'tenant':'common',
+                     'client_id':'abc'}
         creds.token = {'expires_at':'1',
                        'expires_in':'2',
                        'refresh_token':"test"}
@@ -294,14 +321,14 @@ class TestCredentials(unittest.TestCase):
 
         Credentials.get_session(creds)
         mock_requests.OAuth2Session.assert_called_with(
-            '1',
+            'abc',
             token=creds.token,
-            auto_refresh_url='https://3',
-            auto_refresh_kwargs={'client_id':'1', 'resource':'https://2'},
+            auto_refresh_url='https://1/common/auth',
+            auto_refresh_kwargs={'client_id':'abc', 'resource':'https://test'},
             token_updater=creds.store_auth)
 
         creds.token = {'expires_at':'1', 'expires_in':'2'}
         Credentials.get_session(creds)
-        mock_requests.OAuth2Session.assert_called_with('1',
+        mock_requests.OAuth2Session.assert_called_with('abc',
                                                        token=creds.token)
 

@@ -166,8 +166,6 @@ class JobManager(object):
         :Kwargs:
             - jobdetails (dict): Additional job settings or parameters can be
               added as keyword arguments. These include:
-                - 'job_type': The type of processing to be executed, as a
-                  job_type suffix. Default is empty.
                 - 'params': A string dict of job parameters to add to the
                   submission.
                 - 'files': A :class:`.FileCollection` of required files to

@@ -43,8 +43,19 @@ root. It is also hosted online `here <http://dl.windowsazure.com/batchapps/pytho
 Release History
 ================
 
-* 2014-11-03	- 0.1.1 - Authentication bug fixes
-* 2014-10-28	- 0.1.0	- Beta Release
+For full summary of changes, see CHANGES.txt
+
+* 2014-11-xx	- 0.2.0	
+	- Changed file upload format
+	- Changed Authentication config format
+	- Changed terminology regarding application → jobtype
+	- Changed terminology regarding service principal → unattended account
+	- Added FileCollection.index method
+	- Added better handling for missing auth values in Configuration
+* 2014-11-03	- 0.1.1 
+	- Authentication bug fixes
+* 2014-10-28	- 0.1.0	
+	- Beta Release
 
 
 Usage
@@ -56,35 +67,43 @@ Application Configuration
 In order to interact with the applications set up in your services in your Batch Apps 
 account, you will need to configure the python client.
 
-To set up a new job type reference you can add it to the configuration file, 
-along with any custom parameters you want associated with it.
-
 When you instantiate a Configuration object for the first time, the configuration 
 file will be created by default as::
 	$HOME/BatchAppsData/batch_apps.ini
+
+A single configuration object represent a single service in your Batch Apps account.
+This means that each configuration needs an endpoint and client ID.
+
+To set up a new job type reference you can add it to the configuration file, 
+along with any custom parameters you want associated with it.
 
 You can edit the file directly, or via the Configuration class::
 
 	from batchapps import Configuration
 
-	# This can be retrieved when creating an unattended account in the Batch Apps portal.
-	client_id = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+	# These can be retrieved when creating an unattended account in the Batch Apps portal.
+	# See the authentication section below for more details.
+	endpoint = 'myservice.batchapps.core.windows.net'
+	account_details = 'ClientID=xxxxxxxx;TenantID=abcdefg'
+	account_key = '12345'
 
 	cfg = Configuration(log_level='debug', default=True)
-	cfg.add_application('my_job_type', 'https://myservice.batchapps.core.windows.net', client_id)
+	cfg.aad_config(account=account_details, key=account_key,
+		endpoint=endpoint, unattended=True)
+
+	cfg.add_jobtype('my_job_type')
 
 	# Set this job type as the current job type
-	cfg.application('my_job_type')
+	cfg.current_jobtype('my_job_type')
 
 	# Set the current job type as the default job type for future jobs
-	cfg.set_default_application()
+	cfg.set_default_jobtype()
 
-	# Add some custom parameters
-	cfg.set('start_val', 1)
-	cfg.set('end_val', 100)
+	# Set up some default parameter values for the current job type
+	cfg.set('quality', 10)
 	cfg.set('timeout', 500)
 
-	# Save additional parameters to file
+	# Save updated configuration to file
 	cfg.save_config()
 
 Authentication
@@ -95,28 +114,38 @@ The batchapps module provides a helper class to assist in retrieving an AAD toke
 using Requests-OAuthlib. However if you have a preferred OAuth implementation, you 
 can authenticate with this instead.
 
-You can create a set of "Unattended Account" credentials in your `Batch Apps account <https://manage.batchapps.windows.net/>`_.
-Once you have these credentials, you can authenticate the python client by adding them to the batch_apps.ini configuration 
-file::
+You can create a set of "Unattended Account" credentials in your 
+`Batch Apps account <https://manage.batchapps.windows.net/>`_. These will be in the 
+format::
+	Account Id = ClientId=abc;TenantId=xyz
+	Account Key = ***********************
+
+Once you have these credentials, you can authenticate the python client by adding 
+them to the batch_apps.ini configuration either with Python, as described above, 
+or by editing the file directly::
 
 	[Authentication]
-	service_principal = ClientId=abc;TenantId=abc
-	service_principal_key = my_service_password
+	endpoint = myservice.batchapps.core.windows.net
+	unattended_account = ClientID=abc;TenantID=xyz
+	unattended_key = ***********************
 
 Then you can authenticate with these credentials::
 
 	from batchapps import AzureOAuth
 
-	creds = AzureOAuth.get_principal_token()
+	creds = AzureOAuth.get_unattended_session()
 
 
 Or alternatively, if you use a different AAD implementation to retrieve a token::
 
-	from batchapps import Credentials
+	from batchapps import Credentials, Configuration
 	import my_oauth
 
-	aad_token = my_oauth.get_token()
-	creds = Credentials(aad_token)
+	client_id = "abc"
+	cfg = Configuration()
+
+	aad_token = my_oauth.get_token(client_id)
+	creds = Credentials(cfg, client_id, token=aad_token)
 
 Authentication via logging into a Web UI will be supported soon.
 
@@ -128,8 +157,9 @@ Job management, including submission, monitoring, and accessing outputs is done
 through the JobManager class::
 
 	from batchapps import AzureOAuth, JobManager
+	import time
 
-	creds = AzureOAuth.get_session()
+	creds = AzureOAuth.get_unattended_session()
 	mgr = JobManager(creds)
 
 	my_job = mgr.create_job("First Job")
@@ -142,9 +172,21 @@ through the JobManager class::
 
 	job_progress = mgr.get_job(url=new_job['link'])
 	
-	if job_progress.status == 'Complete':
-		job_progress.get_output('c:\\my_download_dir')
+	# Let's allow up to 30 minutes for the job to complete
+	timeout = time.time() + 1800
 
+	while time.time() < timeout:
+
+		if job_progress.status is 'Complete':
+			job_progress.get_output('c:\\my_download_dir')
+			break
+
+		if job_progress.status is 'Error':
+			break
+
+		time.sleep(30)
+		job_progress.update()
+	
 	else:
 		job_progress.cancel()
 
@@ -157,11 +199,11 @@ the cloud can be done using the FileManager class::
 
 	from batchapps import AzureOAuth, FileManager
 
-	creds = AzureOAuth.get_session()
+	creds = AzureOAuth.get_unattended_session()
 	mgr = FileManager(creds)
 
-	job_source = mgr.create_file('C:\\start_job.bat')
 	file_collection = mgr.files_from_dir('c:\\my_job_assets')
+	job_source = mgr.file_from_path('C:\\start_job.bat')
 	file_collection.add(job_source)
 
 	file_collection.upload()

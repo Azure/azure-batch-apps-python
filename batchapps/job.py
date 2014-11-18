@@ -51,7 +51,6 @@ class JobSubmission(object):
 
     :Attributes:
         - name (str)
-        - type (str)
         - required_files (:py:class:`.FileCollection`)
         - source (str)
         - instances (int)
@@ -68,8 +67,6 @@ class JobSubmission(object):
         :Kwargs:
             - job_settings (dict): *Optional* Additional job settings or
               parameters can be added as keyword arguments. These include:
-                  - 'job_type': The type of processing to be executed.
-                    Default is "Animation".
                   - 'params': A string dict of job parameters to add to the
                     submission.
                   - 'files': A :py:class:`.FileCollection` of required files
@@ -91,8 +88,6 @@ class JobSubmission(object):
 
         super(JobSubmission, self).__setattr__(
             'name', str(job_name))
-        super(JobSubmission, self).__setattr__(
-            'type', str(job_settings.get('job_type', "")))
         super(JobSubmission, self).__setattr__(
             'params', job_settings.get('params', self.get_default_params()))
         super(JobSubmission, self).__setattr__(
@@ -212,7 +207,7 @@ class JobSubmission(object):
 
         job_message = {
             'Name': str(self.name),
-            'Type': (self._api.app() + str(self.type)),
+            'Type': self._api.jobtype(),
             'RequiredFiles': self.required_files._get_message("submit"),
             'Pool': {'InstanceCount': str(int(self.instances))},
             'Parameters': list(self._filter_params()),
@@ -369,7 +364,7 @@ class SubmittedJob(object):
               Batch Apps Management API instance.
             - job_id (str): The ID of the job.
             - job_name (str): The name of the job.
-            - job_type (str): The application and type of the job.
+            - job_type (str): The job type.
 
         :Kwargs:
             - job_settings (dict): Additional job submission settings.

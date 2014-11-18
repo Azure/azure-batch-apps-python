@@ -63,7 +63,7 @@ class TestFileManager(unittest.TestCase):
                                  mock_api,
                                  mock_creds,
                                  mock_cfg):
-        """Test create_file"""
+        """Test deprecated method create_file"""
 
         mgr = FileManager(mock_creds, cfg=mock_cfg)
         ufile = mgr.create_file("c:\\test.txt")
@@ -75,6 +75,30 @@ class TestFileManager(unittest.TestCase):
         self.assertIsNotNone(ufile)
 
         ufile = mgr.create_file(42)
+        mock_file.assert_called_with(mock.ANY, "42")
+        self.assertIsNotNone(ufile)
+
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
+    @mock.patch('batchapps.api.BatchAppsApi')
+    @mock.patch('batchapps.file_manager.UserFile')
+    def test_filemgr_file_from_path(self,
+                                    mock_file,
+                                    mock_api,
+                                    mock_creds,
+                                    mock_cfg):
+        """Test file_from_path"""
+
+        mgr = FileManager(mock_creds, cfg=mock_cfg)
+        ufile = mgr.file_from_path("c:\\test.txt")
+        mock_file.assert_called_with(mock.ANY, "c:\\test.txt")
+        self.assertIsNotNone(ufile)
+
+        ufile = mgr.file_from_path(None)
+        mock_file.assert_called_with(mock.ANY, 'None')
+        self.assertIsNotNone(ufile)
+
+        ufile = mgr.file_from_path(42)
         mock_file.assert_called_with(mock.ANY, "42")
         self.assertIsNotNone(ufile)
 

@@ -62,7 +62,7 @@ def authentication(mode):
     """
 
     try:
-        return AzureOAuth.get_session(config=mode)
+        return AzureOAuth.get_unattended_session(config=mode)
 
     except (AuthenticationException, InvalidConfigException) as e:
         print("Could not get existing session: {0}".format(e))
