@@ -82,29 +82,34 @@ class AzureOAuth(object):
     session.
     """
 
-    session = None
     config = None
+    state = None
     LOG = logging.getLogger('batch_apps')
 
     @staticmethod
-    def _setup_session(auth, state=None):
+    def _setup_session(auth):
         """Apply configuration info to set up a new OAuth2 session."""
 
         AzureOAuth.LOG.debug("Configuring session with {0}".format(str(auth)))
+            
+        redirect = _http(auth.get('redirect_uri'))
 
-        if not AzureOAuth.session:
-            redirect = _http(auth.get('redirect_uri'))
+        return requests_oauthlib.OAuth2Session(
+            auth.get('client_id'),
+            redirect_uri=redirect,
+            state=AzureOAuth.state)
 
-            if isinstance(state, str):
-                AzureOAuth.session = requests_oauthlib.OAuth2Session(
-                    auth.get('client_id'),
-                    redirect_uri=redirect,
-                    state=state)
+    def _check_state(response, state):
+        state_key = '&state='
+        state_idx = response.find(state_key)
+        if state_idx < 0:
+            return False
 
-            else:
-                AzureOAuth.session = requests_oauthlib.OAuth2Session(
-                    auth.get('client_id'),
-                    redirect_uri=redirect)
+        strt_idx = state_idx + len(state_key)
+        end_idx = response.find('&', strt_idx)
+        state_val = response[strt_idx:end_idx]
+
+        return state_val == state
 
     @staticmethod
     def get_session(config=None):
@@ -130,7 +135,8 @@ class AzureOAuth(object):
         return Credentials(AzureOAuth.config, auth['client_id'])
 
     @staticmethod
-    def get_authorization_url(config=None, msa=False, prompt=False, **additional_args):
+    def get_authorization_url(config=None, msa=False, prompt=False,
+                              state=None, **additional_args):
         """
         Construct client-specific authentication URL. This URL can be used
         in a web browser to direct the user to log in and authenticate
@@ -143,6 +149,8 @@ class AzureOAuth(object):
             - msa (bool): Authenticate by MSA. Default is ``False``.
             - prompt (bool): Force login prompt regardless of existing session.
               Default is ``False``.
+            - state (str): A guid for validating the state of the server
+              communication.
             - additional_args (dict): Any additional AAD parameters to include
               in the URL
 
@@ -165,21 +173,26 @@ class AzureOAuth(object):
             raise InvalidConfigException(
                 "Correct authentication configuration not found")
 
-        auth = AzureOAuth.config.aad_config()
-        AzureOAuth._setup_session(auth)
-
         if msa:
             additional_args['domain_hint'] = 'live.com'
 
         if prompt:
             additional_args['prompt'] = 'login'
 
+        if state:
+            AzureOAuth.state = state
+        else:
+            AzureOAuth.state = requests_oauthlib.oauth2_session.generate_token()
+
+        auth = AzureOAuth.config.aad_config()
+        session = AzureOAuth._setup_session(auth)
+
         try:
             auth_uri = _https(auth['root'], auth['tenant'], auth['auth_uri'])
             AzureOAuth.LOG.debug("Generating URL with {0}, {1}, {2}".format(
                 auth_uri, _https(auth['resource']), additional_args))
 
-            auth_url, state = AzureOAuth.session.authorization_url(
+            auth_url, state = session.authorization_url(
                 auth_uri,
                 resource=_https(auth['resource']), #DEP
                 **additional_args)
@@ -202,7 +215,9 @@ class AzureOAuth(object):
             - config (:class:`.Configuration`): A custom configuration object.
               Default is `None` where a default :class:`.Configuration` will
               be created.
-            - state (str): A state guid for auth server validation.
+            - state (str): A state guid for auth server validation. This is not
+              necessary if :meth:`.get_authorization_url` was used to generate
+              the url, as state will already be set. If set, will override.
 
         :Returns:
             - An authenticated :class:`.Credentials` object.
@@ -222,7 +237,13 @@ class AzureOAuth(object):
                 "Correct authentication configuration not found")
 
         auth = AzureOAuth.config.aad_config()
-        AzureOAuth._setup_session(auth, state=state)
+        session = AzureOAuth._setup_session(auth)
+
+        state = state if state else AzureOAuth.state
+        valid_state = AzureOAuth._check_state(auth_url, state)
+        if not valid_state:
+            raise AuthenticationException(
+                "Security error: State not equal in request and response.")
 
         redirect = auth.get('redirect_uri')
 
@@ -237,7 +258,7 @@ class AzureOAuth(object):
             AzureOAuth.LOG.debug("Fetching token with token_uri: "
                                  "{0}".format(token_uri))
 
-            token = AzureOAuth.session.fetch_token(token_uri,
+            token = session.fetch_token(token_uri,
                 authorization_response=auth_url)
 
         except oauth2.rfc6749.errors.InvalidGrantError as excp:

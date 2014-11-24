@@ -3,6 +3,9 @@ v0.2.0, 2014-11-xx	- Changed file upload format
 					- Changed Authentication config format (old format still supported)
 						Service ID, Endpoint and redirect uri settings have been relocated to the "Authentication"
 						section. A single configuration now reflects a single Batch Apps service.
+					- Validation of state for OAuth security.
+					- Added SessionExpiredException for when a token expires mid-session or a refresh-token is
+					  expired.
 					- Changed terminology regarding application -> jobtype
 						Deprecated methods:
 							- BatchAppsApi.app() -> BatchAppsApi.jobtype()

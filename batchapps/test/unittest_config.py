@@ -558,15 +558,12 @@ class TestConfiguration(unittest.TestCase):
         cfg._config = _cfg
 
         Configuration.add_jobtype(cfg,
-                                  "TestApp",
-                                  "http://endpoint",
-                                  "test_id")
+                                  "TestApp")
         self.assertEqual(cfg._config.sections(), ['TestApp'])
         self.assertEqual(dict(cfg._config.items('TestApp')), {})
 
         Configuration.add_jobtype(cfg,
                                   "TestApp2",
-                                  "test_id",
                                   a="1",
                                   b=2,
                                   c=None)

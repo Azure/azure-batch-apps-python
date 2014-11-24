@@ -31,6 +31,12 @@ import traceback
 import logging
 LOG = logging.getLogger('batch_apps')
 
+class SessionExpiredException(Exception):
+    """
+    InvalidGrantError thrown during server call.  
+    """
+    pass
+
 class AuthenticationException(Exception):
     """
     Error relating to missing or invalid credentials.

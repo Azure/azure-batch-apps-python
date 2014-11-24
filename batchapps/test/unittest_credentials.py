@@ -42,6 +42,7 @@ import requests_oauthlib
 import logging
 
 from batchapps import (
+    credentials,
     AzureOAuth,
     Credentials,
     Configuration)
@@ -55,29 +56,34 @@ from batchapps.exceptions import (
 class TestAzureOAuth(unittest.TestCase):
     """Unit tests for AzureOAuth"""
 
+    def test_azureoauth_check_state(self):
+
+        self.assertFalse(AzureOAuth._check_state("test", "abc"))
+        self.assertFalse(AzureOAuth._check_state("test&abc", "abc"))
+        self.assertFalse(AzureOAuth._check_state("test&state=xyx", "abc"))
+        self.assertFalse(AzureOAuth._check_state("test&state=xyx&", "abc"))
+        self.assertFalse(AzureOAuth._check_state("test&state=abcd&", "abc"))
+        self.assertTrue(AzureOAuth._check_state("test&state=abc&", "abc"))
+
+
     @mock.patch('batchapps.credentials.requests_oauthlib')
     def test_azureoauth_setup_session(self, mock_requests):
         """Test _setup_session"""
 
-        AzureOAuth._setup_session({}, None)
+        AzureOAuth.state = None
+        AzureOAuth._setup_session({})
         mock_requests.OAuth2Session.assert_called_with(
-            None, redirect_uri="http://None")
+            None, redirect_uri="http://None", state=None)
 
-        AzureOAuth.session = None
         AzureOAuth._setup_session({'redirect_uri':'1', 'client_id':'3'})
         mock_requests.OAuth2Session.assert_called_with("3",
-                                                       redirect_uri="http://1")
-        AzureOAuth.session = None
-        AzureOAuth._setup_session({'redirect_uri':'1', 'client_id':'3'},
-                                  state='2')
+                                                       redirect_uri="http://1",
+                                                       state=None)
+        AzureOAuth.state = "test"
+        AzureOAuth._setup_session({'redirect_uri':'1', 'client_id':'3'})
         mock_requests.OAuth2Session.assert_called_with("3",
                                                        redirect_uri="http://1",
-                                                       state='2')
-        mock_requests.reset_mock()
-        AzureOAuth._setup_session({'redirect_uri':'1', 'client_id':'3'},
-                                  state='4')
-        self.assertFalse(mock_requests.OAuth2Session.called)
-        AzureOAuth.session = None
+                                                       state='test')
 
     @mock.patch('batchapps.credentials.Credentials')
     @mock.patch('batchapps.credentials.Configuration')
@@ -99,42 +105,56 @@ class TestAzureOAuth(unittest.TestCase):
 
     @mock.patch('batchapps.credentials.Configuration')
     @mock.patch.object(AzureOAuth, '_setup_session')
-    def test_azureoauth_get_authorization_url(self, mock_setup, mock_config):
+    @mock.patch.object(credentials.requests_oauthlib.oauth2_session, 'generate_token')
+    def test_azureoauth_get_authorization_url(self, mock_gen, mock_setup, mock_config):
         """Test get_authorization_url"""
 
-        AzureOAuth.session = mock.create_autospec(
+        mock_gen.return_value = "gen_state_123"
+        mock_setup.return_value = mock.create_autospec(
             requests_oauthlib.OAuth2Session)
 
-        mock_config.aad_config.return_value = {'auth_uri':'1', 'resource':'2'}
+        mock_config.return_value.aad_config.return_value = {'auth_uri':'1', 'resource':'2', 'root':'3',
+                                                            'tenant':'4'}
         with self.assertRaises(AuthenticationException):
             AzureOAuth.get_authorization_url()
 
-        AzureOAuth.session.authorization_url.return_value = ("a", "b")
+
+        mock_setup.return_value.authorization_url.return_value = ("a", "b")
         url, state = AzureOAuth.get_authorization_url()
         self.assertTrue(mock_config.called)
         self.assertIsNotNone(url)
         self.assertIsNotNone(state)
-
+        mock_setup.return_value.authorization_url.assert_called_with('https://341',
+                                                                     resource='https://2')
+        self.assertEqual(AzureOAuth.state, "gen_state_123")
         mock_config.reset_mock()
         with self.assertRaises(InvalidConfigException):
             AzureOAuth.get_authorization_url(1)
 
         self.assertFalse(mock_config.called)
-        AzureOAuth.session = None
+        url, state = AzureOAuth.get_authorization_url(msa=True, prompt=True, state="test")
+        self.assertEqual(AzureOAuth.state, "test")
+        mock_setup.return_value.authorization_url.assert_called_with('https://341',
+                                                                     resource='https://2',
+                                                                     prompt='login',
+                                                                     domain_hint='live.com')
+
 
     @mock.patch('batchapps.credentials.Configuration')
     @mock.patch.object(AzureOAuth, '_setup_session')
+    @mock.patch.object(AzureOAuth, '_check_state')
     @mock.patch('batchapps.credentials.Credentials')
     def test_azureoauth_get_authorization_token(self,
-                                     mock_creds,
-                                     mock_setup,
-                                     mock_config):
+                                     mock_creds, mock_state,
+                                     mock_setup, mock_config):
         """Test get_authorization_token"""
 
-        AzureOAuth.session = mock.create_autospec(
+        mock_state.return_value = True
+        mock_setup.return_value = mock.create_autospec(
             requests_oauthlib.OAuth2Session)
+        mock_setup.return_value.fetch_token.return_value = {}
 
-        mock_config.aad_config.return_value = {'root':'1/',
+        mock_config.return_value.aad_config.return_value = {'root':'1/',
                                                'unattended_key':'3',
                                                'token_uri':'/auth',
                                                'resource':'test',
@@ -144,14 +164,19 @@ class TestAzureOAuth(unittest.TestCase):
         with self.assertRaises(InvalidConfigException):
             AzureOAuth.get_authorization_token("test", config="test")
 
-        AzureOAuth.session.fetch_token.return_value = {}
+        mock_setup.return_value.fetch_token.return_value = {}
         authed = AzureOAuth.get_authorization_token("test")
-        mock_setup.assert_called_with(mock.ANY, state=None)
+        mock_setup.assert_called_with(mock.ANY)
         mock_creds.assert_called_with(mock.ANY, mock.ANY, token={})
         self.assertIsNotNone(authed)
 
         authed = AzureOAuth.get_authorization_token("test", state="test")
-        mock_setup.assert_called_with(mock.ANY, state="test")
+        mock_setup.assert_called_with(mock.ANY)
+        mock_creds.assert_called_with(mock.ANY, 'abc', token={})
+
+        mock_state.return_value = False
+        with self.assertRaises(AuthenticationException):
+            authed = AzureOAuth.get_authorization_token("test")
 
     @mock.patch.object(AzureOAuth, 'get_unattended_session')
     def test_azureoauth_get_principal_token(self, mock_token):

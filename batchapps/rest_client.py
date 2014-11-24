@@ -27,7 +27,8 @@
 
 from batchapps.exceptions import (
     RestCallException,
-    AuthenticationException)
+    AuthenticationException,
+    SessionExpiredException)
 
 from .utils import (
     url_from_filename,
@@ -58,6 +59,10 @@ def _call(auth, *args, **kwargs):
             "Opened requests session with max retries: {0}".format(RETRIES))
 
         resp = conn_session.request(*args, verify=True, **kwargs)
+
+    except oauth2.rfc6749.errors.InvalidGrantError as exp:
+        auth.clear_auth()
+        raise SessionExpiredException(str(exp))
 
     except (requests.RequestException,
             oauth2.rfc6749.errors.OAuth2Error) as exp:

@@ -121,7 +121,7 @@ class Configuration(object):
                     if (self._config.has_option(sec, "default_app") and #DEP
                     self._config.get(sec, "default_app") == "True"):
                         self._log.warning(
-                            "Use of setting 'default_app' is"
+                            "Use of setting 'default_app' is "
                             "deprecated. Please use 'default_jobtype.'")
 
                         self.jobtype = sec
