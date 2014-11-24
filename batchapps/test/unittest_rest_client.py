@@ -51,7 +51,7 @@ from oauthlib import oauth2
 from batchapps import rest_client
 from batchapps.credentials import Credentials
 from batchapps.files import UserFile
-from batchapps.exceptions import RestCallException
+from batchapps.exceptions import RestCallException, SessionExpiredException
 
 
 # pylint: disable=W0212
@@ -88,6 +88,11 @@ class TestRestClient(unittest.TestCase):
             session.request.side_effect = exp("Boom!")
             with self.assertRaises(RestCallException):
                 rest_client._call(auth, "a", "b", c="c")
+
+        session.request.side_effect = oauth2.rfc6749.errors.InvalidGrantError("Boom!")
+        with self.assertRaises(SessionExpiredException):
+            rest_client._call(auth, "a", "b", c="c")
+
 
     @mock.patch.object(rest_client, '_call')
     def test_rest_client_get(self, mock_call):

@@ -33,9 +33,18 @@ LOG = logging.getLogger('batch_apps')
 
 class SessionExpiredException(Exception):
     """
-    InvalidGrantError thrown during server call.  
+    InvalidGrantError thrown during server call. This is generally interpreted
+    to mean the current token has expired and cannot be refreshed. The client
+    will need to be re-authenticated. This can be raised during any server call
+    and would need to be handled by prompting the user to log in again.
+
     """
-    pass
+    def __init__(self, *args):
+        """
+        Log the exception args as ERROR
+        """
+        LOG.error("SessionExpiredException: {0}".format(*args))
+        super(SessionExpiredException, self).__init__(*args)
 
 class AuthenticationException(Exception):
     """
