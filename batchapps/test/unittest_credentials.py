@@ -57,7 +57,7 @@ class TestAzureOAuth(unittest.TestCase):
     """Unit tests for AzureOAuth"""
 
     def test_azureoauth_check_state(self):
-
+        """Test _check_state"""
         self.assertFalse(AzureOAuth._check_state("test", "abc"))
         self.assertFalse(AzureOAuth._check_state("test&abc", "abc"))
         self.assertFalse(AzureOAuth._check_state("test&state=xyx", "abc"))

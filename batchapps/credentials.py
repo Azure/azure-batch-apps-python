@@ -99,6 +99,7 @@ class AzureOAuth(object):
             redirect_uri=redirect,
             state=AzureOAuth.state)
 
+    @staticmethod
     def _check_state(response, state):
         state_key = '&state='
         state_idx = response.find(state_key)
