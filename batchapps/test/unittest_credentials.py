@@ -85,13 +85,14 @@ class TestAzureOAuth(unittest.TestCase):
         mock_requests.OAuth2Session.assert_called_with("3",
                                                        redirect_uri="http://1",
                                                        state='test')
-        credentials.VERIFY = False
-        session = AzureOAuth._setup_session({'redirect_uri':'1', 'client_id':'3'})
-        self.assertFalse(session.verify)
-
+        
         credentials.CA_CERT = "cacert.pem"
         session = AzureOAuth._setup_session({'redirect_uri':'1', 'client_id':'3'})
         self.assertEqual(session.verify, "cacert.pem")
+        
+        credentials.VERIFY = False
+        session = AzureOAuth._setup_session({'redirect_uri':'1', 'client_id':'3'})
+        self.assertFalse(session.verify)
 
     @mock.patch('batchapps.credentials.Credentials')
     @mock.patch('batchapps.credentials.Configuration')
@@ -232,7 +233,8 @@ class TestAzureOAuth(unittest.TestCase):
             client_id='abc',
             resource='https://test',
             client_secret='3',
-            response_type='client_credentials')
+            response_type='client_credentials',
+            verify=True)
 
         mock_config.aad_config.return_value = {'root':'http://1/',
                                                'unattended_key':'3',
@@ -248,7 +250,8 @@ class TestAzureOAuth(unittest.TestCase):
             client_id='abc',
             resource='https://test',
             client_secret='3',
-            response_type='client_credentials')
+            response_type='client_credentials',
+            verify=True)
 
 
 # pylint: disable=W0212
