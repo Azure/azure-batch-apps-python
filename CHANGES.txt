@@ -4,6 +4,8 @@ v0.2.0, 2014-11-xx	- Changed file upload format
 						Service ID, Endpoint and redirect uri settings have been relocated to the "Authentication"
 						section. A single configuration now reflects a single Batch Apps service.
 					- Validation of state for OAuth security.
+					- Changed SSL verification to be configurable, as credentials.VERIFY. Default is True.
+					  Also added credentials.CA_CERT for addition of custom CA certificate bundle.
 					- Added SessionExpiredException for when a token expires mid-session or a refresh-token is
 					  expired.
 					- Changed terminology regarding application -> jobtype

@@ -42,11 +42,12 @@ import json
 import os
 
 import logging
+
 LOG = logging.getLogger('batch_apps')
 RETRIES = 3
 
 def _call(auth, *args, **kwargs):
-    """Internal method to open Requests session"""
+    """Internal method to open Requests session."""
 
     try:
         conn_session = auth.get_session()
@@ -58,7 +59,7 @@ def _call(auth, *args, **kwargs):
         LOG.debug(
             "Opened requests session with max retries: {0}".format(RETRIES))
 
-        resp = conn_session.request(*args, verify=True, **kwargs)
+        resp = conn_session.request(*args, **kwargs)
 
     except oauth2.rfc6749.errors.InvalidGrantError as exp:
         auth.clear_auth()

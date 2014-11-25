@@ -75,7 +75,7 @@ class TestRestClient(unittest.TestCase):
             resp = rest_client._call(auth, "a", "b", c="c")
             self.assertIsNotNone(resp)
             self.assertTrue(auth.get_session.called)
-            session.request.assert_called_with("a", "b", verify=True, c="c")
+            session.request.assert_called_with("a", "b", c="c")
 
         for code in [400, 401, 403, 404, 500]:
             session.request.return_value.status_code = code

@@ -41,6 +41,8 @@ from .exceptions import (
 import logging
 
 CRED_STORE = 'AzureBatchApps'
+VERIFY = True
+CA_CERT = None
 
 
 def _http(base_uri, *extra):
@@ -94,10 +96,15 @@ class AzureOAuth(object):
             
         redirect = _http(auth.get('redirect_uri'))
 
-        return requests_oauthlib.OAuth2Session(
-            auth.get('client_id'),
-            redirect_uri=redirect,
-            state=AzureOAuth.state)
+        new_session = requests_oauthlib.OAuth2Session(
+                auth.get('client_id'),
+                redirect_uri=redirect,
+                state=AzureOAuth.state)
+
+        new_session.verify = VERIFY
+        if CA_CERT:
+            new_session.verify = CA_CERT
+        return new_session
 
     @staticmethod
     def _check_state(response, state):
@@ -440,7 +447,7 @@ class Credentials(object):
                 refresh = _https(self.cfg['root'], self.cfg['tenant'],
                          self.cfg['token_uri'])
 
-                return requests_oauthlib.OAuth2Session(
+                new_session = requests_oauthlib.OAuth2Session(
                     self._id,
                     token=self.token,
                     auto_refresh_url=refresh,
@@ -449,7 +456,7 @@ class Credentials(object):
                     token_updater=self.store_auth)
 
             else:
-                return requests_oauthlib.OAuth2Session(self._id,
+                new_session = requests_oauthlib.OAuth2Session(self._id,
                                                        token=self.token)
 
         except oauth2.rfc6749.errors.TokenExpiredError as excp:
@@ -458,6 +465,12 @@ class Credentials(object):
 
             raise AuthenticationException(
                 "Token expired: {0}".format(excp.description))
+
+        else:
+            new_session.verify = VERIFY
+            if CA_CERT:
+                new_session.verify = CA_CERT
+            return new_session
 
     def get_stored_auth(self):
         """Retrieve a previously stored access token for refreshing

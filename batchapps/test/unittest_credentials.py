@@ -75,15 +75,23 @@ class TestAzureOAuth(unittest.TestCase):
         mock_requests.OAuth2Session.assert_called_with(
             None, redirect_uri="http://None", state=None)
 
-        AzureOAuth._setup_session({'redirect_uri':'1', 'client_id':'3'})
+        session = AzureOAuth._setup_session({'redirect_uri':'1', 'client_id':'3'})
         mock_requests.OAuth2Session.assert_called_with("3",
                                                        redirect_uri="http://1",
                                                        state=None)
         AzureOAuth.state = "test"
-        AzureOAuth._setup_session({'redirect_uri':'1', 'client_id':'3'})
+        session = AzureOAuth._setup_session({'redirect_uri':'1', 'client_id':'3'})
+        self.assertTrue(session.verify)
         mock_requests.OAuth2Session.assert_called_with("3",
                                                        redirect_uri="http://1",
                                                        state='test')
+        credentials.VERIFY = False
+        session = AzureOAuth._setup_session({'redirect_uri':'1', 'client_id':'3'})
+        self.assertFalse(session.verify)
+
+        credentials.CA_CERT = "cacert.pem"
+        session = AzureOAuth._setup_session({'redirect_uri':'1', 'client_id':'3'})
+        self.assertEqual(session.verify, "cacert.pem")
 
     @mock.patch('batchapps.credentials.Credentials')
     @mock.patch('batchapps.credentials.Configuration')
