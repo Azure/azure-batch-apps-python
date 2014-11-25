@@ -48,7 +48,7 @@ from batchapps.exceptions import (
     InvalidConfigException)
 
 LOG_LEVEL = "debug" 
-DOWNLOAD_DIR = "C:\\Path\\To\\Download\\Directory"
+DOWNLOAD_DIR = "//Path/To/Download/Directory"
 
 def authentication(mode):
     """
@@ -67,15 +67,14 @@ def authentication(mode):
         return AzureOAuth.get_unattended_session(config=mode)
 
     except (AuthenticationException, InvalidConfigException) as e:
-        print("Could not get existing session: {0}".format(e))
+        print("Could not get unattended session: {0}".format(e))
         
     try:
         auth_url = AzureOAuth.get_authorization_url(config=mode)[0]
         webbrowser.open(auth_url)
         redirect_url = input("Please enter authentication url: ")
         return AzureOAuth.get_authorization_token(redirect_url,
-                                                  config=mode,
-                                                  state=None)
+                                                  config=mode)
 
     except (AuthenticationException, InvalidConfigException) as e:
         print("Failed to get authorization: {0}".format(e))

@@ -48,7 +48,7 @@ from batchapps.exceptions import (
     InvalidConfigException)
 
 LOG_LEVEL = "debug" 
-ASSET_DIR = "C:\\Path\\To\\Assets\\Directory"
+ASSET_DIR = "//Path/To/Assets/Directory"
 
 # These settings will be specific to a users Batch Apps service.
 ENDPOINT = "myservice.batchapps.core.windows.net"
@@ -72,15 +72,14 @@ def authentication(mode):
         return AzureOAuth.get_unattended_session(config=mode)
 
     except (AuthenticationException, InvalidConfigException) as e:
-        print("Could not get existing session: {0}".format(e))
+        print("Could not get unattended session: {0}".format(e))
         
     try:
         auth_url = AzureOAuth.get_authorization_url(config=mode)[0]
         webbrowser.open(auth_url)
         redirect_url = input("Please enter authentication url: ")
         return AzureOAuth.get_authorization_token(redirect_url,
-                                                  config=mode,
-                                                  state=None)
+                                                  config=mode)
 
     except (AuthenticationException, InvalidConfigException) as e:
         raise RuntimeError("Failed to authenticate: {0}".format(e))
@@ -102,7 +101,7 @@ def create_config():
     try:
         # Look for application in existing config file
         config = Configuration(log_level=LOG_LEVEL, jobtype="MyApp")
-        print("Config Accepted")
+        print("Config found.")
         return config
 
     except InvalidConfigException:

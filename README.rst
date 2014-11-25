@@ -45,7 +45,7 @@ Release History
 
 For full summary of changes, see CHANGES.txt
 
-* 2014-11-xx	- 0.2.0	
+* 2014-11-26	- 0.2.0	
 	- Changed file upload format
 	- Changed Authentication config format
 	- Changed terminology regarding application → jobtype

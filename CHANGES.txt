@@ -1,4 +1,4 @@
-v0.2.0, 2014-11-xx	- Changed file upload format
+v0.2.0, 2014-11-26	- Changed file upload format
 						Multipart form data -> application/octet-stream
 					- Changed Authentication config format (old format still supported)
 						Service ID, Endpoint and redirect uri settings have been relocated to the "Authentication"
