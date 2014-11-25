@@ -102,7 +102,7 @@ class AzureOAuth(object):
                 state=AzureOAuth.state)
 
         new_session.verify = VERIFY
-        if CA_CERT:
+        if CA_CERT and VERIFY is True:
             new_session.verify = CA_CERT
         return new_session
 
@@ -348,6 +348,10 @@ class AzureOAuth(object):
         silent_session = requests_oauthlib.OAuth2Session(
             client_id,
             client=BackendApplicationClient(client_id))
+        
+        verification = VERIFY
+        if CA_CERT and VERIFY is True:
+            verification = CA_CERT
 
         try:
             AzureOAuth.LOG.debug("Fetching token with token_uri: "
@@ -358,7 +362,8 @@ class AzureOAuth(object):
                 client_id=client_id,
                 resource=_https(auth['resource']), #DEP
                 client_secret=secret,
-                response_type="client_credentials")
+                response_type="client_credentials",
+                verify=verification)
 
         except oauth2.rfc6749.errors.InvalidGrantError as excp:
             raise AuthenticationException(excp.description)
@@ -468,7 +473,7 @@ class Credentials(object):
 
         else:
             new_session.verify = VERIFY
-            if CA_CERT:
+            if CA_CERT and VERIFY is True:
                 new_session.verify = CA_CERT
             return new_session
 
