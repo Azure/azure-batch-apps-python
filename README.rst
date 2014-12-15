@@ -235,7 +235,7 @@ deleted on completion::
 	creds = AzureOAuth.get_unattended_session()
 	mgr = PoolManager(creds)
 
-	new_pool = PoolSpecifier(target_size=5)
+	new_pool = mgr.create_pool(target_size=5)
 	ref = new_pool.deploy()
 
 	pool = PoolManager.get_pool(url=ref['link'])
