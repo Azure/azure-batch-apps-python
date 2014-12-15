@@ -45,6 +45,8 @@ Release History
 
 For full summary of changes, see CHANGES.txt
 
+* 2014-12-xx	- 0.2.1
+	- Added preliminary support for Batch Apps pool management
 * 2014-11-26	- 0.2.0	
 	- Changed file upload format
 	- Changed Authentication config format
@@ -69,6 +71,7 @@ account, you will need to configure the python client.
 
 When you instantiate a Configuration object for the first time, the configuration 
 file will be created by default as::
+
 	$HOME/BatchAppsData/batch_apps.ini
 
 A single configuration object represent a single service in your Batch Apps account.
@@ -117,6 +120,7 @@ can authenticate with this instead.
 You can create a set of "Unattended Account" credentials in your 
 `Batch Apps account <https://manage.batchapps.windows.net/>`_. These will be in the 
 format::
+
 	Account Id = ClientId=abc;TenantId=xyz
 	Account Key = ***********************
 

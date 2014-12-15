@@ -1119,3 +1119,174 @@ class BatchAppsApi(object):
 
         else:
             return Response(True, put_resp)
+
+    def add_pool(self, target_size=0, max_tasks=1, communication=False, certs=[]):
+        """
+        Add a new pool.
+
+        :Kwargs:
+            - target_size (int): The target size of the pool. Default is 0.
+            - max_tasks (int): Max tasks that can run on a single TVM.
+              Default is 1.
+            - communication (bool): Indicates whether tasks running on TVMs
+              in the pool need to ba able to communicated directly with each
+              other. Default is ``False``.
+            - certs (list): A list of certificates that need to be installed
+              on the TVMs of the pool. The maximum number of certs that can
+              be installed on a pool is 10.
+
+        :Returns:
+            - A :class:`.Response` object a dict with the new pool id and
+              a link to the newly created pool.
+              ``{'id': '', 'link': ''}``
+            - If the call failed or if the response is incomplete/malformed
+              a :class:`.Response` object with a :class:`.RestCallException`.
+        """
+        self._log.debug("add_pool")
+        url = self.url("pools")
+
+        if len(certs) > 10:
+            certs = certs[0:10]
+
+        try:
+            message = {
+                'targetDedicated': str(int(target_size)),
+                'maxTasksPerTVM': str(int(max_tasks)),
+                'communication': bool(communication),
+                'certificateReferences': list(certs)}
+
+        except ValueError as exp:
+            return Response(
+                False,
+                RestCallException(ValueError, str(exp), exp))
+
+        try:
+            resp = rest_client.post(self._auth, url, self.headers, message)
+
+        except  RestCallException as exp:
+            return Response(False, exp)
+
+        if utils.valid_keys(resp, ['poolId', 'link']):
+                return Response(True, resp)
+
+        return Response(
+            False,
+            RestCallException(KeyError,
+                                "incorrectly formatted pool response",
+                                resp))
+
+    def resize_pool(self, pool_id, target_size):
+        """
+        Resize an existing pool.
+
+        :Args:
+            - pool_id (str): The Guid of the pool to be resized.
+            - target_size (int): The new size of the pool.
+
+        :Returns:
+            - :class:`.Response` with the POST response, however this is not
+              required if the call was successful.
+            - If the call failed a :class:`.Response` object with a
+              :class:`.RestCallException`.
+        """
+        self._log.debug("resize_pool, pool_id={0}, "
+                        "target_size={1}".format(pool_id, target_size))
+        url = self.url("pools/{poolid}/actions/resize")
+        url = url.format(url, poolid=pool_id)
+
+        message = {'targetDedicated': str(target_size)}
+
+        try:
+            resp = rest_client.post(self._auth, url, self.headers, message)
+
+        except  RestCallException as exp:
+            return Response(False, exp)
+
+        return Response(True, resp)
+
+    def get_pool(self, pool_id=None, url=None):
+        """
+        Gets information about a pool.
+        Pool info can be retrieved by supplying **either** the pool's ID
+        **or** a URL to the pool. If both are supplied, URL is used.
+
+        :Kwargs:
+            - pool_id (str): Guid of the pool on which info is requested.
+            - url (str): A complete URL to the pool info.
+
+        :Returns:
+            - A :class:`.Response` object containing the pool details as a
+              dictionary, if successful. Otherwise the Response will
+              contain the :exc:`.RestCallException`.
+            - :class:`.RestCallException` if neither pool ID or URL are
+              supplied.
+            - :class:`.RestCallException` if pool details dictionary is
+              malformed / missing necessary keys
+        """
+        self._log.debug("get_pool, pool_id={0}, url={1}".format(pool_id, url))
+        if not url and pool_id:
+            url = self.url("pools/{poolid}").format(poolid=pool_id)
+
+        elif not url and not pool_id:
+            return Response(
+                False,
+                RestCallException(AttributeError,
+                                  "Either pool_id or url must be set",
+                                  None))
+
+        try:
+            get_resp = rest_client.get(self._auth, url, self.headers)
+
+        except RestCallException as exp:
+            return Response(False, exp)
+
+        else:
+            return Response(True, get_resp)
+
+    def list_pools(self):
+        """Lists the users pools.
+
+        :Returns:
+            - :class:`.Response` object containing success of call. If
+              successful, the ``Response.result`` will contain a list of
+              pool dictionaries. If failed, ``Response.result`` will
+              hold the :exc:`.RestCallException`.
+        """
+        self._log.debug("list_pools, no params")
+
+        url = self.url("pools")
+
+        try:
+            get_resp = rest_client.get(self._auth, url,
+                                       self.headers)
+
+        except RestCallException as exp:
+            return Response(False, exp)
+
+        else:
+            return Response(True, get_resp)
+
+    def delete_pool(self, pool_id):
+        """
+        Delete an existing pool.
+
+        :Args:
+            - pool_id (str): The Guid of the pool to be deleted.
+
+        :Returns:
+            - :class:`.Response` with the POST response, however this is not
+              required if the call was successful.
+            - If the call failed a :class:`.Response` object with a
+              :class:`.RestCallException`.
+        """
+        self._log.debug("delete_pool, no params")
+        url = self.url("pools/{poolid}")
+        url = url.format(url, poolid=pool_id)
+
+        try:
+            resp = rest_client.delete(self._auth, url, self.headers)
+
+        except  RestCallException as exp:
+            return Response(False, exp)
+
+        return Response(True, resp)

@@ -265,7 +265,7 @@ class TestBatchAppsApi(unittest.TestCase):
         self.assertTrue(val.success)
 
         mock_post.side_effect = RestCallException(None, "Boom~", None)
-        val = _api.cancel("test_id")
+        val = _api.reprocess("test_id")
         self.assertFalse(val.success)
 
     @mock.patch.object(api.rest_client, 'get')
@@ -947,4 +947,156 @@ class TestBatchAppsApi(unittest.TestCase):
 
         mock_post.side_effect = RestCallException(None, "test", None)
         val = _api.query_missing_files({})
+        self.assertFalse(val.success)
+
+    @mock.patch.object(api.rest_client, 'post')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
+    @mock.patch.object(BatchAppsApi, 'url')
+    def test_api_add_pool(self, mock_url, mock_creds, mock_config, mock_post):
+        """Test add_pool"""
+
+        _api = BatchAppsApi(mock_creds, mock_config)
+        mock_url.return_value = "https://test_endpoint.com/api/pools"
+        mock_post.return_value = {}
+        message = {
+            'targetDedicated': '0',
+            'maxTasksPerTVM': '1',
+            'communication': False,
+            'certificateReferences': []}
+
+        val = _api.add_pool()
+        mock_post.assert_called_with(mock_creds,
+                                     "https://test_endpoint.com/api/pools",
+                                     self.headers, message)
+        self.assertFalse(val.success)
+
+        mock_post.return_value = {'poolId':'1', 'link':'2'}
+        val = _api.add_pool()
+        mock_post.assert_called_with(mock_creds,
+                                     "https://test_endpoint.com/api/pools",
+                                     self.headers,
+                                     message)
+        self.assertTrue(val.success)
+
+        val = _api.add_pool(target_size="test")
+        self.assertFalse(val.success)
+
+        message['targetDedicated'] = '6'
+        val = _api.add_pool(target_size=6)
+        mock_post.assert_called_with(mock_creds,
+                                     "https://test_endpoint.com/api/pools",
+                                     self.headers,
+                                     message)
+        self.assertTrue(val.success)
+
+        val = _api.add_pool(certs=[1,2,3,4,5,6,7,8,9,10,11])
+        message['certificateReferences'] = [1,2,3,4,5,6,7,8,9,10]
+        message['targetDedicated'] = '0'
+        mock_post.assert_called_with(mock_creds,
+                                     "https://test_endpoint.com/api/pools",
+                                     self.headers,
+                                     message)
+        self.assertTrue(val.success)
+
+        mock_post.side_effect = RestCallException(None, "Boom~", None)
+        val = _api.add_pool()
+        self.assertFalse(val.success)
+
+    @mock.patch.object(api.rest_client, 'post')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
+    @mock.patch.object(BatchAppsApi, 'url')
+    def test_api_resize_pool(self, mock_url, mock_creds, mock_config, mock_post):
+        """Test resize_pool"""
+
+        _api = BatchAppsApi(mock_creds, mock_config)
+        mock_url.return_value = "https://test_endpoint.com/api/{poolid}/actions/resize"
+        mock_post.return_value = {}
+
+        val = _api.resize_pool("test_id", 5)
+        mock_post.assert_called_with(mock_creds,
+                                     "https://test_endpoint.com/api/test_id/actions/resize",
+                                     self.headers,
+                                     {'targetDedicated': '5'})
+        self.assertTrue(val.success)
+
+        mock_post.side_effect = RestCallException(None, "Boom~", None)
+        val = _api.resize_pool("test_id", None)
+        self.assertFalse(val.success)
+
+    @mock.patch.object(api.rest_client, 'get')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
+    @mock.patch.object(BatchAppsApi, 'url')
+    def test_api_get_pool(self, mock_url, mock_creds, mock_config, mock_get):
+        """Test get_pool"""
+
+        _api = BatchAppsApi(mock_creds, mock_config)
+        mock_url.return_value = "https://test_endpoint.com/api/pools"
+        mock_get.return_value = None
+        val = _api.get_pool()
+        self.assertIsInstance(val, Response)
+        self.assertFalse(val.success)
+
+        val = _api.get_pool(url="https://pool_url")
+        mock_get.assert_called_with(mock_creds,
+                                    "https://pool_url",
+                                    self.headers)
+        self.assertTrue(val.success)
+
+        mock_url.return_value = "https://test_endpoint.com/api/{poolid}"
+        val = _api.get_pool(pool_id="abcdef")
+        mock_get.assert_called_with(mock_creds,
+                                    "https://test_endpoint.com/api/abcdef",
+                                    self.headers)
+        self.assertTrue(val.success)
+        self.assertTrue(mock_url.called)
+
+        mock_get.side_effect = RestCallException(None, "Boom~", None)
+        val = _api.get_pool(pool_id="abcdef")
+        self.assertFalse(val.success)
+
+    @mock.patch.object(api.rest_client, 'get')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
+    @mock.patch.object(BatchAppsApi, 'url')
+    def test_api_list_pools(self, mock_url, mock_creds, mock_config, mock_get):
+        """Test list_pools"""
+
+        _api = BatchAppsApi(mock_creds, mock_config)
+
+        mock_url.return_value = "https://test_endpoint.com/api/pools"
+
+        val = _api.list_pools()
+        self.assertIsInstance(val, Response)
+        self.assertTrue(val.success)
+        mock_get.assert_called_with(mock_creds,
+                                    "https://test_endpoint.com/api/pools",
+                                    self.headers)
+
+        mock_get.side_effect = RestCallException(None, "Boom!", None)
+        val = _api.list_pools()
+        self.assertIsInstance(val, Response)
+        self.assertFalse(val.success)
+
+    @mock.patch.object(api.rest_client, 'delete')
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
+    @mock.patch.object(BatchAppsApi, 'url')
+    def test_api_delete_pool(self, mock_url, mock_creds, mock_config, mock_delete):
+        """Test delete_pool"""
+
+        _api = BatchAppsApi(mock_creds, mock_config)
+        mock_url.return_value = "https://test_endpoint.com/api/{poolid}"
+        mock_delete.return_value = {}
+
+        val = _api.delete_pool("test_id")
+        mock_delete.assert_called_with(mock_creds,
+                                     "https://test_endpoint.com/api/test_id",
+                                     self.headers)
+        self.assertTrue(val.success)
+
+        mock_delete.side_effect = RestCallException(None, "Boom~", None)
+        val = _api.delete_pool("test_id")
         self.assertFalse(val.success)

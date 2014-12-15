@@ -35,14 +35,16 @@ logging.setLoggerClass(PickleLog)
 
 from .job_manager import JobManager
 from .file_manager import FileManager
+from .pool_manager import PoolManager
 from .credentials import Credentials, AzureOAuth
 from .config import Configuration
 
 __all__ = ["job_manager",
            "file_manager",
+           "pool_manager",
            "credentials",
            "config"]
 
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 __author__ = 'Microsoft Corp. <bigcompute@microsoft.com>'

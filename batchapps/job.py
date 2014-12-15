@@ -27,6 +27,7 @@
 
 from batchapps.exceptions import FileDownloadException
 from batchapps import utils
+from batchapps.pool import PoolSpecifier
 from batchapps.utils import Listener
 from batchapps.files import (
     UserFile,
@@ -95,7 +96,7 @@ class JobSubmission(object):
         super(JobSubmission, self).__setattr__(
             'source', str(job_settings.get('job_file', "")))
         super(JobSubmission, self).__setattr__(
-            'instances', int(job_settings.get('instances', 0)))
+            'instances', int(job_settings.get('instances', 0))) #DEP
 
     def __str__(self):
         """Job submission as a string
@@ -191,7 +192,7 @@ class JobSubmission(object):
 
         return utils.format_dictionary(complete_params)
 
-    def _create_job_message(self):
+    def _create_job_message(self, pool_id):
         """
         Create job message for submitting to the REST API.
         Only used internally on job submission (see :py:meth:.submit()).
@@ -205,16 +206,24 @@ class JobSubmission(object):
         if not hasattr(self.required_files, '_get_message'):
             self.add_file_collection()
 
+        if pool_id:
+            pool_options = {'poolId': str(pool_id)}
+
+        else:
+            pool_size = max(int(self.instances), 3)
+            pool = PoolSpecifier(self._api, target_size=pool_size)
+            pool_options = {'autoPoolSpecification': pool.auto_spec()}
+
         job_message = {
             'Name': str(self.name),
             'Type': self._api.jobtype(),
             'RequiredFiles': self.required_files._get_message("submit"),
-            'Pool': {'InstanceCount': str(int(self.instances))},
             'Parameters': list(self._filter_params()),
             'JobFile': str(self.source),
             'Settings': '',
             'Priority': 'Medium'
         }
+        job_message.update(pool_options)
 
         self._log.debug("Job message: {0}".format(job_message))
         return job_message
@@ -271,6 +280,7 @@ class JobSubmission(object):
         """
         if self.required_files is None:
             self.required_files = FileCollection(self._api)
+
         self.required_files.add(userfile)
 
     def set_job_file(self, jobfile):
@@ -311,8 +321,11 @@ class JobSubmission(object):
         self._log.debug(
             "Assigned file: {0} as starting job file".format(self.source))
 
-    def submit(self):
+    def submit(self, pool_id=None):
         """Submit the job.
+
+        :Kwargs:
+            - pool_id (str): The Id of an existing pool to submit the job to.
 
         :Returns:
             - If successful, a dictionary holding the new job's ID and a URL
@@ -322,7 +335,7 @@ class JobSubmission(object):
         :Raises:
             - :class:`.RestCallException` if job submission failed.
         """
-        resp = self._api.send_job(self._create_job_message())
+        resp = self._api.send_job(self._create_job_message(pool_id))
 
         if resp.success:
             self._log.info("Job successfull submitted with ID: "
@@ -355,6 +368,7 @@ class SubmittedJob(object):
         - output_url (str)
         - thumb_url (str)
         - tasks_url (str)
+        - pool_id (str)
     """
 
     def __init__(self, client, job_id, job_name, job_type, **job_settings):
@@ -501,13 +515,13 @@ class SubmittedJob(object):
         formatted['time_submitted'] = sub.get('submissionTime', None)
         formatted['time_started'] = sub.get('startTime', None)
         formatted['time_completed'] = sub.get('completionTime', None)
-        #formatted['requested_instances'] = sub.get('pool', {'instanceCount':0})['instanceCount']
-        formatted['requested_instances'] = int(sub.get('instanceCount', 0))
+        formatted['requested_instances'] = int(sub.get('instanceCount', 0)) #DEP
         formatted['number_tasks'] = int(sub.get('taskCount', 0))
         formatted['output_filename'] = sub.get('outputFileName', None)
         formatted['output_url'] = sub.get('outputLink', {'href':None})['href']
         formatted['thumb_url'] = sub.get('previewLink', {'href':None})['href']
         formatted['tasks_url'] = sub.get('taskListLink', {'href':None})['href']
+        formatted['pool_id'] = sub.get('poolId', None)
 
         self._log.debug("Extracted job submission data: {0}".format(formatted))
         return formatted

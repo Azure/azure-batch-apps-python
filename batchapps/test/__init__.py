@@ -24,7 +24,8 @@
 # THE SOFTWARE.
 #
 #--------------------------------------------------------------------------
-"""Batch Apps Python Client Unit Test Suite
+"""
+Batch Apps Python Client Unit Test Suite
 """
 
 import sys

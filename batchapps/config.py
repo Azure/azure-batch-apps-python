@@ -44,6 +44,8 @@ from . import utils
 
 LOGGERS = {}
 API_RESOURCE = "https://batchapps.core.windows.net/"
+FILE_LOG = True
+STREAM_LOG = True
 
 class Configuration(object):
     """
@@ -271,11 +273,13 @@ class Configuration(object):
             "%(asctime)-15s [%(levelname)s] %(module)s: %(message)s")
 
         logger = logging.getLogger('batch_apps')
-        console_logging = logging.StreamHandler()
-        console_logging.setFormatter(log_format)
-        logger.addHandler(console_logging)
 
-        if self._write_file:
+        if STREAM_LOG:
+            console_logging = logging.StreamHandler()
+            console_logging.setFormatter(log_format)
+            logger.addHandler(console_logging)
+
+        if self._write_file and FILE_LOG:
             logfile = os.path.join(data_path, "batch_apps.log")
 
             if os.path.isfile(logfile) and os.path.getsize(logfile) > 10485760:

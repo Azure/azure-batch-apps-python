@@ -101,9 +101,6 @@ class AzureOAuth(object):
                 redirect_uri=redirect,
                 state=AzureOAuth.state)
 
-        new_session.verify = VERIFY
-        if CA_CERT and VERIFY is True:
-            new_session.verify = CA_CERT
         return new_session
 
     @staticmethod
@@ -253,6 +250,10 @@ class AzureOAuth(object):
             raise AuthenticationException(
                 "Security error: State not equal in request and response.")
 
+        verification = VERIFY
+        if CA_CERT and VERIFY is True:
+            verification = CA_CERT
+
         redirect = auth.get('redirect_uri')
 
         if auth_url.startswith(_http(redirect)):
@@ -267,7 +268,8 @@ class AzureOAuth(object):
                                  "{0}".format(token_uri))
 
             token = session.fetch_token(token_uri,
-                authorization_response=auth_url)
+                authorization_response=auth_url,
+                verify=verification)
 
         except oauth2.rfc6749.errors.InvalidGrantError as excp:
             raise AuthenticationException(excp.description)

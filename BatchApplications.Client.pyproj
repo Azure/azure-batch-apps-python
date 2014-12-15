@@ -35,6 +35,12 @@
     <Compile Include="batchapps\job.py" />
     <Compile Include="batchapps\job_manager.py" />
     <Compile Include="batchapps\log.py" />
+    <Compile Include="batchapps\pool.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="batchapps\pool_manager.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="batchapps\rest_client.py" />
     <Compile Include="batchapps\test\unittest_api.py" />
     <Compile Include="batchapps\test\unittest_config.py" />
@@ -43,6 +49,12 @@
     <Compile Include="batchapps\test\unittest_file_manager.py" />
     <Compile Include="batchapps\test\unittest_job.py" />
     <Compile Include="batchapps\test\unittest_job_manager.py" />
+    <Compile Include="batchapps\test\unittest_pool.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="batchapps\test\unittest_pool_manager.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="batchapps\test\unittest_rest_client.py" />
     <Compile Include="batchapps\test\__init__.py" />
     <Compile Include="batchapps\utils.py" />

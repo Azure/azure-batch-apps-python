@@ -41,6 +41,7 @@ except ImportError:
 import tempfile
 from operator import itemgetter
 from batchapps.utils import Listener
+from batchapps.pool import PoolSpecifier
 from batchapps.api import (
     BatchAppsApi,
     Response)
@@ -151,12 +152,15 @@ class TestJobSubmission(unittest.TestCase):
                                  {"Name":"k1", "Value":"v1"}],
                                 key=itemgetter('Name')))
 
+    @mock.patch('batchapps.job.PoolSpecifier')
     @mock.patch.object(JobSubmission, '_filter_params')
-    def test_jobsubmission_create_job_message(self, mock_filter):
+    def test_jobsubmission_create_job_message(self, mock_filter, mock_pool):
         """Test _create_job_message"""
 
         api = mock.create_autospec(BatchAppsApi)
         api.jobtype.return_value = "TestApp"
+        mock_pool.return_value = mock.create_autospec(PoolSpecifier)
+        mock_pool.return_value.auto_spec.return_value = {"autopool":"0"}
         files = mock.create_autospec(FileCollection)
         files._get_message.return_value = ["file1", "file2"]
         files.__len__.return_value = 2
@@ -165,22 +169,25 @@ class TestJobSubmission(unittest.TestCase):
         job = JobSubmission(api, "test_job", params={})
 
         #with self.assertRaises(ValueError):
-        msg = job._create_job_message()
+        msg = job._create_job_message(None)
+        self.assertTrue(mock_pool.called)
         self.assertEqual(msg, {'Name':'test_job',
                                'Type': 'TestApp',
                                'RequiredFiles':[],
-                               'Pool': {'InstanceCount':'0'},
+                               'autoPoolSpecification': {"autopool":"0"},
                                'Parameters':[{"Name":"k1", "Value":"v1"}],
                                'JobFile':'',
                                'Settings':'',
                                'Priority':'Medium'})
 
         job.required_files = files
-        msg = job._create_job_message()
+        job.instances = 5
+        msg = job._create_job_message(None)
+        mock_pool.assert_called_with(api, target_size=5)
         self.assertEqual(msg, {'Name':'test_job',
                                'Type': 'TestApp',
                                'RequiredFiles':["file1", "file2"],
-                               'Pool': {'InstanceCount':'0'},
+                               'autoPoolSpecification': {"autopool":"0"},
                                'Parameters':[{"Name":"k1", "Value":"v1"}],
                                'JobFile':'',
                                'Settings':'',
@@ -194,12 +201,11 @@ class TestJobSubmission(unittest.TestCase):
         with self.assertRaises(TypeError):
             job._create_job_message()
 
-        job.instances = "100"
-        msg = job._create_job_message()
+        msg = job._create_job_message("testID")
         self.assertEqual(msg, {'Name':'{}',
                                'Type': 'TestApp',
                                'RequiredFiles':["file1", "file2"],
-                               'Pool': {'InstanceCount':'100'},
+                               'poolId': "testID",
                                'Parameters':[{"Name":"k1", "Value":"v1"}],
                                'JobFile':'None',
                                'Settings':'',
@@ -292,10 +298,12 @@ class TestJobSubmission(unittest.TestCase):
         with self.assertRaises(RestCallException):
             job.submit()
         api.send_job.assert_called_with("{message}")
+        mock_message.assert_called_with(None)
 
         resp.success = True
         resp.result = {'jobId':'abc'}
-        sub = job.submit()
+        sub = job.submit(pool_id="testID")
+        mock_message.assert_called_with("testID")
         self.assertEqual(sub, {'jobId':'abc'})
 
 

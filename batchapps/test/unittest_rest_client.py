@@ -329,3 +329,19 @@ class TestRestClient(unittest.TestCase):
                                  "c:\\test",
                                  0,
                                  True)
+
+    @mock.patch.object(rest_client, '_call')
+    def test_rest_client_delete(self, mock_call):
+        """Test delete"""
+
+        auth = mock.create_autospec(Credentials)
+        val = rest_client.delete(auth, "http://test", {})
+        mock_call.assert_called_with(auth, 'DELETE', "http://test", headers={})
+
+        mock_call.return_value = "Something"
+        resp = rest_client.delete(auth, "http://test", {})
+        self.assertEqual(resp, "Something")
+
+        mock_call.side_effect = RestCallException(None, "Boom!", None)
+        with self.assertRaises(RestCallException):
+            rest_client.delete(auth, "http://test", {})

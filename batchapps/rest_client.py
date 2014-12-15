@@ -123,6 +123,7 @@ def get(auth, url, headers, params=None):
     Call GET.
 
     :Args:
+        - auth (:class:`.Credentials`): The session credentials object.
         - url (str): The complete endpoint URL.
         - headers (dict): The headers to be used in the request.
 
@@ -160,6 +161,7 @@ def head(auth, url, headers, filename=""):
     header to get a file size.
 
     :Args:
+        - auth (:class:`.Credentials`): The session credentials object.
         - url (str): The complete endpoint URL.
         - headers (dict): The headers to be used in the request.
 
@@ -199,6 +201,7 @@ def post(auth, url, headers, message=None):
     Used for job submission, job commands and file queries.
 
     :Args:
+        - auth (:class:`.Credentials`): The session credentials object.
         - url (str): The complete endpoint URL.
         - headers (dict): The headers to be used in the request.
 
@@ -243,6 +246,7 @@ def put(auth, url, headers, userfile, params, *args):
     This call is only used to upload files.
 
     :Args:
+        - auth (:class:`.Credentials`): The session credentials object.
         - url (str): The complete endpoint URL.
         - headers (dict): The headers to be used in the request.
         - userfile (:class:`.UserFile`): The :class:`.UserFile`
@@ -299,6 +303,7 @@ def download(auth, url, headers, output_path, size, overwrite,
     Call GET for a file stream.
 
     :Args:
+        - auth (:class:`.Credentials`): The session credentials object.
         - url (str): The complete endpoint URL.
         - headers (dict): The headers to be used in the request.
         - output_path (str): Full file path to download the data to.
@@ -368,3 +373,34 @@ def download(auth, url, headers, output_path, size, overwrite,
 
     except EnvironmentError as exp:
         raise RestCallException(type(exp), str(exp), exp)
+ 
+def delete(auth, url, headers):
+    """
+    Call DELETE.
+    Currently only used to delete pools.
+
+    :Args:
+        - auth (:class:`.Credentials`): The session credentials object.
+        - url (str): The complete endpoint URL.
+        - headers (dict): The headers to be used in the request.
+
+    :Returns:
+        - The raw server response.
+
+    :Raises:
+        - :exc:`.RestCallException` if the call failed or returned a
+          non-200 status.
+    """
+    try:
+        LOG.debug("Delete call url: {0}".format(url))
+        response = _call(auth, 'DELETE', url, headers=headers)
+        return response
+
+    except RestCallException:
+        raise
+
+    except (ValueError, AttributeError) as exp:
+        raise RestCallException(
+            ValueError,
+            "No json object to be decoded from DELETE call.",
+            exp)
