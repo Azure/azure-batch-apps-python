@@ -1,3 +1,10 @@
+v0.2.1, 2014-12-xx	- Added preliminary support for new pool management API
+						Added new PoolManager class, Pool and PoolSpecifier classes
+						Added api calls for retrieving, createing and deleting pools.
+						Added support for rest DELETE call
+						Auto pool will be created on submission, or existing pool ID can be passed at submit
+					- Added flags to turn off console and/or file logging
+
 v0.2.0, 2014-11-26	- Changed file upload format
 						Multipart form data -> application/octet-stream
 					- Changed Authentication config format (old format still supported)

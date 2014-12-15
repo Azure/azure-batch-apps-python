@@ -219,3 +219,31 @@ the cloud can be done using the FileManager class::
 	mgr.list_files()
 
 
+Pool Management
+----------------
+
+Pool management, including creating, resizing and deleting pools can
+be done using the PoolManager class.
+
+Once a pool has been created, jobs can be submitted to it. By default, 
+when a job has been submitted without referencing an existing pool, it will 
+use an auto-pool which will be created for the running of the job, then 
+deleted on completion::
+
+	from bathcapps import AzureOAuth, PoolManager
+
+	creds = AzureOAuth.get_unattended_session()
+	mgr = PoolManager(creds)
+
+	new_pool = PoolSpecifier(target_size=5)
+	ref = new_pool.deploy()
+
+	pool = PoolManager.get_pool(url=ref['link'])
+
+	# Create new job submission, then submit to pool
+	my_job.submit(pool.id)
+
+	# After job has completed, and we no longer need the pool
+	pool.delete()
+
+
