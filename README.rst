@@ -45,7 +45,7 @@ Release History
 
 For full summary of changes, see CHANGES.txt
 
-* 2014-12-xx	- 0.2.1
+* 2014-12-xx	- 0.3.0
 	- Added preliminary support for Batch Apps pool management
 * 2014-11-26	- 0.2.0	
 	- Changed file upload format

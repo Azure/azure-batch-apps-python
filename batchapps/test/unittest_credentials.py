@@ -56,6 +56,12 @@ from batchapps.exceptions import (
 class TestAzureOAuth(unittest.TestCase):
     """Unit tests for AzureOAuth"""
 
+    def setUp(self):
+
+        credentials.VERIFY = True
+        credentials.CA_CERT = None
+        return super(TestAzureOAuth, self).setUp()
+
     def test_azureoauth_check_state(self):
         """Test _check_state"""
         self.assertFalse(AzureOAuth._check_state("test", "abc"))
@@ -85,14 +91,6 @@ class TestAzureOAuth(unittest.TestCase):
         mock_requests.OAuth2Session.assert_called_with("3",
                                                        redirect_uri="http://1",
                                                        state='test')
-        
-        #credentials.CA_CERT = "cacert.pem"
-        #session = AzureOAuth._setup_session({'redirect_uri':'1', 'client_id':'3'})
-        #self.assertEqual(session.verify, "cacert.pem")
-        
-        #credentials.VERIFY = False
-        #session = AzureOAuth._setup_session({'redirect_uri':'1', 'client_id':'3'})
-        #self.assertFalse(session.verify)
 
     @mock.patch('batchapps.credentials.Credentials')
     @mock.patch('batchapps.credentials.Configuration')
@@ -187,6 +185,21 @@ class TestAzureOAuth(unittest.TestCase):
         with self.assertRaises(AuthenticationException):
             authed = AzureOAuth.get_authorization_token("test")
 
+        mock_state.return_value = True
+        credentials.CA_CERT = "cacert.pem"
+        AzureOAuth.get_authorization_token("test", state="test")
+        mock_setup.return_value.fetch_token.assert_called_with(
+            "https://1/common/auth",
+            authorization_response='https://Nonetest',
+            verify="cacert.pem")
+        
+        credentials.VERIFY = False
+        AzureOAuth.get_authorization_token("test")
+        mock_setup.return_value.fetch_token.assert_called_with(
+            "https://1/common/auth",
+            authorization_response='https://Nonetest',
+            verify=False)
+
     @mock.patch.object(AzureOAuth, 'get_unattended_session')
     def test_azureoauth_get_principal_token(self, mock_token):
         """Test deprecated method get_principal_token"""
@@ -252,6 +265,30 @@ class TestAzureOAuth(unittest.TestCase):
             client_secret='3',
             response_type='client_credentials',
             verify=True)
+
+        credentials.CA_CERT = "cacert.pem"
+        AzureOAuth.get_unattended_session(mock_config)
+        mock_client.assert_called_with("abc")
+        mock_req.OAuth2Session.assert_called_with("abc", client=mock.ANY)
+        mock_session.fetch_token.assert_called_with(
+            "https://1/common/auth",
+            client_id='abc',
+            resource='https://test',
+            client_secret='3',
+            response_type='client_credentials',
+            verify="cacert.pem")
+        
+        credentials.VERIFY = False
+        AzureOAuth.get_unattended_session(mock_config)
+        mock_client.assert_called_with("abc")
+        mock_req.OAuth2Session.assert_called_with("abc", client=mock.ANY)
+        mock_session.fetch_token.assert_called_with(
+            "https://1/common/auth",
+            client_id='abc',
+            resource='https://test',
+            client_secret='3',
+            response_type='client_credentials',
+            verify=False)
 
 
 # pylint: disable=W0212

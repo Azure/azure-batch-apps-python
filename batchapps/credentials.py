@@ -287,6 +287,7 @@ class AzureOAuth(object):
     def get_principal_token(config=None):
         """
         .. warning:: Deprecated. Please use :meth:`.get_unattended_session()`.
+
         Retrieve a Unattended Account access token from AAD server.
 
         :Kwargs:

@@ -40,10 +40,10 @@ from .exceptions import (
     RestCallException)
 
 def upload_wrapper(arg, **kwargs):
-    '''
+    """
     Wrapper to pull upload method from self to avoid multiprocessing
     errors in Python 2.6.
-    '''
+    """
     return FileCollection._upload_forced(*arg, **kwargs)
 
 
@@ -55,12 +55,15 @@ class FileCollection(object):
 
     def __init__(self, client, *files):
         """
+        Create new FileCollection:
+
         :Args:
             - client (:class:`.BatchAppsApi`): An authorized Batch Apps
               Management API REST client.
             - files (:class:`UserFile`, list): *Optional*. Any files to be
               included in the collection. Can be individual
               :class:`UserFile` objects or a list of them.
+
         """
         if not hasattr(client, 'query_files'):
             raise TypeError(
@@ -503,6 +506,8 @@ class UserFile(object):
 
     def __init__(self, client, file_def):
         """
+        Create new UserFile:
+
         :Args:
             - client (:class:`BatchAppsApi`): Authenticated and configured
               REST API client.

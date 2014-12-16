@@ -90,6 +90,7 @@ class FileManager(object):
     def create_file(self, fullpath):
         """
         .. warning:: Deprecated. Use :meth:`.file_from_path()`.
+
         Create a userfile object.
 
         :Args:

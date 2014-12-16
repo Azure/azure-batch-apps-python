@@ -1,4 +1,4 @@
-v0.2.1, 2014-12-xx	- Added preliminary support for new pool management API
+v0.3.0, 2014-12-xx	- Added preliminary support for new pool management API
 						Added new PoolManager class, Pool and PoolSpecifier classes
 						Added api calls for retrieving, createing and deleting pools.
 						Added support for rest DELETE call

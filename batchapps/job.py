@@ -68,6 +68,7 @@ class JobSubmission(object):
         :Kwargs:
             - job_settings (dict): *Optional* Additional job settings or
               parameters can be added as keyword arguments. These include:
+
                   - 'params': A string dict of job parameters to add to the
                     submission.
                   - 'files': A :py:class:`.FileCollection` of required files

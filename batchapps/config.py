@@ -384,6 +384,7 @@ class Configuration(object):
     def set_default_application(self):
         """
         .. warning:: Deprecated. Use :meth:`.set_default_jobtype()`.
+
         Set the job type to be used by default when creating a
         :class:`.Configuration` object. This method will set the current
         job type to be the default, and will save the changes.
@@ -554,6 +555,7 @@ class Configuration(object):
     def application(self, *jobtype):
         """
         .. warning:: Deprecated. Please use :meth:`.current_jobtype()`.
+
         Gets and sets the current job type.
 
         :Args:
@@ -608,6 +610,7 @@ class Configuration(object):
     def applications(self):
         """
         .. warning:: Deprecated. Please use :meth:`.list_jobtypes()`.
+
         Gets a list of all the job types defined in the configuration.
 
         :Returns:
@@ -648,6 +651,7 @@ class Configuration(object):
     def add_application(self, jobtype, *args, **params):
         """
         .. warning:: Deprecated. Please use :meth:`.add_jobtype()`.
+
         Add a new job type section to the configuration.
 
         :Args:

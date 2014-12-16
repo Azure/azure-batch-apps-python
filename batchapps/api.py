@@ -70,16 +70,20 @@ class BatchAppsApi(object):
 
     :Attributes:
         - headers (dict)
+
     """
 
     def __init__(self, credentials, config):
         """
+        Create new API client:
+
         :Args:
             - credentials (:class:`.Credentials`): Credentials with which all
               API calls will be authenticated.
             - config (:class:`.Configuration`): Configuration of the
               job type the jobs will be submitted as, as well as endpoint
               and logging configuration.
+
         """
         self._config = config
         self._log = logging.getLogger('batch_apps')
@@ -92,6 +96,7 @@ class BatchAppsApi(object):
     def app(self):
         """
         .. warning:: Deprecated. Use :meth:`.jobtype()`.
+
         Retrieve the current jobtype from the :class:`.Configuration`.
 
         :Returns:
