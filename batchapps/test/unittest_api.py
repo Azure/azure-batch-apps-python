@@ -105,7 +105,7 @@ class TestBatchAppsApi(unittest.TestCase):
         _api = BatchAppsApi(mock_creds, mock_config)
 
         mock_url.return_value = "https://test_endpoint.com/api/jobs"
-        mock_get.return_value = None
+        mock_get.return_value = {}
         val = _api.list_jobs()
         self.assertIsInstance(val, Response)
         self.assertFalse(val.success)

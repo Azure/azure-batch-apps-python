@@ -182,8 +182,9 @@ class BatchAppsApi(object):
             return Response(False, exp)
 
         else:
-            if utils.valid_keys(get_resp, ['totalCount', 'jobs']):
+            if 'jobs' in get_resp:
                 return Response(True, get_resp)
+
             return Response(
                 False,
                 RestCallException(KeyError,

@@ -32,7 +32,7 @@ import subprocess
 import shutil
 
 def main():
-    """Build Py Module documentation and Pip package"""
+    """Build Pip package"""
 
     python_exe = os.path.join(sys.prefix, "python.exe")
     if not os.path.exists(python_exe):
