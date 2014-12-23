@@ -269,6 +269,7 @@ class BatchAppsApi(object):
         else:
             if utils.valid_keys(post_resp, ['jobId', 'link']):
                 return Response(True, post_resp)
+
             return Response(
                 False,
                 RestCallException(KeyError,

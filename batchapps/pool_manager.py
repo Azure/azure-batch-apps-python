@@ -63,11 +63,36 @@ class PoolManager(object):
         """
         return self.count
 
-    def create_pool(self, target_size=0, max_tasks=1,
-                 communication=False):
+    def create(self, spec=None, target_size=0, max_tasks=1,
+               communication=False):
         """
-        Crete a new :class:`.PoolSpecifier` object, which can then be deployed
-        and referenced for use on job submission.
+        Create a new pool which can be referenced for use on job submission.
+        The minimum number of running instances for a pool with 1 task per TVM
+        is 3 to prevent a deadlock.
+
+        :Kwargs:
+            - spec (:class:`.PoolSpecifier`): A specifier of the pool to
+              create. If set, all proceeding kwargs will be ignored.
+            - target_size (int): The target number of instances in the pool.
+              Default is 0 (i.e. and empty pool).
+            - max_tasks (int): Maximum number of tasks per TVM. Default is 1.
+            - communication (bool): Whether tasks running on TVMs
+              in the pool need to ba able to communicated directly with each
+              other. Default is ``False``.
+
+        :Returns:
+            - A new :class:`.Pool` object.
+        """
+        if not spec or not hasattr(spec, 'start'):
+            spec = PoolSpecifier(self._client, target_size, max_tasks,
+                                 communication)
+
+        ref = spec.start()
+        return self.get_pool(url=ref['link'])
+
+    def create_spec(self, target_size=0, max_tasks=1, communication=False):
+        """
+        Create a new :class:`.PoolSpecifier`.
         The minimum number of running instances for a pool with 1 task per TVM
         is 3 to prevent a deadlock.
 
@@ -82,9 +107,8 @@ class PoolManager(object):
         :Returns:
             - A new :class:`.PoolSpecifier` object.
         """
-
-        new_pool = PoolSpecifier(self._client, target_size, max_tasks, communication)
-        return new_pool
+        return PoolSpecifier(self._client, target_size, max_tasks,
+                                 communication)
 
     def get_pool(self, url=None, poolid=None):
         """
@@ -93,9 +117,9 @@ class PoolManager(object):
 
         :Kwargs:
             - url (str): The URL to a the details of a pool, as returned by
-              :meth:`.PoolSpecifier.deploy()`.
+              :meth:`.create()`, or :meth:`.PoolSpecifier.start()`.
             - poolid (str): The ID of a submitted job, as retrieved from
-              Mission Control or returned by :meth:`.PoolSpecifier.deploy()`.
+              Mission Control or returned by :meth:`.PoolSpecifier.start()`.
 
         :Returns:
             - An updated or new :class:`.Pool` object.

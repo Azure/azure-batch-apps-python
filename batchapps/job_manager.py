@@ -196,6 +196,9 @@ class JobManager(object):
             - A job susbmission response dictionary in the format:
               ``{'jobId': '', 'link': ''}``
 
+              .. warning:: Dictionary response will be deprecated to be replaced
+                 by a :class:`.SubmittedJob` object in 1.0 release.
+
         :Raises:
             - :exc:`TypeError` if ``submitjob`` is not a JobSubmission.
             - :exc:`.RestCallException` if job submission failed.

@@ -131,14 +131,14 @@ class TestPool(unittest.TestCase):
         self.assertEqual(pool.target_size, 0)
         self.assertEqual(pool.current_size, 0)
         self.assertEqual(pool.state, None)
-        self.assertEqual(pool.resize_state, None)
+        self.assertEqual(pool.allocation_state, None)
         self.assertEqual(pool.resize_error, '')
         pool.update()
         api.get_pool.assert_called_with(pool_id=None)
         self.assertEqual(pool.target_size, 5)
         self.assertEqual(pool.current_size, 4)
         self.assertEqual(pool.state, 'active')
-        self.assertEqual(pool.resize_state, 'test')
+        self.assertEqual(pool.allocation_state, 'test')
         self.assertEqual(pool.resize_error, '')
 
         api.get_pool.return_value.success = False
@@ -166,8 +166,8 @@ class TestPoolSpecifier(unittest.TestCase):
         self.assertEqual(pool.communication, True)
         self.assertEqual(pool.certificates, [])
 
-    def test_poolspecifier_deploy(self):
-        """Test deploy"""
+    def test_poolspecifier_start(self):
+        """Test start"""
 
         api = mock.create_autospec(BatchAppsApi)
         api.add_pool.return_value.success = True
@@ -175,14 +175,14 @@ class TestPoolSpecifier(unittest.TestCase):
             'poolId':'abc', 'link':{'href':'test.com'}}
 
         pool = PoolSpecifier(api)
-        new_pool = pool.deploy()
+        new_pool = pool.start()
         self.assertEqual(new_pool, {'id':'abc', 'link':'test.com'})
         api.add_pool.assert_called_with(0, 1, False, [])
 
         api.add_pool.return_value.success = False
         api.add_pool.return_value.result = RestCallException(None, "Test", None)
         with self.assertRaises(RestCallException):
-            pool.deploy()
+            pool.start()
 
     def test_poolspecifier_add_cert(self):
 

@@ -30,7 +30,7 @@ import logging
 class Pool(object):
     """Reference for a Batch VM Pool"""
 
-    def __init__(self, client,  **kwargs):
+    def __init__(self, client, **kwargs):
         """New pool reference
 
         :Args:
@@ -66,7 +66,7 @@ class Pool(object):
         self.target_size = int(kwargs.get('targetDedicated', 0))
         self.current_size = int(kwargs.get('currentDedicated', 0))
         self.state = kwargs.get('state')
-        self.resize_state = kwargs.get('allocationState')
+        self.allocation_state = kwargs.get('allocationState')
         self.max_tasks = int(kwargs.get('maxTasksPerTVM', '0'))
         self.resize_error = str(kwargs.get('resizeError', ''))
         self.communication = kwargs.get('communication')
@@ -149,7 +149,7 @@ class Pool(object):
         self.target_size = int(updated.result.get('targetDedicated', 0))
         self.current_size = int(updated.result.get('currentDedicated', 0))
         self.state = updated.result.get('state')
-        self.resize_state = updated.result.get('allocationState')
+        self.allocation_state = updated.result.get('allocationState')
         self.resize_error = str(updated.result.get('resizeError', ''))
         self.jobs = list(updated.result.get('jobs', []))
 
@@ -162,7 +162,7 @@ class PoolSpecifier(Pool):
     """
     A new user-created Pool. This class can be used to create a pool on-the-fly
     during job submission, or can be used to create a pool manually before
-    submission. The pool can be configured up until is has been deployed.
+    submission.
     """
 
     def __init__(self, client, target_size=0, max_tasks=1,
@@ -188,28 +188,12 @@ class PoolSpecifier(Pool):
         self.communication = communication
         self.certificates = []
 
-    def auto_spec(self):
-        """
-        Create an autopoolspecification reference for use in job
-        submission.
-
-        :Returns:
-            - A dictionary.
-        """
-
-        return {
-            'targetDedicated': str(self.target_size),
-            'maxTasksPerTVM': str(self.max_tasks),
-            'communication': self.communication,
-            'certificateReferences': self.certificates
-            }
-
     def add_cert(self, thumbprint, algorithm='SHA1',
                  store_location='CurrentUser', store_name='My'):
         """
         Add a certificate reference to the PoolSpecifier. The certificate will
-        only be added to the Pool if it has not yet been deployed, or if
-        if does not yet have 10 certificates.
+        only be added to the Pool if it has not yet been started, or if
+        it does not yet have 10 certificates.
 
         :Args:
             - thumbprint (str): The X509 certificate thumbprint property of
@@ -247,28 +231,28 @@ class PoolSpecifier(Pool):
         return True
 
 
-    def deploy(self):
+    def start(self):
         """
-        Deploy the pool. This can only be done once.
-        The deployment will failed with status 409 if the deployment
+        Start a pool according to this specification.
+        The call will fail with status 409 if the new pool
         exceeds the maximum number of allocated pools.
 
         :Returns:
             - A dictionary with the new pool details:
               ``{'id': Pool ID, 'link': Pool URL}``
-            - ``None`` if the pool has already been deployed.
 
         :Raises:
-            - A :class:`.RestCallException` if the deployment failed.
+            - A :class:`.RestCallException` if the call failed.
 
         """
-        add = self._api.add_pool(self.target_size, self.max_tasks,
+        pool = self._api.add_pool(self.target_size, self.max_tasks,
                                 self.communication, self.certificates)
 
-        if not add.success:
-            raise add.result
+        if not pool.success:
+            raise pool.result
 
-        return {'id': add.result['poolId'], 'link': add.result['link']['href']}
+        return {'id': pool.result['poolId'],
+                'link': pool.result['link']['href']}
 
         
 

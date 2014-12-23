@@ -193,6 +193,23 @@ class JobSubmission(object):
 
         return utils.format_dictionary(complete_params)
 
+    def _auto_pool(self, size):
+        """
+        Create an autopoolspecification reference for use in job
+        submission.
+
+        :Returns:
+            - A dictionary.
+        """
+        pool = PoolSpecifier(self._api, target_size=size)
+
+        return {
+            'targetDedicated': str(pool.target_size),
+            'maxTasksPerTVM': str(pool.max_tasks),
+            'communication': pool.communication,
+            'certificateReferences': pool.certificates
+            }
+
     def _create_job_message(self, pool_id):
         """
         Create job message for submitting to the REST API.
@@ -211,9 +228,8 @@ class JobSubmission(object):
             pool_options = {'poolId': str(pool_id)}
 
         else:
-            pool_size = max(int(self.instances), 3)
-            pool = PoolSpecifier(self._api, target_size=pool_size)
-            pool_options = {'autoPoolSpecification': pool.auto_spec()}
+            size = max(int(self.instances), 3)
+            pool_options = {'autoPoolSpecification': self._auto_pool(size)}
 
         job_message = {
             'Name': str(self.name),
@@ -333,6 +349,8 @@ class JobSubmission(object):
               to get the job details (See: :meth:`.SubmittedJob.update()`).
               Dictionary has the keys: ``['jobId', 'link']``
 
+              .. warning:: 'jobId' key will be deprecated to be replaced with 'id'.
+
         :Raises:
             - :class:`.RestCallException` if job submission failed.
         """
@@ -342,7 +360,9 @@ class JobSubmission(object):
             self._log.info("Job successfull submitted with ID: "
                            "{0}".format(resp.result['jobId']))
 
-            return resp.result
+            return {'jobId':resp.result['jobId'], #DEP
+                    'id': resp.result['jobId'],
+                    'link': resp.result['link']['href']}
 
         else:
             raise resp.result

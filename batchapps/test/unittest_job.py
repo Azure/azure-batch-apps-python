@@ -153,14 +153,36 @@ class TestJobSubmission(unittest.TestCase):
                                 key=itemgetter('Name')))
 
     @mock.patch('batchapps.job.PoolSpecifier')
+    def test_jobsubmission_auto_pool(self, mock_pool):
+        """Test _auto_pool"""
+
+        api = mock.create_autospec(BatchAppsApi)
+        api.jobtype.return_value = "TestApp"
+        mock_pool.return_value = mock.create_autospec(PoolSpecifier)
+        mock_pool.return_value.target_size = 5
+        mock_pool.return_value.max_tasks = 2
+        mock_pool.return_value.communication = False
+        mock_pool.return_value.certificates = []
+
+        job = JobSubmission(api, "test_job", params={})
+        pool = job._auto_pool(4)
+
+        mock_pool.assert_called_with(mock.ANY, target_size=4)
+        self.assertEqual(pool, {
+            'targetDedicated': "5",
+            'maxTasksPerTVM': "2",
+            'communication': False,
+            'certificateReferences': []
+            })
+
+    @mock.patch.object(JobSubmission, '_auto_pool')
     @mock.patch.object(JobSubmission, '_filter_params')
     def test_jobsubmission_create_job_message(self, mock_filter, mock_pool):
         """Test _create_job_message"""
 
         api = mock.create_autospec(BatchAppsApi)
         api.jobtype.return_value = "TestApp"
-        mock_pool.return_value = mock.create_autospec(PoolSpecifier)
-        mock_pool.return_value.auto_spec.return_value = {"autopool":"0"}
+        mock_pool.return_value = {"autopool":"0"}
         files = mock.create_autospec(FileCollection)
         files._get_message.return_value = ["file1", "file2"]
         files.__len__.return_value = 2
@@ -183,7 +205,7 @@ class TestJobSubmission(unittest.TestCase):
         job.required_files = files
         job.instances = 5
         msg = job._create_job_message(None)
-        mock_pool.assert_called_with(api, target_size=5)
+        mock_pool.assert_called_with(5)
         self.assertEqual(msg, {'Name':'test_job',
                                'Type': 'TestApp',
                                'RequiredFiles':["file1", "file2"],
@@ -301,10 +323,10 @@ class TestJobSubmission(unittest.TestCase):
         mock_message.assert_called_with(None)
 
         resp.success = True
-        resp.result = {'jobId':'abc'}
+        resp.result = {'jobId':'abc', 'link':{'href':'test'}}
         sub = job.submit(pool_id="testID")
         mock_message.assert_called_with("testID")
-        self.assertEqual(sub, {'jobId':'abc'})
+        self.assertEqual(sub, {'jobId':'abc', 'id':'abc', 'link':'test'})
 
 
 # pylint: disable=W0212

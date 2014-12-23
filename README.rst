@@ -236,7 +236,7 @@ deleted on completion::
 	mgr = PoolManager(creds)
 
 	new_pool = mgr.create_pool(target_size=5)
-	ref = new_pool.deploy()
+	ref = new_pool.start()
 
 	pool = PoolManager.get_pool(url=ref['link'])
 

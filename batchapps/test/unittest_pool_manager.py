@@ -53,6 +53,70 @@ class TestPoolManager(unittest.TestCase):
     @mock.patch('batchapps.credentials.Configuration')
     @mock.patch('batchapps.credentials.Credentials')
     @mock.patch('batchapps.pool_manager.BatchAppsApi')
+    @mock.patch('batchapps.pool_manager.PoolSpecifier')
+    @mock.patch.object(PoolManager, 'get_pool')
+    def test_poolmgr_create(self, mock_get, mock_pool, mock_api, mock_creds, mock_cfg):
+        """Test create_spec"""
+
+        spec = mock.create_autospec(PoolSpecifier)
+        mgr = PoolManager(mock_creds, cfg=mock_cfg)
+
+        pool = mgr.create(spec)
+        self.assertFalse(mock_pool.called)
+        self.assertTrue(spec.start.called)
+
+        pool = mgr.create()
+        mock_pool.assert_called_with(mock.ANY, 0, 1, False)
+        self.assertTrue(mock_get.called)
+        
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
+    @mock.patch('batchapps.pool_manager.BatchAppsApi')
+    @mock.patch('batchapps.pool_manager.PoolSpecifier')
+    def test_poolmgr_create_spec(self, mock_pool, mock_api, mock_creds, mock_cfg):
+        """Test create_spec"""
+
+        mgr = PoolManager(mock_creds, cfg=mock_cfg)
+        spec = mgr.create_spec()
+        mock_pool.assert_called_with(mock.ANY, 0, 1, False)
+
+        spec = mgr.create_spec(target_size=3, max_tasks=3, communication=True)
+        mock_pool.assert_called_with(mock.ANY, 3, 3, True)
+
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
+    @mock.patch('batchapps.pool_manager.BatchAppsApi')
+    @mock.patch('batchapps.pool_manager.Pool')
+    def test_poolmgr_get_pool(self, mock_pool, mock_api, mock_creds, mock_cfg):
+        """Test get_pool"""
+
+        mgr = PoolManager(mock_creds, cfg=mock_cfg)
+
+        with self.assertRaises(ValueError):
+            mgr.get_pool()
+
+        resp = mock.create_autospec(Response)
+        resp.success = False
+        resp.result = RestCallException(None, "test", None)
+        mgr._client.get_pool.return_value = resp
+
+        with self.assertRaises(RestCallException):
+            mgr.get_pool(url="http://test")
+        mgr._client.get_pool.assert_called_with(url="http://test")
+
+        resp.success = True
+        resp.result = {'id':'1', 'autoPool':False, 'state':'test'}
+        job = mgr.get_pool(url="http://test")
+        mgr._client.get_pool.assert_called_with(url="http://test")
+        mock_pool.assert_called_with(mgr._client, id='1', autoPool=False, state="test")
+
+        resp.result = {'id':'1', 'name':'2', 'type':'3', 'other':'4'}
+        job = mgr.get_pool(poolid="test_id")
+        mgr._client.get_pool.assert_called_with(pool_id="test_id")
+        
+    @mock.patch('batchapps.credentials.Configuration')
+    @mock.patch('batchapps.credentials.Credentials')
+    @mock.patch('batchapps.pool_manager.BatchAppsApi')
     @mock.patch('batchapps.pool_manager.Pool')
     def test_poolmgr_get_pools(self, mock_pool, mock_api, mock_creds, mock_cfg):
         """Test get_pools"""
