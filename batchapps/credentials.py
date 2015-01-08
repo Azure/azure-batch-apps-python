@@ -154,14 +154,14 @@ class AzureOAuth(object):
             - msa (bool): Authenticate by MSA. Default is ``False``.
             - prompt (bool): Force login prompt regardless of existing session.
               Default is ``False``.
-            - state (str): A guid for validating the state of the server
+            - state (str): A GUID for validating the state of the server
               communication.
             - additional_args (dict): Any additional AAD parameters to include
               in the URL
 
         :Returns:
             - A URL (str) that can be used to direct the user to a login page.
-            - A guid (str) for validating the state of the server
+            - A GUID (str) for validating the state of the server
               communication.
 
         :Raises:
@@ -206,23 +206,23 @@ class AzureOAuth(object):
 
         except Exception as exp:
             raise AuthenticationException(
-                "Failed to generate auth url. Error: {0}".format(str(exp)))
+                "Failed to generate auth URL. Error: {0}".format(str(exp)))
 
     @staticmethod
     def get_authorization_token(auth_url, config=None, state=None):
         """Retrieve access token from AAD server.
 
         :Args:
-            - auth_url (str): The redirect URL generated from a successfull
+            - auth_url (str): The redirect URL generated from a successful
               browser sign-in.
 
         :Kwargs:
             - config (:class:`.Configuration`): A custom configuration object.
               Default is `None` where a default :class:`.Configuration` will
               be created.
-            - state (str): A state guid for auth server validation. This is not
+            - state (str): A state GUID for auth server validation. This is not
               necessary if :meth:`.get_authorization_url` was used to generate
-              the url, as state will already be set. If set, will override.
+              the URL, as state will already be set. If set, will override.
 
         :Returns:
             - An authenticated :class:`.Credentials` object.

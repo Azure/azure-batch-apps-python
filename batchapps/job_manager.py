@@ -38,7 +38,7 @@ class JobManager(object):
     """
     This is the only class that a user should need to import to access all
     job manipulation. Contains general functionality for the creation
-    of new job submissions and retrieveing data on submitted jobs.
+    of new job submissions and retrieving data on submitted jobs.
     """
 
     def __init__(self, credentials, cfg=None):
@@ -83,7 +83,7 @@ class JobManager(object):
 
         :Raises:
             - :exc:`AttributeError` if invalid parameters have been set.
-            - :exc:`.RestCallException` if an error occured during the request.
+            - :exc:`.RestCallException` if an error occurred during the request.
         """
         resp = None
         if hasattr(job, 'update'):
@@ -126,7 +126,7 @@ class JobManager(object):
             - A list of :class:`.SubmittedJob` objects.
 
         :Raises:
-            - :exc:`.RestCallException` if an error occured during the request.
+            - :exc:`.RestCallException` if an error occurred during the request.
         """
         if name:
             resp = self._client.list_jobs(int(index),
@@ -189,11 +189,11 @@ class JobManager(object):
             - submitjob (:class:`.JobSubmission`): The job to be submitted.
 
         :Kwargs:
-            - upload_threads (int): Number of concurrent asset uplaods.
+            - upload_threads (int): Number of concurrent asset uploads.
               Default is 1.
 
         :Returns:
-            - A job susbmission response dictionary in the format:
+            - A job submission response dictionary in the format:
               ``{'jobId': '', 'link': ''}``
 
               .. warning:: Dictionary response will be deprecated to be replaced

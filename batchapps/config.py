@@ -250,12 +250,12 @@ class Configuration(object):
         If an existing log file has exceeded 10mb, it will be 'archived',
         and a new log file created.
 
-        All logging statements will be in the folowing format:
+        All logging statements will be in the following format:
             ``"%(asctime)-15s [%(levelname)s] %(module)s: %(message)s"``
 
         :Args:
             - data_path (str): The path that the log file will be written to
-              if file writting is enabled in the configuration
+              if file writing is enabled in the configuration
               (see :meth:._check_directory())
 
         :Returns:

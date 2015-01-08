@@ -35,10 +35,10 @@ class Pool(object):
 
         :Args:
             - client (:class:`.BatchAppsApi`): A configured and
-              authenticated api client.
+              authenticated API client.
         
         :Kwargs:
-            - id (str): The pool guid.
+            - id (str): The pool GUID.
             - creationTime (str): Time the pool was created.
             - targetDedicated (int): The target size of the pool.
             - currentDedicated (int): The current pool size.
@@ -53,9 +53,9 @@ class Pool(object):
               the pool need to be able to communicate directly with each other.
             - certificateReferences (list): A list of certificates that need
               to be installed on the TVMs of the pool. Max 10.
-            - jobs (list): A list of dictionaries refering to the jobs
+            - jobs (list): A list of dictionaries referring to the jobs
               currently running on the pool.
-            - poolDetailLink (dict): A dictiory with url info to pool details.
+            - poolDetailLink (dict): A dictionary with URL info to pool details.
         """
         self._api = client
         self._log = logging.getLogger('batch_apps')
@@ -177,7 +177,7 @@ class PoolSpecifier(Pool):
             - max_tasks (int): Max tasks that can run on a single TVM.
               Default is 1.
             - communication (bool): Indicates whether tasks running on TVMs
-              in the pool need to ba able to communicated directly with each
+              in the pool need to be able to communicated directly with each
               other. Default is ``False``.
         """
         self._api = client

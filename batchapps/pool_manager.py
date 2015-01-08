@@ -66,7 +66,8 @@ class PoolManager(object):
     def create(self, spec=None, target_size=0, max_tasks=1,
                communication=False):
         """
-        Create a new pool which can be referenced for use on job submission.
+        Create and start a new pool which can be referenced for use on job
+        submission.
         The minimum number of running instances for a pool with 1 task per TVM
         is 3 to prevent a deadlock.
 
@@ -74,10 +75,10 @@ class PoolManager(object):
             - spec (:class:`.PoolSpecifier`): A specifier of the pool to
               create. If set, all proceeding kwargs will be ignored.
             - target_size (int): The target number of instances in the pool.
-              Default is 0 (i.e. and empty pool).
+              Default is 0 (i.e. an empty pool).
             - max_tasks (int): Maximum number of tasks per TVM. Default is 1.
             - communication (bool): Whether tasks running on TVMs
-              in the pool need to ba able to communicated directly with each
+              in the pool need to be able to communicated directly with each
               other. Default is ``False``.
 
         :Returns:
@@ -98,10 +99,10 @@ class PoolManager(object):
 
         :Kwargs:
             - target_size (int): The target number of instances in the pool.
-              Default is 0 (i.e. and empty pool).
+              Default is 0 (i.e. an empty pool).
             - max_tasks (int): Maximum number of tasks per TVM. Default is 1.
             - communication (bool): Whether tasks running on TVMs
-              in the pool need to ba able to communicated directly with each
+              in the pool need to be able to communicated directly with each
               other. Default is ``False``.
 
         :Returns:
@@ -126,7 +127,7 @@ class PoolManager(object):
 
         :Raises:
             - :exc:`AttributeError` if invalid parameters have been set.
-            - :exc:`.RestCallException` if an error occured during the request.
+            - :exc:`.RestCallException` if an error occurred during the request.
         """
         resp = None
 
@@ -155,7 +156,7 @@ class PoolManager(object):
             - A list of :class:`.Pool` objects.
 
         :Raises:
-            - :exc:`.RestCallException` if an error occured during the request.
+            - :exc:`.RestCallException` if an error occurred during the request.
         """
         resp = self._client.list_pools()
 
@@ -184,7 +185,7 @@ class PoolManager(object):
         
         :Returns:
             - A list of any pools that failed to delete. If the call was
-              successfull this list will be empty, otherwise it will hold
+              successful this list will be empty, otherwise it will hold
               a tuple with the pool that errored, and the exception:
               ``[(poolA, exception), (poolB, exception)]``
 

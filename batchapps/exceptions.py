@@ -81,7 +81,7 @@ class FileDownloadException(Exception):
 
 class FileMissingException(Exception):
     """
-    Error occured during userfile creation and gathering where file does not
+    Error occurred during userfile creation and gathering where file does not
     exist locally.
     """
     def __init__(self, *args):

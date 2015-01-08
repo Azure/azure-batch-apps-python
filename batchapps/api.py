@@ -24,7 +24,7 @@
 # THE SOFTWARE.
 #
 #--------------------------------------------------------------------------
-""" Client for the Batch Apps Managment API.
+""" Client for the Batch Apps Management API.
 """
 
 from batchapps import rest_client
@@ -55,7 +55,7 @@ class Response(object):
 
         :Kwargs:
             - output: The response from the REST client. This could be the
-              result of a successful api call, or it could hold exception
+              result of a successful API call, or it could hold exception
               information for a failed call. Defaults to None.
         """
         self.success = success
@@ -127,7 +127,7 @@ class BatchAppsApi(object):
             - The complete, formatted URL (str)
         """
         end_p = self._config.endpoint()
-        self._log.debug("Formatting url: https://{endpoint}/api/{api}".format(
+        self._log.debug("Formatting URL: https://{endpoint}/api/{api}".format(
             endpoint=end_p,
             api=api_call))
 
@@ -198,7 +198,7 @@ class BatchAppsApi(object):
         **or** a URL to the job. If both are supplied, URL is used.
 
         :Kwargs:
-            - job_id (str): Guid of the job on which info is requested.
+            - job_id (str): GUID of the job on which info is requested.
             - url (str): A complete URL to the job info.
 
         :Returns:
@@ -283,7 +283,7 @@ class BatchAppsApi(object):
         application.
 
         :Args:
-            - job_id (str): The guid of the job on which to download the logs.
+            - job_id (str): The GUID of the job on which to download the logs.
 
         :Kwargs:
             - start (str): The start time from which the logs will be
@@ -330,7 +330,7 @@ class BatchAppsApi(object):
         """Cancels a running job.
 
         :Args:
-            - job_id (str): guid of the job to be cancelled.
+            - job_id (str): GUID of the job to be cancelled.
 
         :Returns:
             - A :class:`.Response` object with the POST response, however this
@@ -419,7 +419,7 @@ class BatchAppsApi(object):
                                   "jobOutputs key not in response message",
                                   get_resp))
 
-        # Reformat output dictrionary to be more manageable
+        # Reformat output dictionary to be more manageable
         for output in get_resp['jobOutputs']:
             outputs.append({
                 'name': output.get('name'),
@@ -740,7 +740,7 @@ class BatchAppsApi(object):
 
         :Returns:
             - A :class:`.Response` object containing the list of task
-              dictionaries if the call is successfull.
+              dictionaries if the call is successful.
             - A :class:`.Response` object containing the
               :class:`.RestCallException` is the call failed.
         """
@@ -1187,7 +1187,7 @@ class BatchAppsApi(object):
         Resize an existing pool.
 
         :Args:
-            - pool_id (str): The Guid of the pool to be resized.
+            - pool_id (str): The GUID of the pool to be resized.
             - target_size (int): The new size of the pool.
 
         :Returns:
@@ -1218,7 +1218,7 @@ class BatchAppsApi(object):
         **or** a URL to the pool. If both are supplied, URL is used.
 
         :Kwargs:
-            - pool_id (str): Guid of the pool on which info is requested.
+            - pool_id (str): GUID of the pool on which info is requested.
             - url (str): A complete URL to the pool info.
 
         :Returns:
@@ -1278,7 +1278,7 @@ class BatchAppsApi(object):
         Delete an existing pool.
 
         :Args:
-            - pool_id (str): The Guid of the pool to be deleted.
+            - pool_id (str): The GUID of the pool to be deleted.
 
         :Returns:
             - :class:`.Response` with the POST response, however this is not

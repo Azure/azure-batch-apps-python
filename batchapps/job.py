@@ -47,7 +47,7 @@ class JobSubmission(object):
     Description of a new processing request to be sent to the cloud.
     Specifies application to be used, the files required for processing and
     any additional parameters required for the processing.
-    It also specifies the requested compute resouces to be dedicated to the
+    It also specifies the requested compute resources to be dedicated to the
     job on submission.
 
     :Attributes:
@@ -55,6 +55,7 @@ class JobSubmission(object):
         - required_files (:py:class:`.FileCollection`)
         - source (str)
         - instances (int)
+        - pool (:py:class:`.Pool`)
         - params (dict)
     """
 
@@ -78,6 +79,8 @@ class JobSubmission(object):
                     included in the above ``files`` collection.
                   - 'instances': The number (int) of instances to allocate
                     to the job on submission.
+                  - 'pool': A :py:class:`.Pool` to submit the job to. Default
+                    is ``None``, i.e. create an auto-pool.
         """
         if not hasattr(client, 'send_job'):
             raise TypeError(
@@ -98,6 +101,8 @@ class JobSubmission(object):
             'source', str(job_settings.get('job_file', "")))
         super(JobSubmission, self).__setattr__(
             'instances', int(job_settings.get('instances', 0))) #DEP
+        super(JobSubmission, self).__setattr__(
+            'pool', job_settings.get('pool', None))
 
     def __str__(self):
         """Job submission as a string
@@ -133,7 +138,7 @@ class JobSubmission(object):
 
     def __setattr__(self, name, value):
         """
-        Set job attribte if it exists, or add job parameter.
+        Set job attribute if it exists, or add job parameter.
         If the :py:class:`.JobSubmission` object has the named attribute
         this will be set. If no such attribute exists, the key and value will
         be added as a string pair to the job parameters dictionary.
@@ -210,7 +215,7 @@ class JobSubmission(object):
             'certificateReferences': pool.certificates
             }
 
-    def _create_job_message(self, pool_id):
+    def _create_job_message(self):
         """
         Create job message for submitting to the REST API.
         Only used internally on job submission (see :py:meth:.submit()).
@@ -224,8 +229,11 @@ class JobSubmission(object):
         if not hasattr(self.required_files, '_get_message'):
             self.add_file_collection()
 
-        if pool_id:
-            pool_options = {'poolId': str(pool_id)}
+        if self.pool and hasattr(self.pool, 'id'):
+            pool_options = {'poolId': self.pool.id}
+
+        elif self.pool:
+            pool_options = {'poolId': str(self.pool)}
 
         else:
             size = max(int(self.instances), 3)
@@ -338,11 +346,8 @@ class JobSubmission(object):
         self._log.debug(
             "Assigned file: {0} as starting job file".format(self.source))
 
-    def submit(self, pool_id=None):
+    def submit(self):
         """Submit the job.
-
-        :Kwargs:
-            - pool_id (str): The Id of an existing pool to submit the job to.
 
         :Returns:
             - If successful, a dictionary holding the new job's ID and a URL
@@ -354,10 +359,10 @@ class JobSubmission(object):
         :Raises:
             - :class:`.RestCallException` if job submission failed.
         """
-        resp = self._api.send_job(self._create_job_message(pool_id))
-
+        resp = self._api.send_job(self._create_job_message())
+        
         if resp.success:
-            self._log.info("Job successfull submitted with ID: "
+            self._log.info("Job successful submitted with ID: "
                            "{0}".format(resp.result['jobId']))
 
             return {'jobId':resp.result['jobId'], #DEP
@@ -468,12 +473,12 @@ class SubmittedJob(object):
 
     def __setattr__(self, name, value):
         """
-        Set job attribte if it exists.
+        Set job attribute if it exists.
         The submission data cannot be overwritten except through using the
         :meth:`.update()` call to collect updated date from the server.
 
         :Args:
-            - name (str): Name of the attribte to be set.
+            - name (str): Name of the attribute to be set.
             - value: Value to set to the attribute.
 
         :Raises:
@@ -608,7 +613,7 @@ class SubmittedJob(object):
         """Internal method to download any file from the job output.
 
         :Args:
-            - output (dict): The output specification dictonary as created
+            - output (dict): The output specification dictionary as created
               by :meth:`.list_all_outputs()`.
             - download_dir (str): The directory the output file will be
               written to.
@@ -625,7 +630,7 @@ class SubmittedJob(object):
         output_props = self._api.props_output_file(url=output.get('link'))
 
         if output_props.success:
-            self._log.debug("Successfull retrieved output size data: "
+            self._log.debug("Successful retrieved output size data: "
                             "{0}".format(output_props.result))
 
             size = output_props.result
@@ -682,7 +687,7 @@ class SubmittedJob(object):
         :Kwargs:
             - output: An output dictionary (as created by
               :meth:`.list_all_outputs()`). If specified, the specific output
-              will be downloaded, otheriwse the jobs final output will be
+              will be downloaded, otherwise the jobs final output will be
               downloaded.
 
         :Returns:
@@ -692,7 +697,7 @@ class SubmittedJob(object):
             - :exc:`.FileDownloadException` if the SubmittedJob has no URL
               to a final output yet. This may be because the job has not yet
               finished, or has not been updated.
-            - :exc:`.RestCallException` if an error occured during the request.
+            - :exc:`.RestCallException` if an error occurred during the request.
         """
         if output:
             name = output.get('name', "")
@@ -725,7 +730,7 @@ class SubmittedJob(object):
               ``['name', 'link', 'type']``.
 
         :Raises:
-            - :exc:`.RestCallException` if error occured during request.
+            - :exc:`.RestCallException` if error occurred during request.
         """
         all_outputs = self._api.list_output_files(self.id)
 
@@ -756,7 +761,7 @@ class SubmittedJob(object):
             - :exc:`.FileDownloadException` if the SubmittedJob has no
               reference to a job thumbnail. This could mean that the job
               has not yet completed or the object has not been updated.
-            - :exc:`.RestCallException` if an error occured during the request.
+            - :exc:`.RestCallException` if an error occurred during the request.
         """
         if not download_dir:
             download_dir = tempfile.gettempdir()
@@ -820,7 +825,7 @@ class SubmittedJob(object):
             - ``True`` if the job has been successfully updated.
 
         :Raises:
-            - :exc:`.RestCallException` if an error occured during the request.
+            - :exc:`.RestCallException` if an error occurred during the request.
         """
         self._log.debug("About to update job {0}".format(self.id))
         resp = self._api.get_job(self.id)
@@ -864,8 +869,8 @@ class SubmittedJob(object):
         Reprocess any failed tasks in a job.
 
         :Returns:
-            - ``True`` if the failed tasks have been successfully requeued.
-            - ``False`` if the job is unable to be requeued,
+            - ``True`` if the failed tasks have been successfully re-queued.
+            - ``False`` if the job is unable to be re-queued,
               e.g. it has already completed.
 
         :Raises:
@@ -997,7 +1002,7 @@ class Task(object):
             - :exc:`.FileDownloadException` if the Task has no reference to
               a thumbnail. This could mean that the task has not yet
               completed or the object has not been updated.
-            - :exc:`.RestCallException` if an error occured during the request.
+            - :exc:`.RestCallException` if an error occurred during the request.
         """
         if not download_dir:
             download_dir = tempfile.gettempdir()
@@ -1040,7 +1045,7 @@ class Task(object):
               ``['name', 'link', 'type']``.
 
         :Raises:
-            - :exc:`.RestCallException` if error occured during request.
+            - :exc:`.RestCallException` if error occurred during request.
         """
         resp = self._api.list_task_outputs(self._job, self.id)
 
@@ -1068,7 +1073,7 @@ class Task(object):
             - The full path to the downloaded file (str).
 
         :Raises:
-            - :exc:`.RestCallException` if an error occured during the request.
+            - :exc:`.RestCallException` if an error occurred during the request.
         """
         download = self._get_file(output, download_dir, overwrite)
         if download.success:

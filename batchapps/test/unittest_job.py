@@ -41,7 +41,7 @@ except ImportError:
 import tempfile
 from operator import itemgetter
 from batchapps.utils import Listener
-from batchapps.pool import PoolSpecifier
+from batchapps.pool import Pool, PoolSpecifier
 from batchapps.api import (
     BatchAppsApi,
     Response)
@@ -191,7 +191,7 @@ class TestJobSubmission(unittest.TestCase):
         job = JobSubmission(api, "test_job", params={})
 
         #with self.assertRaises(ValueError):
-        msg = job._create_job_message(None)
+        msg = job._create_job_message()
         self.assertTrue(mock_pool.called)
         self.assertEqual(msg, {'Name':'test_job',
                                'Type': 'TestApp',
@@ -204,7 +204,7 @@ class TestJobSubmission(unittest.TestCase):
 
         job.required_files = files
         job.instances = 5
-        msg = job._create_job_message(None)
+        msg = job._create_job_message()
         mock_pool.assert_called_with(5)
         self.assertEqual(msg, {'Name':'test_job',
                                'Type': 'TestApp',
@@ -219,15 +219,25 @@ class TestJobSubmission(unittest.TestCase):
         job.instances = []
         job.type = 42
         job.name = {}
+        job.pool = "testID"
 
-        with self.assertRaises(TypeError):
-            job._create_job_message()
-
-        msg = job._create_job_message("testID")
+        msg = job._create_job_message()
         self.assertEqual(msg, {'Name':'{}',
                                'Type': 'TestApp',
                                'RequiredFiles':["file1", "file2"],
                                'poolId': "testID",
+                               'Parameters':[{"Name":"k1", "Value":"v1"}],
+                               'JobFile':'None',
+                               'Settings':'',
+                               'Priority':'Medium'})
+
+        job.pool = mock.create_autospec(Pool)
+        job.pool.id = "differentID"
+        msg = job._create_job_message()
+        self.assertEqual(msg, {'Name':'{}',
+                               'Type': 'TestApp',
+                               'RequiredFiles':["file1", "file2"],
+                               'poolId': "differentID",
                                'Parameters':[{"Name":"k1", "Value":"v1"}],
                                'JobFile':'None',
                                'Settings':'',
@@ -320,12 +330,12 @@ class TestJobSubmission(unittest.TestCase):
         with self.assertRaises(RestCallException):
             job.submit()
         api.send_job.assert_called_with("{message}")
-        mock_message.assert_called_with(None)
+        mock_message.assert_called_with()
 
         resp.success = True
         resp.result = {'jobId':'abc', 'link':{'href':'test'}}
-        sub = job.submit(pool_id="testID")
-        mock_message.assert_called_with("testID")
+        sub = job.submit()
+        mock_message.assert_called_with()
         self.assertEqual(sub, {'jobId':'abc', 'id':'abc', 'link':'test'})
 
 

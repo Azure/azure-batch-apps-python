@@ -60,7 +60,7 @@ def parse_date_string(time_string):
 
 def url_from_filename(filename):
     """
-    Format a given filename for use in a URL, version independant.
+    Format a given filename for use in a URL, version independent.
 
     :Args:
         - filename (str): The filename to be used in the URL.
@@ -85,7 +85,7 @@ def filename_from_url(url, ext):
     url_file = alt.path.rpartition('/')[2]
     filename = urlunquote(url_file)
 
-    LOG.debug("Filename {fn} with extension {ex} from url "
+    LOG.debug("Filename {fn} with extension {ex} from URL "
               "{ur}".format(fn=filename, ex=ext, ur=url))
 
     return (filename + ext) if ext else filename
@@ -105,7 +105,7 @@ def format_dictionary(dictionary):
 
 def valid_keys(resp_dict, search_keys):
     '''
-    Version independant checking if a list of keys are present in a
+    Version independent checking if a list of keys are present in a
     given dictionary.
 
     :Args:
@@ -161,7 +161,7 @@ class Listener(object):
             - process (:class:`multiprocessing.Process`): The process to be
                 wrapped for monitoring
             - child (:class:`.Listener`): And child processes that should be
-                stoped before the parent process is stopped.
+                stopped before the parent process is stopped.
         """
         self._proc = process
         self.pid = self._proc.pid

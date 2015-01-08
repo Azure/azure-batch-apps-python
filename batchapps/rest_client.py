@@ -109,8 +109,8 @@ def _call(auth, *args, **kwargs):
             raise  RestCallException(None, msg, resp, silent=True)
 
         elif resp.status_code == 404:
-            msg = ("Invalid endpoint or api call. Failed with status {0}.\n"
-                   "Url: {1}".format(resp.status_code, resp.url))
+            msg = ("Invalid endpoint or API call. Failed with status {0}.\n"
+                   "URL: {1}".format(resp.status_code, resp.url))
             raise RestCallException(OSError, msg, resp)
 
         else:
@@ -128,7 +128,7 @@ def get(auth, url, headers, params=None):
         - headers (dict): The headers to be used in the request.
 
     :Kwargs:
-        - params (dict): Any additional parameters to be added to the uri as
+        - params (dict): Any additional parameters to be added to the URI as
           required by the specified call.
 
     :Returns:
@@ -138,7 +138,7 @@ def get(auth, url, headers, params=None):
         - :exc:`.RestCallException` is the call failed,
           or returned a non-200 status.
     """
-    LOG.debug("Get call url: {0}, headers: {1}, params: "
+    LOG.debug("Get call URL: {0}, headers: {1}, params: "
               "{2}".format(url, headers, params))
 
     try:
@@ -178,7 +178,7 @@ def head(auth, url, headers, filename=""):
     """
     try:
         url = url.format(name=url_from_filename(filename))
-        LOG.debug("Head call url: {0}, headers: {1}".format(url, headers))
+        LOG.debug("Head call URL: {0}, headers: {1}".format(url, headers))
         response = _call(auth, 'HEAD', url, headers=headers)
         return int(response.headers["content-length"])
 
@@ -192,7 +192,7 @@ def head(auth, url, headers, filename=""):
 
     except IndexError as exp:
         raise RestCallException(IndexError,
-                                "Incorrectly formatted url supplied.",
+                                "Incorrectly formatted URL supplied.",
                                 exp)
 
 def post(auth, url, headers, message=None):
@@ -207,7 +207,7 @@ def post(auth, url, headers, message=None):
 
     :Kwargs:
         - message (dict): Data to be acted on e.g. job submission
-          specfication, file query parameters. Format and contents will
+          specification, file query parameters. Format and contents will
           depend on the specific API call.
 
     :Returns:
@@ -221,7 +221,7 @@ def post(auth, url, headers, message=None):
         if message:
             message = json.dumps(message)
 
-        LOG.debug("Post call url: {0}, headers: {1}, message: "
+        LOG.debug("Post call URL: {0}, headers: {1}, message: "
                   "{2}".format(url, headers, message))
 
         response = _call(auth, 'POST', url, headers=headers, data=message)
@@ -266,8 +266,7 @@ def put(auth, url, headers, userfile, params, *args):
         put_headers = dict(headers)
         put_headers["Content-Type"] = "application/octet-stream"
 
-        LOG.info("url={0}, headers={1}".format(url, put_headers))
-        LOG.debug("Put call url: {0}, headers: {1}, "
+        LOG.debug("Put call URL: {0}, headers: {1}, "
                   "file: {2}, parameters: {3}".format(url,
                                                       put_headers,
                                                       userfile,
@@ -292,7 +291,7 @@ def put(auth, url, headers, userfile, params, *args):
 
     except IndexError as exp:
         raise RestCallException(IndexError,
-                                "Incorrectly formatted url supplied.",
+                                "Incorrectly formatted URL supplied.",
                                 exp)
 
 def download(auth, url, headers, output_path, size, overwrite,
@@ -336,7 +335,7 @@ def download(auth, url, headers, output_path, size, overwrite,
 
         return True
 
-    LOG.debug("Get call url: {0}, headers: {1}, file: "
+    LOG.debug("Get call URL: {0}, headers: {1}, file: "
               "{2}, size: {3}, overwrite: {4}".format(url,
                                                       headers,
                                                       downloadfile,
@@ -392,7 +391,7 @@ def delete(auth, url, headers):
           non-200 status.
     """
     try:
-        LOG.debug("Delete call url: {0}".format(url))
+        LOG.debug("Delete call URL: {0}".format(url))
         response = _call(auth, 'DELETE', url, headers=headers)
         return response
 

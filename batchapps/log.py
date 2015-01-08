@@ -50,7 +50,7 @@ class PickleLog(logging.getLoggerClass()):
         """De-serialization state of the logger.
 
         Reinstates the console stream handler, but the not file handler as
-        the could create confilcts between subprocesses writing to the same
+        the could create conflicts between subprocesses writing to the same
         file.
 
         :Args:

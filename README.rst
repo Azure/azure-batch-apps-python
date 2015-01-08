@@ -230,18 +230,16 @@ when a job has been submitted without referencing an existing pool, it will
 use an auto-pool which will be created for the running of the job, then 
 deleted on completion::
 
-	from bathcapps import AzureOAuth, PoolManager
+	from batchapps import AzureOAuth, PoolManager
 
 	creds = AzureOAuth.get_unattended_session()
 	mgr = PoolManager(creds)
 
 	new_pool = mgr.create_pool(target_size=5)
-	ref = new_pool.start()
-
-	pool = PoolManager.get_pool(url=ref['link'])
 
 	# Create new job submission, then submit to pool
-	my_job.submit(pool.id)
+	my_job.pool = new_pool
+	my_job.submit()
 
 	# After job has completed, and we no longer need the pool
 	pool.delete()

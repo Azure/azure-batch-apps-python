@@ -115,7 +115,7 @@ class FileCollection(object):
 
         :Returns:
             - If a string name is passed in, the output will be a list of
-              :class:`.UserFile` objects, as multplie files may have the same
+              :class:`.UserFile` objects, as multiple files may have the same
               name. Likewise, passing in a slice will produce a list of
               :class:`.UserFile`. Passing an int index will return a single
               :class:`.UserFile`
@@ -320,8 +320,8 @@ class FileCollection(object):
         :Args:
             - userfile (str, int, :class:`.UserFile`, list, slice): The name,
               object or index of the file to be removed. If a name is passed
-              in, only the first occurance of that name will be removed. To
-              remove all occurances, use :meth:`.__delitem__()`.
+              in, only the first occurrence of that name will be removed. To
+              remove all occurrences, use :meth:`.__delitem__()`.
               A :class:`.UserFile` object can also be passed in or a list
               of any of the above.
 
@@ -370,7 +370,7 @@ class FileCollection(object):
             - force (bool): Whether the client will only upload if the file
               has not be previously uploaded. Default is ``False``,
               i.e. always check and if file has been uploaded, don't
-              re-uplod. Set to ``True`` to upload regardless.
+              re-upload. Set to ``True`` to upload regardless.
             - threads (int): number of parallel uploads, default is 1
               (i.e. not parallel). Max threads is 10.
 
@@ -483,7 +483,7 @@ class FileCollection(object):
                              if (_file.name == r_file.name)
                              and (_file.compare_lastmodified(r_file))]
 
-                # Remove any matches from the list of files to be uplaoded.
+                # Remove any matches from the list of files to be uploaded.
                 file_set.remove(to_remove)
 
         self._log.debug(
@@ -624,7 +624,7 @@ class UserFile(object):
         return self.name
 
     def __hash__(self):
-        """:class:`.UserFile` hashing behaviour
+        """:class:`.UserFile` hashing behavior
 
         :Returns:
             - If file exists locally, hash of the file checksum.
@@ -638,14 +638,14 @@ class UserFile(object):
             return hash(self.path)
 
     def _verify_path(self):
-        """Verify existance of new userfile reference.
+        """Verify existence of new userfile reference.
 
         :Returns:
             - ``True`` if file exists at the given path, else ``False``.
         """
         if not path.isfile(self.path):
             self._log.warning(
-                "Unable to verify existance of new file: %s", self.path)
+                "Unable to verify existence of new file: %s", self.path)
 
             return False
 
@@ -809,7 +809,7 @@ class UserFile(object):
             - :class:`.UserFile` if file has already been uploaded, else ``None``.
 
         :Raises:
-            - :class:`.RestCallException` if any errors occured in the API
+            - :class:`.RestCallException` if any errors occurred in the API
               client.
         """
         resp = self._api.query_files(self.create_query_specifier())
@@ -837,7 +837,7 @@ class UserFile(object):
               will be downloaded.
 
         :Raises:
-            - :class:`.RestCallException` if any errors occured in the API
+            - :class:`.RestCallException` if any errors occurred in the API
               client.
         """
         
