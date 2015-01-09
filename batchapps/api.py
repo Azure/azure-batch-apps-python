@@ -151,11 +151,12 @@ class BatchAppsApi(object):
 
         :Kwargs:
             - index (int): The starting index from which the list of jobs will
-              be returned. Default is 0, i.e. return all jobs from the start.
+              be returned. The default is 0, i.e. return all jobs from the
+              start.
             - per_call (int): The number of job entries from ``index`` to
-              return. Default is 10.
+              return. The default is 10.
             - name (str): Return only the jobs whose name contains the given
-              string. Default is None.
+              string. The default is None.
 
         :Returns:
             - :class:`.Response` object containing success of call. If
@@ -198,7 +199,7 @@ class BatchAppsApi(object):
         **or** a URL to the job. If both are supplied, URL is used.
 
         :Kwargs:
-            - job_id (str): GUID of the job on which info is requested.
+            - job_id (str): ID of the job on which info is requested.
             - url (str): A complete URL to the job info.
 
         :Returns:
@@ -283,14 +284,14 @@ class BatchAppsApi(object):
         application.
 
         :Args:
-            - job_id (str): The GUID of the job on which to download the logs.
+            - job_id (str): The ID of the job on which to download the logs.
 
         :Kwargs:
             - start (str): The start time from which the logs will be
               downloaded. If not specified, the default is from the
               beginning of the job.
             - max_lines (int): The max number of logging messages to retrieve.
-              Default is 100. If set to ``None``, all messages from start
+              The default is 100. If set to ``None``, all messages from start
               time will be retrieved.
 
         :Returns:
@@ -330,7 +331,7 @@ class BatchAppsApi(object):
         """Cancels a running job.
 
         :Args:
-            - job_id (str): GUID of the job to be cancelled.
+            - job_id (str): The ID of the job to be cancelled.
 
         :Returns:
             - A :class:`.Response` object with the POST response, however this
@@ -452,12 +453,12 @@ class BatchAppsApi(object):
 
         :Kwargs:
             - job_id (str): The ID of the job whose output will be downloaded.
-              Default is None.
+              The default is None.
             - otype (str): The type of output to be downloaded, must be a
               string in ``['output', 'preview']``.
             - url (str): The URL directly to the file to be downloaded. If
               supplied, ``job_id`` and ``otype`` will not be used.
-              Default is None.
+              The default is None.
 
         :Returns:
             - :class:`.Response` with the GET response, however this is not
@@ -522,12 +523,12 @@ class BatchAppsApi(object):
 
         :Kwargs:
             - job_id (str): The ID of the job whose output will be checked.
-              Default is None.
+              The default is None.
             - otype (str): The type of output to be checked, must be a
               string in ``['output', 'preview']``.
             - url (str): The URL directly to the file to be checked. If
               supplied, ``job_id`` and ``otype`` will not be used.
-              Default is None.
+              The default is None.
 
         :Returns:
             - :class:`.Response` with the requested output size in bytes (int)
@@ -630,10 +631,10 @@ class BatchAppsApi(object):
 
         :Kwargs:
             - job_id (str): The ID of the job whose output will be downloaded.
-              Default is None.
+              The default is None.
             - fname (str): The name of the output file to be downloaded.
             - url (str): The URL directly to the file to be downloaded.
-              Default is None.
+              The default is None.
 
         :Returns:
             - :class:`.Response` with the GET response, however this is not
@@ -690,10 +691,10 @@ class BatchAppsApi(object):
 
         :Kwargs:
             - job_id (str): The ID of the job whose output will be checked.
-              Default is None.
+              The default is None.
             - fname (str): The name of the output file to be downloaded.
             - url (str): The URL directly to the file to be checked.
-              Default is None.
+              The default is None.
 
         :Returns:
             - :class:`.Response` with the requested output size in bytes (int)
@@ -734,7 +735,7 @@ class BatchAppsApi(object):
 
         :Kwargs:
             - job_id (str): ID of of the job to list the tasks for.
-              Default is None.
+              The default is None.
             - url (str): Direct URL to the task list of the job
               (supplied by :meth:`.BatchAppsApi.get_job()`)
 
@@ -1016,7 +1017,7 @@ class BatchAppsApi(object):
 
         :Kwargs:
             - overwrite (bool): Whether to overwrite a destination file if it
-              already exists. Default is ``False``.
+              already exists. The default is ``False``.
 
         :Returns:
             - :class:`.Response` with the GET response, however this is not
@@ -1132,12 +1133,12 @@ class BatchAppsApi(object):
         Add a new pool.
 
         :Kwargs:
-            - target_size (int): The target size of the pool. Default is 0.
+            - target_size (int): The target size of the pool. The default is 0.
             - max_tasks (int): Max tasks that can run on a single TVM.
-              Default is 1.
+              The default is 1.
             - communication (bool): Indicates whether tasks running on TVMs
-              in the pool need to ba able to communicated directly with each
-              other. Default is ``False``.
+              in the pool need to ba able to communicate directly with each
+              other. The default is ``False``.
             - certs (list): A list of certificates that need to be installed
               on the TVMs of the pool. The maximum number of certs that can
               be installed on a pool is 10.
@@ -1187,7 +1188,7 @@ class BatchAppsApi(object):
         Resize an existing pool.
 
         :Args:
-            - pool_id (str): The GUID of the pool to be resized.
+            - pool_id (str): The ID of the pool to be resized.
             - target_size (int): The new size of the pool.
 
         :Returns:
@@ -1218,7 +1219,7 @@ class BatchAppsApi(object):
         **or** a URL to the pool. If both are supplied, URL is used.
 
         :Kwargs:
-            - pool_id (str): GUID of the pool on which info is requested.
+            - pool_id (str): ID of the pool on which info is requested.
             - url (str): A complete URL to the pool info.
 
         :Returns:
@@ -1278,7 +1279,7 @@ class BatchAppsApi(object):
         Delete an existing pool.
 
         :Args:
-            - pool_id (str): The GUID of the pool to be deleted.
+            - pool_id (str): The ID of the pool to be deleted.
 
         :Returns:
             - :class:`.Response` with the POST response, however this is not

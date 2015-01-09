@@ -49,8 +49,8 @@ class PickleLog(logging.getLoggerClass()):
     def __setstate__(self, state):
         """De-serialization state of the logger.
 
-        Reinstates the console stream handler, but the not file handler as
-        the could create conflicts between subprocesses writing to the same
+        Reinstates the console stream handler, but not the file handler as
+        this could create conflicts between subprocesses writing to the same
         file.
 
         :Args:

@@ -37,7 +37,7 @@ from .exceptions import RestCallException
 class JobManager(object):
     """
     This is the only class that a user should need to import to access all
-    job manipulation. Contains general functionality for the creation
+    job manipulation. It contains general functionality for the creation
     of new job submissions and retrieving data on submitted jobs.
     """
 
@@ -118,8 +118,8 @@ class JobManager(object):
 
         :Kwargs:
             - index (int): The start index of the list of jobs to be returned.
-              Default is 0, i.e. return all jobs from the beginning.
-            - per_call (int): Number of jobs to be returned. Default is 10.
+              The default is 0, i.e. return all jobs from the beginning.
+            - per_call (int): Number of jobs to be returned. The default is 10.
             - name (str): Only return jobs whose names contain this string.
 
         :Returns:
@@ -189,8 +189,8 @@ class JobManager(object):
             - submitjob (:class:`.JobSubmission`): The job to be submitted.
 
         :Kwargs:
-            - upload_threads (int): Number of concurrent asset uploads.
-              Default is 1.
+            - upload_threads (int): Maximum number of concurrent asset uploads.
+              The default is 1.
 
         :Returns:
             - A job submission response dictionary in the format:

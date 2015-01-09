@@ -38,7 +38,7 @@ class Pool(object):
               authenticated API client.
         
         :Kwargs:
-            - id (str): The pool GUID.
+            - id (str): The pool ID.
             - creationTime (str): Time the pool was created.
             - targetDedicated (int): The target size of the pool.
             - currentDedicated (int): The current pool size.
@@ -55,7 +55,7 @@ class Pool(object):
               to be installed on the TVMs of the pool. Max 10.
             - jobs (list): A list of dictionaries referring to the jobs
               currently running on the pool.
-            - poolDetailLink (dict): A dictionary with URL info to pool details.
+            - poolDetailLink (dict): A dictionary holding pool details URL.
         """
         self._api = client
         self._log = logging.getLogger('batch_apps')
@@ -173,12 +173,12 @@ class PoolSpecifier(Pool):
               authenticated API instance.
         
         :Kwargs:
-            - target_size (int): The target size of the pool. Default is 0.
+            - target_size (int): The target size of the pool. The default is 0.
             - max_tasks (int): Max tasks that can run on a single TVM.
-              Default is 1.
+              The default is 1.
             - communication (bool): Indicates whether tasks running on TVMs
-              in the pool need to be able to communicated directly with each
-              other. Default is ``False``.
+              in the pool need to be able to communicate directly with each
+              other. The default is ``False``.
         """
         self._api = client
         self._log = logging.getLogger('batch_apps')
@@ -204,13 +204,13 @@ class PoolSpecifier(Pool):
               certificate. Currently SHA1 is the only supported algorithm.
             - store_location (str): The location of the certificate store where
               the certificate needs to be installed on the TVM. Possible values
-              are CurrentUser and LocalMachine. Default is 'CurrentUser'.
+              are CurrentUser and LocalMachine. The default is 'CurrentUser'.
             - store_name (str): The name of the certificate store where the
               certificate needs to be installed on the TVM. Possible values
               include the built-in store names My, Root, CA, Trust, Disallowed,
               TrustedPeople, TrustedPublisher, AuthRoot, AddressBook or any
               custom store name. If a custom store name is specified, the store
-              is automatically created. Default is 'My'.
+              is automatically created. The default is 'My'.
 
         :Returns:
             - ``True`` if the certificate was added, else ``False``.

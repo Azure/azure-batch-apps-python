@@ -791,7 +791,7 @@ class Configuration(object):
               from the Batch Apps portal: ``ClientID=abc;TenantID=xyz``.
             - key (str): An Unattended Account key. This can be created in
               the Batch Apps portal.
-            - client_id (str): The client GUID, this can be retrieved from
+            - client_id (str): The client ID, this can be retrieved from
               the AAD portal (not required if using an Unattended Account).
             - tenant (str): The auth tenant, this can be retrieved from
               the AAD portal (not required if using an Unattended Account).
@@ -801,7 +801,7 @@ class Configuration(object):
             - endpoint (str): The Batch Apps service endpoint. This can be
               found in the service details in the Batch Apps Portal.
             - unattended (bool): Whether the intended authentication method
-              will be unattended. Default is ``False``.
+              will be unattended. The default is ``False``.
 
         :Returns:
             - dict containing the authentication parameters.

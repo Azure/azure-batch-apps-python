@@ -114,7 +114,7 @@ class JobSubmission(object):
 
     def __getattr__(self, name):
         """
-        Get job attribute, or job parameter.
+        Get a job attribute, or a job parameter.
         This will only be called if :py:class:`.JobSubmission` object does
         not have the requested attribute, in which case the job parameters
         dictionary will be searched for a matching key.
@@ -138,7 +138,7 @@ class JobSubmission(object):
 
     def __setattr__(self, name, value):
         """
-        Set job attribute if it exists, or add job parameter.
+        Set a job attribute if it exists, or add a job parameter.
         If the :py:class:`.JobSubmission` object has the named attribute
         this will be set. If no such attribute exists, the key and value will
         be added as a string pair to the job parameters dictionary.
@@ -217,7 +217,7 @@ class JobSubmission(object):
 
     def _create_job_message(self):
         """
-        Create job message for submitting to the REST API.
+        Create a job message for submitting to the REST API.
         Only used internally on job submission (see :py:meth:.submit()).
 
         :Returns:
@@ -362,7 +362,7 @@ class JobSubmission(object):
         resp = self._api.send_job(self._create_job_message())
         
         if resp.success:
-            self._log.info("Job successful submitted with ID: "
+            self._log.info("Job successfully submitted with ID: "
                            "{0}".format(resp.result['jobId']))
 
             return {'jobId':resp.result['jobId'], #DEP
@@ -473,13 +473,13 @@ class SubmittedJob(object):
 
     def __setattr__(self, name, value):
         """
-        Set job attribute if it exists.
+        Set a job attribute if it exists.
         The submission data cannot be overwritten except through using the
         :meth:`.update()` call to collect updated date from the server.
 
         :Args:
             - name (str): Name of the attribute to be set.
-            - value: Value to set to the attribute.
+            - value: Value of the attribute.
 
         :Raises:
             - :exc:`ValueError` if attempts to overwrite submission data.
@@ -630,7 +630,7 @@ class SubmittedJob(object):
         output_props = self._api.props_output_file(url=output.get('link'))
 
         if output_props.success:
-            self._log.debug("Successful retrieved output size data: "
+            self._log.debug("Successfully retrieved output size data: "
                             "{0}".format(output_props.result))
 
             size = output_props.result
@@ -687,7 +687,7 @@ class SubmittedJob(object):
         :Kwargs:
             - output: An output dictionary (as created by
               :meth:`.list_all_outputs()`). If specified, the specific output
-              will be downloaded, otherwise the jobs final output will be
+              will be downloaded, otherwise the job's final output will be
               downloaded.
 
         :Returns:
@@ -730,7 +730,8 @@ class SubmittedJob(object):
               ``['name', 'link', 'type']``.
 
         :Raises:
-            - :exc:`.RestCallException` if error occurred during request.
+            - :exc:`.RestCallException` if an error occurred during the
+              request.
         """
         all_outputs = self._api.list_output_files(self.id)
 
@@ -752,7 +753,7 @@ class SubmittedJob(object):
             - filename (str): A name to give the thumbnail file. If not
               specified a randomly generated filename will be used.
             - overwrite (bool): Whether an existing file will be overwritten.
-              Default is ``True``.
+              The default is ``True``.
 
         :Returns:
             - The full path to the downloaded file (str).
@@ -792,9 +793,9 @@ class SubmittedJob(object):
         :Kwargs:
             - start (str): The UTC time from which log messages will be
               retrieved. If not set, will retrieve messages from the start
-              of the job. Default is ``None``.
+              of the job. The default is ``None``.
             - max_lines (int): The max number of log messages to be retrieved.
-              Default is 100.
+              The default is 100.
 
         :Returns:
             - If successful, a dict in the format:
@@ -993,7 +994,7 @@ class Task(object):
               specified and one has not been specified by the server, a
               randomly generated filename will be used.
             - overwrite (bool): Whether an existing file will be overwritten.
-              Default is ``True``.
+              The default is ``True``.
 
         :Returns:
             - The full path to the downloaded file (str).
@@ -1001,7 +1002,7 @@ class Task(object):
         :Raises:
             - :exc:`.FileDownloadException` if the Task has no reference to
               a thumbnail. This could mean that the task has not yet
-              completed or the object has not been updated.
+              completed or that the object has not been updated.
             - :exc:`.RestCallException` if an error occurred during the request.
         """
         if not download_dir:
@@ -1045,7 +1046,8 @@ class Task(object):
               ``['name', 'link', 'type']``.
 
         :Raises:
-            - :exc:`.RestCallException` if error occurred during request.
+            - :exc:`.RestCallException` if an error occurred during the
+              request.
         """
         resp = self._api.list_task_outputs(self._job, self.id)
 
@@ -1067,7 +1069,7 @@ class Task(object):
 
         :Kwargs:
             - overwrite (bool): Whether to overwrite an existing file.
-              Default is ``False``.
+              The default is ``False``.
 
         :Returns:
             - The full path to the downloaded file (str).

@@ -129,7 +129,7 @@ class FileManager(object):
 
         :Kwargs:
             - recursive (bool): Whether the set will include the contents of
-              subdirectories. Default is ``False``
+              subdirectories. The default is ``False``
             - pattern (str): The pattern to apply to filter director contents.
               Default: ``"*"``, i.e. all files included.
 

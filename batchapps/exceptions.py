@@ -33,7 +33,7 @@ LOG = logging.getLogger('batch_apps')
 
 class SessionExpiredException(Exception):
     """
-    InvalidGrantError thrown during server call. This is generally interpreted
+    An InvalidGrantError thrown during server call. This is generally interpreted
     to mean the current token has expired and cannot be refreshed. The client
     will need to be re-authenticated. This can be raised during any server call
     and would need to be handled by prompting the user to log in again.
@@ -48,7 +48,7 @@ class SessionExpiredException(Exception):
 
 class AuthenticationException(Exception):
     """
-    Error relating to missing or invalid credentials.
+    An error relating to missing or invalid credentials.
     """
     def __init__(self, *args):
         """
@@ -59,7 +59,7 @@ class AuthenticationException(Exception):
 
 class InvalidConfigException(Exception):
     """
-    Error thrown by an incorrect/incomplete config file.
+    An error thrown by an incorrect/incomplete config file.
     """
     def __init__(self, *args):
         """
@@ -70,7 +70,7 @@ class InvalidConfigException(Exception):
 
 class FileDownloadException(Exception):
     """
-    Error thrown during downloading outputs or files.
+    An error thrown during downloading outputs or files.
     """
     def __init__(self, *args):
         """
@@ -81,7 +81,7 @@ class FileDownloadException(Exception):
 
 class FileMissingException(Exception):
     """
-    Error occurred during userfile creation and gathering where file does not
+    An error occurred during userfile creation and gathering where file does not
     exist locally.
     """
     def __init__(self, *args):
@@ -93,7 +93,7 @@ class FileMissingException(Exception):
 
 class FileInvalidException(Exception):
     """
-    Error occurred during the manipulation of a userfile.
+    An error occurred during the manipulation of a userfile.
     """
     def __init__(self, *args):
         """
@@ -111,7 +111,7 @@ class RestCallException(Exception):
 
     def __init__(self, exp_type, message, excep, *args, **kwargs):
         """
-        Will mostly be used to wrap an exception thrown during a REST call,
+        This will mostly be used to wrap an exception thrown during a REST call,
         then returned to the user as the ``result`` of a :class:`.Response`
         object.
 
@@ -129,7 +129,7 @@ class RestCallException(Exception):
 
         :Kwargs:
             - silent (bool): If ``True``, the error will not be logged.
-              Default is ``False``.
+              The default is ``False``.
         """
         #TODO: Restructure the way we log these exception, as these can
         #be missed.
@@ -156,7 +156,8 @@ class RestCallException(Exception):
         super(RestCallException, self).__init__(message, *args)
 
     def __str__(self):
-        """RestCallException as a string.
+        """
+        RestCallException as a string.
 
         :Returns:
             - The message string.

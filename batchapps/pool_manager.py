@@ -75,11 +75,12 @@ class PoolManager(object):
             - spec (:class:`.PoolSpecifier`): A specifier of the pool to
               create. If set, all proceeding kwargs will be ignored.
             - target_size (int): The target number of instances in the pool.
-              Default is 0 (i.e. an empty pool).
-            - max_tasks (int): Maximum number of tasks per TVM. Default is 1.
+              The default is 0 (i.e. an empty pool).
+            - max_tasks (int): Maximum number of tasks per TVM. The default
+              is 1.
             - communication (bool): Whether tasks running on TVMs
-              in the pool need to be able to communicated directly with each
-              other. Default is ``False``.
+              in the pool need to be able to communicate directly with each
+              other. The default is ``False``.
 
         :Returns:
             - A new :class:`.Pool` object.
@@ -99,11 +100,12 @@ class PoolManager(object):
 
         :Kwargs:
             - target_size (int): The target number of instances in the pool.
-              Default is 0 (i.e. an empty pool).
-            - max_tasks (int): Maximum number of tasks per TVM. Default is 1.
+              The default is 0 (i.e. an empty pool).
+            - max_tasks (int): Maximum number of tasks per TVM. The
+              default is 1.
             - communication (bool): Whether tasks running on TVMs
-              in the pool need to be able to communicated directly with each
-              other. Default is ``False``.
+              in the pool need to be able to communicate directly with each
+              other. The default is ``False``.
 
         :Returns:
             - A new :class:`.PoolSpecifier` object.

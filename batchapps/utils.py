@@ -197,7 +197,7 @@ class Listener(object):
 
         :Kwargs:
             - timeout (int): The number of seconds that the subprocess will
-                be monitored. Default is 100 seconds. Is set to ``None``,
+                be monitored. The default is 100 seconds. If set to ``None``,
                 the process will be listened to indefinitely.
 
         :Raises:

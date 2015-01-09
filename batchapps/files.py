@@ -367,11 +367,10 @@ class FileCollection(object):
         """Upload all files in a set, optionally in parallel
 
         :Kwargs:
-            - force (bool): Whether the client will only upload if the file
-              has not be previously uploaded. Default is ``False``,
-              i.e. always check and if file has been uploaded, don't
-              re-upload. Set to ``True`` to upload regardless.
-            - threads (int): number of parallel uploads, default is 1
+            - force (bool): If ``True``, uploads regardless of whether the
+              file has already been uploaded. Otherwise checks if file has
+              been uploaded, and if so, skips. The default is ``False``.
+            - threads (int): Maximum number of parallel uploads, default is 1
               (i.e. not parallel). Max threads is 10.
 
         :Returns:
@@ -445,7 +444,8 @@ class FileCollection(object):
             - per_call (int): Number of files to check against the server
               at a time. The more per call, the slower the call and the
               bigger the return object, but too few per call could mean a
-              large number of calls for a big file collection. Default is 50.
+              large number of calls for a big file collection. The default
+              is 50.
 
         :Returns:
             - An :class:`FileCollection` containing the files that have yet
@@ -780,8 +780,8 @@ class UserFile(object):
 
         :Kwargs:
             - force (bool): If ``True``, uploads regardless of whether the
-              file has already been uploaded. Else, checks if file has been
-              uploaded, and if so, skips.
+              file has already been uploaded. Otherwise checks if file has
+              been uploaded, and if so, skips. The default is ``False``.
 
         :Returns:
             - Client :class:`.Response` object if upload was attempted.
@@ -809,8 +809,8 @@ class UserFile(object):
             - :class:`.UserFile` if file has already been uploaded, else ``None``.
 
         :Raises:
-            - :class:`.RestCallException` if any errors occurred in the API
-              client.
+            - :class:`.RestCallException` if an error occurred during the
+              request.
         """
         resp = self._api.query_files(self.create_query_specifier())
         if resp.success:
@@ -837,8 +837,8 @@ class UserFile(object):
               will be downloaded.
 
         :Raises:
-            - :class:`.RestCallException` if any errors occurred in the API
-              client.
+            - :class:`.RestCallException` if an error occurred during the
+              request.
         """
         
         try:

@@ -122,7 +122,7 @@ class AzureOAuth(object):
 
         :Kwargs:
             - config (:class:`.Configuration`): A custom configuration
-              object. Default is `None` where a default
+              object. The default is `None` in which case a default
               :class:`.Configuration` will be created.
 
         :Returns:
@@ -149,19 +149,19 @@ class AzureOAuth(object):
 
         :Kwargs:
             - config (:class:`.Configuration`): A custom configuration object.
-              Default is `None` where a default :class:`.Configuration` will
-              be created.
-            - msa (bool): Authenticate by MSA. Default is ``False``.
+              The default is `None` in which case a default
+              :class:`.Configuration` will be created.
+            - msa (bool): Authenticate by MSA. The default is ``False``.
             - prompt (bool): Force login prompt regardless of existing session.
-              Default is ``False``.
-            - state (str): A GUID for validating the state of the server
+              The default is ``False``.
+            - state (str): An ID for validating the state of the server
               communication.
             - additional_args (dict): Any additional AAD parameters to include
               in the URL
 
         :Returns:
             - A URL (str) that can be used to direct the user to a login page.
-            - A GUID (str) for validating the state of the server
+            - A ID (str) for validating the state of the server
               communication.
 
         :Raises:
@@ -206,7 +206,8 @@ class AzureOAuth(object):
 
         except Exception as exp:
             raise AuthenticationException(
-                "Failed to generate auth URL. Error: {0}".format(str(exp)))
+                "Failed to generate authentication URL. "
+                "Error: {0}".format(str(exp)))
 
     @staticmethod
     def get_authorization_token(auth_url, config=None, state=None):
@@ -218,9 +219,9 @@ class AzureOAuth(object):
 
         :Kwargs:
             - config (:class:`.Configuration`): A custom configuration object.
-              Default is `None` where a default :class:`.Configuration` will
-              be created.
-            - state (str): A state GUID for auth server validation. This is not
+              The default is `None` in which case a default
+              :class:`.Configuration` will be created.
+            - state (str): A state ID for auth server validation. This is not
               necessary if :meth:`.get_authorization_url` was used to generate
               the URL, as state will already be set. If set, will override.
 
@@ -292,8 +293,8 @@ class AzureOAuth(object):
 
         :Kwargs:
             - config (:class:`.Configuration`): A custom configuration object.
-              Default is `None` where a default :class:`.Configuration`
-              will be created.
+              The default is `None` in which case a default
+              :class:`.Configuration` will be created.
 
         :Returns:
             - An authenticated :class:`.Credentials` object.
@@ -315,8 +316,8 @@ class AzureOAuth(object):
 
         :Kwargs:
             - config (:class:`.Configuration`): A custom configuration object.
-              Default is `None` where a default :class:`.Configuration`
-              will be created.
+              The default is `None` in which case a default
+              :class:`.Configuration` will be created.
 
         :Returns:
             - An authenticated :class:`.Credentials` object.

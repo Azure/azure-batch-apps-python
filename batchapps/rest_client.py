@@ -167,7 +167,7 @@ def head(auth, url, headers, filename=""):
 
     :Kwargs:
         - filename (str): Used to add a filename to the end of the URL if
-          doesn't already have one. Default is an empty string.
+          doesn't already have one. The default is an empty string.
 
     :Returns:
         - The content-length header, as an integer.
@@ -207,7 +207,7 @@ def post(auth, url, headers, message=None):
 
     :Kwargs:
         - message (dict): Data to be acted on e.g. job submission
-          specification, file query parameters. Format and contents will
+          specification, file query parameters. The format and contents will
           depend on the specific API call.
 
     :Returns:
@@ -313,11 +313,11 @@ def download(auth, url, headers, output_path, size, overwrite,
 
     :Kwargs:
         - f_name (str): Used to specify a filename if one is not already
-          included in the URL. Default is ``None``.
+          included in the URL. The default is ``None``.
         - ext (str): Used to specify a file extension if one is not already
-          included in the URL. Default is ``None``.
+          included in the URL. The default is ``None``.
         - block_size (int): Used to vary the upload chunk size.
-          Default is 1024 bytes.
+          The default is 1024 bytes.
 
     :Returns:
         - The raw server response.
