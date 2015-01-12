@@ -61,7 +61,8 @@ def _call(auth, *args, **kwargs):
 
         resp = conn_session.request(*args, **kwargs)
 
-    except oauth2.rfc6749.errors.InvalidGrantError as exp:
+    except (oauth2.rfc6749.errors.InvalidGrantError,
+            oauth2.rfc6749.errors.TokenExpiredError) as exp:
         auth.clear_auth()
         raise SessionExpiredException("Please log in again. "
                                       "{0}".format(str(exp)))

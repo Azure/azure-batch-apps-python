@@ -75,8 +75,8 @@ class JobManager(object):
             - job (:class:`.SubmittedJob`): A job object to be updated.
             - url (str): The URL to a the details of a job, as returned by
               :meth:`.JobSubmission.submit()`.
-            - jobid (str): The ID of a submitted job, as retrieved from
-              Mission Control or returned by :meth:`.JobSubmission.submit()`.
+            - jobid (str): The ID of a submitted job, as retrieved from the
+              Management Portal or returned by :meth:`.JobSubmission.submit()`.
 
         :Returns:
             - An updated or new :class:`.SubmittedJob` object.

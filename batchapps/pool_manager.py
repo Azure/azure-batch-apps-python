@@ -121,8 +121,8 @@ class PoolManager(object):
         :Kwargs:
             - url (str): The URL to a the details of a pool, as returned by
               :meth:`.create()`, or :meth:`.PoolSpecifier.start()`.
-            - poolid (str): The ID of a submitted job, as retrieved from
-              Mission Control or returned by :meth:`.PoolSpecifier.start()`.
+            - poolid (str): The ID of a submitted job, as retrieved from the
+              Management Portal or returned by :meth:`.PoolSpecifier.start()`.
 
         :Returns:
             - An updated or new :class:`.Pool` object.
