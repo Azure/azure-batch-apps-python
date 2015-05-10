@@ -779,7 +779,7 @@ class Configuration(object):
             return False
 
     def aad_config(self, account=None, key=None, client_id=None, tenant=None,
-                  redirect=None, endpoint=None, unattended=False, **kwargs):
+                  redirect=None, endpoint=None, unattended=False, validate=True, **kwargs):
         """Configure AAD authentication parameters to accompany an existing
         Batch Apps Service.
         If new values are set, :meth:`.save_config()` must be called for
@@ -827,25 +827,29 @@ class Configuration(object):
             for setting in auth_cfg:
                 self._config.set("Authentication", setting, auth_cfg[setting])
 
-        if account:
+        if account is not None:
             self._config.set("Authentication", "unattended_account", str(account))
 
-        if key:
+        if key is not None:
             self._config.set("Authentication", "unattended_key", str(key))
 
-        if client_id:
+        if client_id is not None:
             self._config.set("Authentication", "client_id", str(client_id))
 
-        if tenant:
+        if tenant is not None:
             self._config.set("Authentication", "tenant", str(tenant))
 
-        if redirect:
+        if redirect is not None:
             self._config.set("Authentication", "redirect_uri", str(redirect))
 
-        if endpoint:
+        if endpoint is not None:
             self._config.set("Authentication", "endpoint", str(endpoint))
 
-        auth_dict = self._validate_auth(unattended)
+        if validate:
+            auth_dict = self._validate_auth(unattended)
+        else:
+            auth_dict = dict(self._config.items("Authentication"))
+
         return auth_dict
 
     def _invalid_data(self, value):
