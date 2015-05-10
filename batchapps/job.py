@@ -57,6 +57,7 @@ class JobSubmission(object):
         - instances (int)
         - pool (:py:class:`.Pool`)
         - params (dict)
+        - settings (str)
     """
 
     def __init__(self, client, job_name, **job_settings):
@@ -98,11 +99,13 @@ class JobSubmission(object):
         super(JobSubmission, self).__setattr__(
             'required_files', job_settings.get('files', None))
         super(JobSubmission, self).__setattr__(
-            'source', str(job_settings.get('job_file', "")))
+            'source', str(job_settings.get('job_file', ""))) #DEP
         super(JobSubmission, self).__setattr__(
             'instances', int(job_settings.get('instances', 0))) #DEP
         super(JobSubmission, self).__setattr__(
             'pool', job_settings.get('pool', None))
+        super(JobSubmission, self).__setattr__(
+            'settings', str(job_settings.get('settings', "")))
 
     def __str__(self):
         """Job submission as a string
@@ -245,7 +248,7 @@ class JobSubmission(object):
             'RequiredFiles': self.required_files._get_message("submit"),
             'Parameters': list(self._filter_params()),
             'JobFile': str(self.source),
-            'Settings': '',
+            'Settings': str(self.settings),
             'Priority': 'Medium'
         }
         job_message.update(pool_options)

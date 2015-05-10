@@ -76,6 +76,7 @@ class TestJobSubmission(unittest.TestCase):
         self.assertFalse("type" in job.__dict__)
         self.assertTrue("params" in job.__dict__)
         self.assertEqual(job.required_files, None)
+        self.assertEqual(job.settings, "")
         self.assertEqual(job.source, "")
         self.assertEqual(job.instances, 0)
 
@@ -93,11 +94,12 @@ class TestJobSubmission(unittest.TestCase):
         """Test __getattr__"""
 
         api = mock.create_autospec(BatchAppsApi)
-        job = JobSubmission(api, "test_job", params={})
+        job = JobSubmission(api, "test_job", params={}, settings="test_settings")
 
         job.test = "my_param"
         job.data = "my_data"
         job.number = 42
+
 
         #with self.assertRaises(AttributeError):
         job.none_obj = None
@@ -111,6 +113,7 @@ class TestJobSubmission(unittest.TestCase):
         self.assertEqual(job.test, "my_param")
         self.assertEqual(job.data, "my_data")
         self.assertEqual(job.number, "42")
+        self.assertEqual(job.settings, "test_settings")
         self.assertEqual(job.none_obj, "None")
         self.assertEqual(job.dict_obj, "{'a': []}")
 
@@ -204,6 +207,7 @@ class TestJobSubmission(unittest.TestCase):
 
         job.required_files = files
         job.instances = 5
+        job.settings = "blah"
         msg = job._create_job_message()
         mock_pool.assert_called_with(5)
         self.assertEqual(msg, {'Name':'test_job',
@@ -212,7 +216,7 @@ class TestJobSubmission(unittest.TestCase):
                                'autoPoolSpecification': {"autopool":"0"},
                                'Parameters':[{"Name":"k1", "Value":"v1"}],
                                'JobFile':'',
-                               'Settings':'',
+                               'Settings':'blah',
                                'Priority':'Medium'})
 
         job.source = None
