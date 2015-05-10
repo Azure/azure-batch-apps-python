@@ -232,7 +232,7 @@ class TestJobSubmission(unittest.TestCase):
                                'poolId': "testID",
                                'Parameters':[{"Name":"k1", "Value":"v1"}],
                                'JobFile':'None',
-                               'Settings':'',
+                               'Settings':'blah',
                                'Priority':'Medium'})
 
         job.pool = mock.create_autospec(Pool)
@@ -244,7 +244,7 @@ class TestJobSubmission(unittest.TestCase):
                                'poolId': "differentID",
                                'Parameters':[{"Name":"k1", "Value":"v1"}],
                                'JobFile':'None',
-                               'Settings':'',
+                               'Settings':'blah',
                                'Priority':'Medium'})
 
     @mock.patch('batchapps.job.FileCollection')
