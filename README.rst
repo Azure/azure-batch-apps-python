@@ -45,6 +45,9 @@ Release History
 
 For full summary of changes, see CHANGES.txt
 
+* 2015-05-11	- 0.4.0
+	- Added optional auth config validation
+	- Added JobSubmission.settings attribute
 * 2015-01-13	- 0.3.0
 	- Added preliminary support for Batch Apps pool management
 * 2014-11-26	- 0.2.0	
