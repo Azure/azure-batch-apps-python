@@ -436,7 +436,8 @@ class BatchAppsApi(object):
                    overwrite,
                    job_id=None,
                    otype='output',
-                   url=None):
+                   url=None,
+                   callback=None):
         """
         Gets the content of the job output or its thumbnail.
         Either ``url``, or both ``job_id`` and ``otype`` must be set.
@@ -459,6 +460,9 @@ class BatchAppsApi(object):
             - url (str): The URL directly to the file to be downloaded. If
               supplied, ``job_id`` and ``otype`` will not be used.
               The default is None.
+            - callback (func): A function to be called to report upload progress.
+              The function takes a single parameter, the percent uploaded as a
+              float.
 
         :Returns:
             - :class:`.Response` with the GET response, however this is not
@@ -505,7 +509,8 @@ class BatchAppsApi(object):
                                             download_dir,
                                             size,
                                             overwrite,
-                                            f_name=fname)
+                                            f_name=fname,
+                                            callback=callback)
 
         except RestCallException as exp:
             return Response(False, exp)
@@ -615,7 +620,8 @@ class BatchAppsApi(object):
                         overwrite,
                         job_id=None,
                         fname=None,
-                        url=None):
+                        url=None,
+                        callback=None):
         """
         Gets the content of a file created in a job.
         Either ``url``, or both ``job_id`` and ``fname`` must be set.
@@ -635,6 +641,9 @@ class BatchAppsApi(object):
             - fname (str): The name of the output file to be downloaded.
             - url (str): The URL directly to the file to be downloaded.
               The default is None.
+            - callback (func): A function to be called to report upload progress.
+              The function takes a single parameter, the percent uploaded as a
+              float.
 
         :Returns:
             - :class:`.Response` with the GET response, however this is not
@@ -673,7 +682,8 @@ class BatchAppsApi(object):
                                             self.headers,
                                             download_dir,
                                             size, overwrite,
-                                            f_name=name)
+                                            f_name=name,
+                                            callback=callback)
 
         except RestCallException as exp:
             return Response(False, exp)
@@ -1003,7 +1013,7 @@ class BatchAppsApi(object):
         return Response(True, resp['files'])
 
 
-    def get_file(self, userfile, size, download_dir, overwrite=False):
+    def get_file(self, userfile, size, download_dir, overwrite=False, callback=None):
         """Gets the content of a file previously uploaded by the user.
 
         :Args:
@@ -1018,6 +1028,9 @@ class BatchAppsApi(object):
         :Kwargs:
             - overwrite (bool): Whether to overwrite a destination file if it
               already exists. The default is ``False``.
+            - callback (func): A function to be called to report upload progress.
+              The function takes a single parameter, the percent uploaded as a
+              float.
 
         :Returns:
             - :class:`.Response` with the GET response, however this is not
@@ -1043,7 +1056,8 @@ class BatchAppsApi(object):
                                             self.headers,
                                             download_dir,
                                             size,
-                                            overwrite=overwrite)
+                                            overwrite=overwrite,
+                                            callback=callback)
 
         except RestCallException as exp:
             return Response(False, exp)
@@ -1084,13 +1098,18 @@ class BatchAppsApi(object):
         else:
             return Response(True, head_resp)
 
-    def send_file(self, userfile):
+    def send_file(self, userfile, callback=None):
         """Uploads a user file for use in a job.
 
         :Args:
             - userfile (:class:`.UserFile`): The userfile reference for the
               file to be uploaded. Must be created from a file that exists
               locally.
+
+        :Kwargs:
+            - callback (func): A function to be called to report upload progress.
+              The function takes a single parameter, the percent uploaded as a
+              float.
 
         :Returns:
             - :class:`.Response` with the PUT response, however this is not
@@ -1120,7 +1139,8 @@ class BatchAppsApi(object):
                                         url,
                                         self.headers,
                                         userfile,
-                                        params)
+                                        params,
+                                        callback=callback)
 
         except (RestCallException, FileMissingException) as exp:
             return Response(False, exp)

@@ -555,7 +555,7 @@ class SubmittedJob(object):
         self._log.debug("Extracted job submission data: {0}".format(formatted))
         return formatted
 
-    def _get_final_output(self, download_dir, overwrite):
+    def _get_final_output(self, download_dir, overwrite, callback=None):
         """Internal method to download jobs final output.
 
         :Args:
@@ -563,6 +563,11 @@ class SubmittedJob(object):
               written to.
             - overwrite (bool): Whether to overwrite the file is it already
               exists.
+
+        :Kwargs:
+            - callback (func): A function to be called to report upload progress.
+              The function takes a single parameter, the percent uploaded as a
+              float.
 
         :Returns:
             - :class:`.Response` object returned directly from
@@ -588,9 +593,10 @@ class SubmittedJob(object):
                                     size,
                                     self.output_filename,
                                     overwrite,
-                                    url=self.output_url)
+                                    url=self.output_url,
+                                    callback=calback)
 
-    def _get_final_preview(self, download_dir, filename, overwrite):
+    def _get_final_preview(self, download_dir, filename, overwrite, callback=None):
         """Internal method to download jobs final thumbnail.
         We don't bother to check file size for download feedback, as it's
         assumed to be very small.
@@ -602,6 +608,11 @@ class SubmittedJob(object):
             - overwrite (bool): Whether to overwrite the file is it already
               exists.
 
+        :Kwargs:
+            - callback (func): A function to be called to report upload progress.
+              The function takes a single parameter, the percent uploaded as a
+              float.
+
         :Returns:
             - :class:`.Response` object returned directly from
               :class:`.BatchAppsApi`.
@@ -610,9 +621,10 @@ class SubmittedJob(object):
                                     0,
                                     filename,
                                     overwrite,
-                                    url=self.thumb_url)
+                                    url=self.thumb_url,
+                                    callback=callback)
 
-    def _get_intermediate_output(self, output, download_dir, overwrite):
+    def _get_intermediate_output(self, output, download_dir, overwrite, callback=None):
         """Internal method to download any file from the job output.
 
         :Args:
@@ -622,6 +634,12 @@ class SubmittedJob(object):
               written to.
             - overwrite (bool): Whether to overwrite the file is it already
               exists.
+
+        :Kwargs:
+            - callback (func): A function to be called to report upload progress.
+              The function takes a single parameter, the percent uploaded as a
+              float.
+        
 
         :Returns:
             - :class:`.Response` object returned directly from
@@ -648,7 +666,8 @@ class SubmittedJob(object):
                                          size,
                                          overwrite,
                                          fname=output.get('name'),
-                                         url=output.get('link'))
+                                         url=output.get('link'),
+                                         callback=callback)
 
     def get_tasks(self):
         """
@@ -677,7 +696,7 @@ class SubmittedJob(object):
         else:
             raise resp.result
 
-    def get_output(self, download_dir, output=None, overwrite=False):
+    def get_output(self, download_dir, output=None, overwrite=False, callback=None):
         """
         Download a job output file.
         This could be the jobs final output, or if specified, any intermediate
@@ -692,6 +711,9 @@ class SubmittedJob(object):
               :meth:`.list_all_outputs()`). If specified, the specific output
               will be downloaded, otherwise the job's final output will be
               downloaded.
+            - callback (func): A function to be called to report upload progress.
+              The function takes a single parameter, the percent uploaded as a
+              float.
 
         :Returns:
             - The full path to the downloaded file (str).
@@ -706,11 +728,12 @@ class SubmittedJob(object):
             name = output.get('name', "")
             download = self._get_intermediate_output(output,
                                                      download_dir,
-                                                     overwrite)
+                                                     overwrite,
+                                                     callback=callback)
 
         elif self.output_url and self.output_filename:
             name = self.output_filename
-            download = self._get_final_output(download_dir, overwrite)
+            download = self._get_final_output(download_dir, overwrite, callback=callback)
 
         else:
             raise FileDownloadException(
@@ -951,7 +974,7 @@ class Task(object):
                 'type': _output.get('kind')
                 })
 
-    def _get_file(self, output, download_dir, overwrite):
+    def _get_file(self, output, download_dir, overwrite, callback=None):
         """Internal method to download a task output.
 
         :Args:
@@ -961,6 +984,11 @@ class Task(object):
               written to.
             - overwrite (bool): Whether to overwrite the file is it already
               exists.
+
+        :Kwargs:
+            - callback (func): A function to be called to report upload progress.
+              The function takes a single parameter, the percent uploaded as a
+              float.
 
         :Returns:
             - :class:`.Response` object returned directly from
@@ -982,9 +1010,10 @@ class Task(object):
                                          size,
                                          overwrite,
                                          fname=output.get('name'),
-                                         url=output.get('link'))
+                                         url=output.get('link'),
+                                         callback=callback)
 
-    def get_thumbnail(self, download_dir=None, filename=None, overwrite=True):
+    def get_thumbnail(self, download_dir=None, filename=None, overwrite=True, callback=None):
         """
         Download the preview thumbnail for task.
         This thumbnail will only be available if the task has completed.
@@ -998,6 +1027,9 @@ class Task(object):
               randomly generated filename will be used.
             - overwrite (bool): Whether an existing file will be overwritten.
               The default is ``True``.
+            - callback (func): A function to be called to report upload progress.
+              The function takes a single parameter, the percent uploaded as a
+              float.
 
         :Returns:
             - The full path to the downloaded file (str).
@@ -1031,7 +1063,7 @@ class Task(object):
         self._log.info("Found thumbnails in task object: {0}, "
                        "downloading {1}".format(thumbs, thumb))
 
-        download = self._get_file(thumb, download_dir, overwrite)
+        download = self._get_file(thumb, download_dir, overwrite, callback=callback)
 
         if download.success:
             return os.path.join(download_dir, thumb['name'])
@@ -1061,7 +1093,7 @@ class Task(object):
         else:
             raise resp.result
 
-    def get_output(self, output, download_dir, overwrite=False):
+    def get_output(self, output, download_dir, overwrite=False, callback=None):
         """Download a task output file.
 
         :Args:
@@ -1073,6 +1105,9 @@ class Task(object):
         :Kwargs:
             - overwrite (bool): Whether to overwrite an existing file.
               The default is ``False``.
+            - callback (func): A function to be called to report upload progress.
+              The function takes a single parameter, the percent uploaded as a
+              float.
 
         :Returns:
             - The full path to the downloaded file (str).
@@ -1080,7 +1115,7 @@ class Task(object):
         :Raises:
             - :exc:`.RestCallException` if an error occurred during the request.
         """
-        download = self._get_file(output, download_dir, overwrite)
+        download = self._get_file(output, download_dir, overwrite, callback=callback)
         if download.success:
             return os.path.join(download_dir, output.get('name', ''))
         else:

@@ -177,7 +177,7 @@ class FileCollection(object):
             self._collection = [a for a in self._collection
                                 if a.name != filekey]
 
-    def _upload_forced(self, userfile):
+    def _upload_forced(self, userfile, callback=None):
         """Upload a single file in the collection, ignoring overwrite.
         Only used internally in :func:upload by the parallel subprocesses
 
@@ -185,13 +185,18 @@ class FileCollection(object):
             - userfile (:class:`.UserFile`): The file from the collection
               to be uploaded
 
+        :Kwargs:
+            - callback (func): A function to be called to report upload progress.
+              The function takes a single parameter, the percent uploaded as a
+              float.
+
         :Returns:
             - A tuple containing the result of the :func:`UserFile.upload` call,
               and the original userfile:
               ``(bool success, userfile, string result)``
         """
         self._log.debug("About to upload file: {0}".format(userfile))
-        resp = userfile.upload(force=True)
+        resp = userfile.upload(force=True, callback=callback)
 
         # TODO: Need to fix hanging when we try to return the result
         # object rather than just a string.
@@ -363,7 +368,7 @@ class FileCollection(object):
             raise TypeError("File to remove must be userfile object, "
                             "filename string, userfile index int or slice")
 
-    def upload(self, force=False, threads=None):
+    def upload(self, force=False, threads=None, callback=None):
         """Upload all files in a set, optionally in parallel
 
         :Kwargs:
@@ -372,6 +377,9 @@ class FileCollection(object):
               been uploaded, and if so, skips. The default is ``False``.
             - threads (int): Maximum number of parallel uploads, default is 1
               (i.e. not parallel). Max threads is 10.
+            - callback (func): A function to be called to report upload progress.
+              The function takes a single parameter, the percent uploaded as a
+              float.
 
         :Returns:
             - A list of tuples containing any files that failed to upload and
@@ -401,7 +409,7 @@ class FileCollection(object):
 
         if not threads or threads < 1: # No subprocessed uploads
             for _file in file_set:
-                result, userfile, error = self._upload_forced(_file)
+                result, userfile, error = self._upload_forced(_file, callback=callback)
                 if not result:
                     failed.append((userfile, error))
 
@@ -775,13 +783,16 @@ class UserFile(object):
         self._log.debug("File specification: {0}".format(file_spec))
         return file_spec
 
-    def upload(self, force=False):
+    def upload(self, force=False, callback=None):
         """Upload file.
 
         :Kwargs:
             - force (bool): If ``True``, uploads regardless of whether the
               file has already been uploaded. Otherwise checks if file has
               been uploaded, and if so, skips. The default is ``False``.
+            - callback (func): A function to be called to report upload progress.
+              The function takes a single parameter, the percent uploaded as a
+              float.
 
         :Returns:
             - Client :class:`.Response` object if upload was attempted.
@@ -798,7 +809,7 @@ class UserFile(object):
 
         if force or uploaded is None:
             self._log.info("Uploading file {0}".format(self.name))
-            return self._api.send_file(self)
+            return self._api.send_file(self, callback=callback)
 
         return None
 
@@ -829,12 +840,17 @@ class UserFile(object):
         else:
             raise resp.result
 
-    def download(self, download_dir):
+    def download(self, download_dir, callback=None):
         """Download file.
         
         :Args:
             - download_dir (str): Path to the directory that to which the file 
               will be downloaded.
+
+        :Kwargs:
+            - callback (func): A function to be called to report upload progress.
+              The function takes a single parameter, the percent uploaded as a
+              float.
 
         :Raises:
             - :class:`.RestCallException` if an error occurred during the
@@ -864,7 +880,7 @@ class UserFile(object):
 
         else:
             size = resp.result
-            dl_file = self._api.get_file(self, size, download_dir)
+            dl_file = self._api.get_file(self, size, download_dir, callback=callback)
 
             if not dl_file.success:
 

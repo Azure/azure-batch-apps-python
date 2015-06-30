@@ -240,7 +240,8 @@ def post(auth, url, headers, message=None):
                                 "Response object has no text attribute.",
                                 exp)
 
-def put(auth, url, headers, userfile, params, *args):
+
+def put(auth, url, headers, userfile, params, callback=None, *args):
     """
     Call PUT.
     This call is only used to upload files.
@@ -253,6 +254,11 @@ def put(auth, url, headers, userfile, params, *args):
           reference of the file to be uploaded.
         - params (dict): The file path and timestamp parameters.
 
+    :Kwargs:
+        - callback (func): A function to be called to report upload progress.
+          The function takes a single parameter, the percent uploaded as a
+          float.
+
     :Returns:
         - The raw server response.
 
@@ -260,6 +266,21 @@ def put(auth, url, headers, userfile, params, *args):
         - :exc:`.RestCallException` if the call failed or returned a
           non-200 status.
     """
+    def upload_gen(userfile, file_object, callback, chunk=1024):
+        length = float(len(userfile))
+        percent_complete = float(0)
+        percent_incr = float(chunk/length*100)
+        use_callback = hasattr(callback, "__call__")
+                    
+        while True:
+            if use_callback:
+                callback(percent_complete)
+            data = file_object.read(chunk)
+            if not data:
+                break
+            yield data
+            percent_complete += percent_incr
+
     try:
         url = url.format(name=url_from_filename(userfile.name))
 
@@ -277,7 +298,7 @@ def put(auth, url, headers, userfile, params, *args):
                              'PUT',
                              url,
                              params=params,
-                             data=file_data,
+                             data=upload_gen(userfile, file_data, callback),
                              headers=put_headers)
         return response
 
@@ -297,7 +318,8 @@ def put(auth, url, headers, userfile, params, *args):
 def download(auth, url, headers, output_path, size, overwrite,
              f_name=None,
              ext=None,
-             block_size=1024):
+             block_size=1024,
+             callback=None):
     """
     Call GET for a file stream.
 
@@ -318,6 +340,9 @@ def download(auth, url, headers, output_path, size, overwrite,
           included in the URL. The default is ``None``.
         - block_size (int): Used to vary the upload chunk size.
           The default is 1024 bytes.
+        - callback (func): A function to be called to report upload progress.
+          The function takes a single parameter, the percent uploaded as a
+          float.
 
     :Returns:
         - The raw server response.
@@ -346,8 +371,9 @@ def download(auth, url, headers, output_path, size, overwrite,
 
     if size > 0:
         percent_complete = float(0)
-        LOG.info("Downloading...{0}%".format(int(percent_complete)))
         percent_incr = float(block_size/size*100)
+
+    use_callback = hasattr(callback, "__call__")
 
     try:
         with open(downloadfile, "wb") as handle:
@@ -360,17 +386,24 @@ def download(auth, url, headers, output_path, size, overwrite,
 
                 handle.write(block)
 
-                if size > 0:
+                if size > 0 and use_callback:
                     percent_complete += percent_incr
-                    LOG.info("Downloading...{0}%".format(
-                        min(100, int(percent_complete))))
+                    callback(percent_complete)
 
             return response
 
     except RestCallException:
+        try:
+            os.remove(downloadfile)
+        except:
+            pass
         raise
 
     except EnvironmentError as exp:
+        try:
+            os.remove(downloadfile)
+        except:
+            pass
         raise RestCallException(type(exp), str(exp), exp)
  
 def delete(auth, url, headers):

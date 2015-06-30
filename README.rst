@@ -45,6 +45,8 @@ Release History
 
 For full summary of changes, see CHANGES.txt
 
+* 2015-06-xx	- 0.5.0
+	- Added progress callbacks for file upload and download
 * 2015-05-11	- 0.4.0
 	- Added optional auth config validation
 	- Added JobSubmission.settings attribute
