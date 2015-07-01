@@ -239,7 +239,7 @@ class JobSubmission(object):
             pool_options = {'poolId': str(self.pool)}
 
         else:
-            size = max(int(self.instances), 3)
+            size = max(int(self.instances), 1)
             pool_options = {'autoPoolSpecification': self._auto_pool(size)}
 
         job_message = {

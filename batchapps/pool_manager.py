@@ -68,8 +68,6 @@ class PoolManager(object):
         """
         Create and start a new pool which can be referenced for use on job
         submission.
-        The minimum number of running instances for a pool with 1 task per TVM
-        is 3 to prevent a deadlock.
 
         :Kwargs:
             - spec (:class:`.PoolSpecifier`): A specifier of the pool to
@@ -95,8 +93,6 @@ class PoolManager(object):
     def create_spec(self, target_size=0, max_tasks=1, communication=False):
         """
         Create a new :class:`.PoolSpecifier`.
-        The minimum number of running instances for a pool with 1 task per TVM
-        is 3 to prevent a deadlock.
 
         :Kwargs:
             - target_size (int): The target number of instances in the pool.

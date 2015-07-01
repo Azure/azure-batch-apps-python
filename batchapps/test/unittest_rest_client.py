@@ -199,6 +199,7 @@ class TestRestClient(unittest.TestCase):
 
         def _callback(progress):
             self.assertEqual(progress, 0.0)
+            self.assertIsInstance(progress, float)
 
         with self.assertRaises(RestCallException):
             rest_client.put(auth,
@@ -252,6 +253,7 @@ class TestRestClient(unittest.TestCase):
 
         def _callback(progress):
             self.assertEqual(progress, 0.0)
+            self.assertIsInstance(progress, float)
 
         auth = mock.create_autospec(Credentials)
         mock_path.return_value = True

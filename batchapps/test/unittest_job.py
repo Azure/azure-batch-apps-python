@@ -192,10 +192,11 @@ class TestJobSubmission(unittest.TestCase):
 
         mock_filter.return_value = [{"Name":"k1", "Value":"v1"}]
         job = JobSubmission(api, "test_job", params={})
+        job.instances = -1
 
         #with self.assertRaises(ValueError):
         msg = job._create_job_message()
-        self.assertTrue(mock_pool.called)
+        mock_pool.assert_called_with(1)
         self.assertEqual(msg, {'Name':'test_job',
                                'Type': 'TestApp',
                                'RequiredFiles':[],
