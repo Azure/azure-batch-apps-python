@@ -268,18 +268,17 @@ def put(auth, url, headers, userfile, params, callback=None, *args):
     """
     def upload_gen(userfile, file_object, callback, chunk=1024):
         length = float(len(userfile))
-        percent_complete = float(0)
-        percent_incr = float(chunk/length*100)
+        data_uploaded = float(0)
         use_callback = hasattr(callback, "__call__")
                     
         while True:
             if use_callback:
-                callback(percent_complete)
+                callback(float(data_uploaded/length*100))
             data = file_object.read(chunk)
             if not data:
                 break
             yield data
-            percent_complete += percent_incr
+            data_uploaded += len(data)
 
     try:
         url = url.format(name=url_from_filename(userfile.name))
@@ -340,8 +339,8 @@ def download(auth, url, headers, output_path, size, overwrite,
           included in the URL. The default is ``None``.
         - block_size (int): Used to vary the upload chunk size.
           The default is 1024 bytes.
-        - callback (func): A function to be called to report upload progress.
-          The function takes a single parameter, the percent uploaded as a
+        - callback (func): A function to be called to report download progress.
+          The function takes a single parameter, the percent downloaded as a
           float.
 
     :Returns:
@@ -370,8 +369,7 @@ def download(auth, url, headers, output_path, size, overwrite,
     LOG.info("Starting download to {0}".format(downloadfile))
 
     if size > 0:
-        percent_complete = float(0)
-        percent_incr = float(block_size/size*100)
+        data_downloaded = float(0)
 
     use_callback = hasattr(callback, "__call__")
 
@@ -387,8 +385,8 @@ def download(auth, url, headers, output_path, size, overwrite,
                 handle.write(block)
 
                 if size > 0 and use_callback:
-                    percent_complete += percent_incr
-                    callback(percent_complete)
+                    data_downloaded += len(block)
+                    callback(float(data_downloaded/size*100))
 
             return response
 

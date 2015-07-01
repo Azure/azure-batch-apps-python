@@ -460,8 +460,8 @@ class BatchAppsApi(object):
             - url (str): The URL directly to the file to be downloaded. If
               supplied, ``job_id`` and ``otype`` will not be used.
               The default is None.
-            - callback (func): A function to be called to report upload progress.
-              The function takes a single parameter, the percent uploaded as a
+            - callback (func): A function to be called to report download progress.
+              The function takes a single parameter, the percent downloaded as a
               float.
 
         :Returns:
@@ -641,8 +641,8 @@ class BatchAppsApi(object):
             - fname (str): The name of the output file to be downloaded.
             - url (str): The URL directly to the file to be downloaded.
               The default is None.
-            - callback (func): A function to be called to report upload progress.
-              The function takes a single parameter, the percent uploaded as a
+            - callback (func): A function to be called to report download progress.
+              The function takes a single parameter, the percent downloaded as a
               float.
 
         :Returns:
@@ -1028,8 +1028,8 @@ class BatchAppsApi(object):
         :Kwargs:
             - overwrite (bool): Whether to overwrite a destination file if it
               already exists. The default is ``False``.
-            - callback (func): A function to be called to report upload progress.
-              The function takes a single parameter, the percent uploaded as a
+            - callback (func): A function to be called to report download progress.
+              The function takes a single parameter, the percent downloaded as a
               float.
 
         :Returns:

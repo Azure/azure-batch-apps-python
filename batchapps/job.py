@@ -594,7 +594,7 @@ class SubmittedJob(object):
                                     self.output_filename,
                                     overwrite,
                                     url=self.output_url,
-                                    callback=calback)
+                                    callback=callback)
 
     def _get_final_preview(self, download_dir, filename, overwrite, callback=None):
         """Internal method to download jobs final thumbnail.
@@ -711,8 +711,8 @@ class SubmittedJob(object):
               :meth:`.list_all_outputs()`). If specified, the specific output
               will be downloaded, otherwise the job's final output will be
               downloaded.
-            - callback (func): A function to be called to report upload progress.
-              The function takes a single parameter, the percent uploaded as a
+            - callback (func): A function to be called to report download progress.
+              The function takes a single parameter, the percent downloaded as a
               float.
 
         :Returns:
@@ -986,8 +986,8 @@ class Task(object):
               exists.
 
         :Kwargs:
-            - callback (func): A function to be called to report upload progress.
-              The function takes a single parameter, the percent uploaded as a
+            - callback (func): A function to be called to report download progress.
+              The function takes a single parameter, the percent downloaded as a
               float.
 
         :Returns:
@@ -1105,8 +1105,8 @@ class Task(object):
         :Kwargs:
             - overwrite (bool): Whether to overwrite an existing file.
               The default is ``False``.
-            - callback (func): A function to be called to report upload progress.
-              The function takes a single parameter, the percent uploaded as a
+            - callback (func): A function to be called to report download progress.
+              The function takes a single parameter, the percent downloaded as a
               float.
 
         :Returns:

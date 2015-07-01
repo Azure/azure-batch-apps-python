@@ -848,8 +848,8 @@ class UserFile(object):
               will be downloaded.
 
         :Kwargs:
-            - callback (func): A function to be called to report upload progress.
-              The function takes a single parameter, the percent uploaded as a
+            - callback (func): A function to be called to report download progress.
+              The function takes a single parameter, the percent downloaded as a
               float.
 
         :Raises:
