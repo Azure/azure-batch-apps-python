@@ -331,6 +331,7 @@ class TestBatchAppsApi(unittest.TestCase):
                             mock_download):
         """Test get_output"""
 
+        _callback = mock.Mock()
         _api = BatchAppsApi(mock_creds, mock_config)
         mock_url.return_value = "https://test.com/{jobid}/{type}"
         mock_download.return_value = {}
@@ -350,7 +351,8 @@ class TestBatchAppsApi(unittest.TestCase):
                                          self.headers, "c:\\dir",
                                          500,
                                          False,
-                                         f_name="output.zip")
+                                         f_name="output.zip",
+                                         callback=None)
         self.assertTrue(val.success)
 
         val = _api.get_output("c:\\dir",
@@ -358,7 +360,8 @@ class TestBatchAppsApi(unittest.TestCase):
                               "output.zip",
                               False,
                               url="http://url",
-                              job_id="test_id")
+                              job_id="test_id",
+                              callback=_callback)
 
         mock_download.assert_called_with(mock_creds,
                                          "http://url",
@@ -366,7 +369,8 @@ class TestBatchAppsApi(unittest.TestCase):
                                          "c:\\dir",
                                          500,
                                          False,
-                                         f_name="output.zip")
+                                         f_name="output.zip",
+                                         callback=_callback)
         self.assertTrue(val.success)
 
         val = _api.get_output("c:\\dir",
@@ -381,7 +385,8 @@ class TestBatchAppsApi(unittest.TestCase):
                                          "c:\\dir",
                                          500,
                                          False,
-                                         f_name="output.zip")
+                                         f_name="output.zip",
+                                         callback=None)
         self.assertTrue(val.success)
 
         val = _api.get_output("c:\\dir",
@@ -485,6 +490,7 @@ class TestBatchAppsApi(unittest.TestCase):
                                  mock_download):
         """Test get_output_file"""
 
+        _callback = mock.Mock()
         _api = BatchAppsApi(mock_creds, mock_config)
         mock_url.return_value = "https://test.com/{jobid}/{name}"
         mock_download.return_value = {}
@@ -504,14 +510,16 @@ class TestBatchAppsApi(unittest.TestCase):
                                          "c:\\dir",
                                          500,
                                          False,
-                                         f_name=None)
+                                         f_name=None,
+                                         callback=None)
         self.assertTrue(val.success)
 
         val = _api.get_output_file("c:\\dir",
                                    500,
                                    False,
                                    url="http://url",
-                                   job_id="test_id")
+                                   job_id="test_id",
+                                   callback=_callback)
 
         mock_download.assert_called_with(mock_creds,
                                          "http://url",
@@ -519,7 +527,8 @@ class TestBatchAppsApi(unittest.TestCase):
                                          "c:\\dir",
                                          500,
                                          False,
-                                         f_name=None)
+                                         f_name=None,
+                                         callback=_callback)
         self.assertTrue(val.success)
 
         mock_url.reset()
@@ -738,6 +747,7 @@ class TestBatchAppsApi(unittest.TestCase):
                           mock_download):
         """Test get_file"""
 
+        _callback = mock.Mock()
         _api = BatchAppsApi(mock_creds, mock_config)
 
         val = _api.get_file("a", "b", "c")
@@ -754,11 +764,19 @@ class TestBatchAppsApi(unittest.TestCase):
                                          self.headers,
                                          "c:\\dir",
                                          500,
-                                         overwrite=True)
+                                         overwrite=True,
+                                         callback=None)
 
         mock_download.side_effect = RestCallException(None, "test", None)
-        val = _api.get_file(test_file, 500, "c:\\dir", True)
+        val = _api.get_file(test_file, 500, "c:\\dir", True, callback=_callback)
         self.assertFalse(val.success)
+        mock_download.assert_called_with(mock_creds,
+                                         "http://test",
+                                         self.headers,
+                                         "c:\\dir",
+                                         500,
+                                         overwrite=True,
+                                         callback=_callback)
 
     @mock.patch.object(api.rest_client, 'head')
     @mock.patch('batchapps.credentials.Configuration')
@@ -798,6 +816,7 @@ class TestBatchAppsApi(unittest.TestCase):
                            mock_put):
         """Test send_file"""
 
+        _callback = mock.Mock()
         _api = BatchAppsApi(mock_creds, mock_config)
         mock_url.return_value = "https://test.com"
 
@@ -815,7 +834,8 @@ class TestBatchAppsApi(unittest.TestCase):
                                     "https://test.com",
                                     self.headers,
                                     test_file,
-                                    spec)
+                                    spec,
+                                    callback=None)
         self.assertTrue(val.success)
         test_file.create_query_specifier.side_effect = FileMissingException("no file")
         val = _api.send_file(test_file)
@@ -824,8 +844,14 @@ class TestBatchAppsApi(unittest.TestCase):
 
         test_file.create_query_specifier.side_effect = None
         mock_put.side_effect = RestCallException(None, "test", None)
-        val = _api.send_file(test_file)
+        val = _api.send_file(test_file, callback=_callback)
         self.assertFalse(val.success)
+        mock_put.assert_called_with(mock_creds,
+                                    "https://test.com",
+                                    self.headers,
+                                    test_file,
+                                    spec,
+                                    callback=_callback)
 
     @mock.patch.object(api.rest_client, 'post')
     @mock.patch('batchapps.credentials.Configuration')
@@ -1100,3 +1126,6 @@ class TestBatchAppsApi(unittest.TestCase):
         mock_delete.side_effect = RestCallException(None, "Boom~", None)
         val = _api.delete_pool("test_id")
         self.assertFalse(val.success)
+
+if __name__ == '__main__':
+    unittest.main()

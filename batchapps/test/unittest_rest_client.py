@@ -197,6 +197,9 @@ class TestRestClient(unittest.TestCase):
         u_file.name = "test.jpg"
         u_file.path = "testfile"
 
+        def _callback(progress):
+            self.assertEqual(progress, 0.0)
+
         with self.assertRaises(RestCallException):
             rest_client.put(auth,
                             "http://test//{0}",
@@ -214,7 +217,8 @@ class TestRestClient(unittest.TestCase):
                               "http://test//{name}",
                               {"Content-Type": "application/json"},
                               u_file,
-                              {'timestamp':'a', 'originalFilePath':'b'})
+                              {'timestamp':'a', 'originalFilePath':'b'},
+                              callback=_callback)
         mock_open.assert_called_with("testfile", 'rb')
         mock_call.assert_called_with(auth, 'PUT', "http://test//test.jpg",
                                      data=mock.ANY,
@@ -246,6 +250,9 @@ class TestRestClient(unittest.TestCase):
     def test_rest_client_download(self, mock_open, mock_call, mock_path):
         """Test download"""
 
+        def _callback(progress):
+            self.assertEqual(progress, 0.0)
+
         auth = mock.create_autospec(Credentials)
         mock_path.return_value = True
         val = rest_client.download(auth,
@@ -253,24 +260,19 @@ class TestRestClient(unittest.TestCase):
                                    {},
                                    "c:\\test",
                                    10,
-                                   False)
+                                   False,
+                                   callback=_callback)
 
         self.assertFalse(mock_call.called)
         self.assertTrue(val)
 
-        #with self.assertRaises(TypeError):
-        #    val = rest_client.download(auth,
-        #                               "http://host//something//test?a=b",
-        #                               {},
-        #                               "c:\\test",
-        #                               None,
-        #                               True)
         val = rest_client.download(auth,
                                    "http://host//something//test?a=b",
                                    {},
                                    "c:\\test",
                                    0,
-                                   True)
+                                   True,
+                                   callback=_callback)
 
         mock_call.assert_called_with(auth,
                                      'GET',
@@ -285,7 +287,8 @@ class TestRestClient(unittest.TestCase):
                                    "c:\\test",
                                    500,
                                    False,
-                                   ext=".jpg")
+                                   ext=".jpg",
+                                   callback=_callback)
 
         mock_call.assert_called_with(auth,
                                      'GET',
@@ -345,3 +348,6 @@ class TestRestClient(unittest.TestCase):
         mock_call.side_effect = RestCallException(None, "Boom!", None)
         with self.assertRaises(RestCallException):
             rest_client.delete(auth, "http://test", {})
+
+if __name__ == '__main__':
+    unittest.main()

@@ -395,11 +395,11 @@ class TestFileCollection(unittest.TestCase):
     def test_filecoll_upload(self, mock_isup, mock_upload, mock_api):
         """Test upload"""
 
+        _callback = mock.Mock()
         resp = mock.create_autospec(Response)
         resp.success = False
         resp.result = RestCallException(None, "Boom", None)
         mock_isup.return_value = []
-        #mock_upload.return_value = (resp, "f")
         mock_upload.return_value = (False, "f", "Error!")
 
         mock_isup.called = False
@@ -417,12 +417,9 @@ class TestFileCollection(unittest.TestCase):
 
         col._collection = [1, 2, 3, 4]
         failed = col.upload(force=True)
-        mock_upload.assert_any_call(1)
+        mock_upload.assert_any_call(1, callback=None)
         self.assertEqual(mock_upload.call_count, 4)
-        #self.assertEqual(failed, [("f", resp.result),
-        #                          ("f", resp.result),
-        #                          ("f", resp.result),
-        #                          ("f", resp.result)])
+
         self.assertEqual(failed, [("f", "Error!"),
                                   ("f", "Error!"),
                                   ("f", "Error!"),
@@ -431,8 +428,8 @@ class TestFileCollection(unittest.TestCase):
         mock_upload.call_count = 0
         resp.success = True
         mock_upload.return_value = (True, "f", "All good!")
-        failed = col.upload(force=True, threads=None)
-        mock_upload.assert_any_call(1)
+        failed = col.upload(force=True, threads=None, callback=_callback)
+        mock_upload.assert_any_call(1, callback=_callback)
         self.assertEqual(mock_upload.call_count, 4)
         self.assertEqual(failed, [])
 
@@ -682,6 +679,7 @@ class TestUserFile(unittest.TestCase):
     def test_userfile_upload(self, mock_isup):
         """Test upload"""
 
+        _callback = mock.Mock()
         api = mock.create_autospec(batchapps.api.BatchAppsApi)
         resp = mock.create_autospec(Response)
         resp.success = False
@@ -693,11 +691,12 @@ class TestUserFile(unittest.TestCase):
         ufile = UserFile(api, {})
         self.assertIsNone(ufile.upload())
         self.assertEqual(ufile.upload(force=True), resp)
-        api.send_file.assert_called_once_with(ufile)
+        api.send_file.assert_called_once_with(ufile, callback=None)
 
         mock_isup.return_value = None
         self.assertEqual(ufile.upload(), resp)
-        self.assertEqual(ufile.upload(force=True), resp)
+        self.assertEqual(ufile.upload(force=True, callback=_callback), resp)
+        api.send_file.assert_called_with(ufile, callback=_callback)
 
     @mock.patch('batchapps.files.UserFile')
     @mock.patch.object(UserFile, 'create_query_specifier')
@@ -737,6 +736,7 @@ class TestUserFile(unittest.TestCase):
     def test_userfile_download(self, mock_size, mock_is_uploaded):
         """Test download"""
 
+        _callback = mock.Mock()
         mock_size.return_value = 0
         api = mock.create_autospec(batchapps.api.BatchAppsApi)
         ufile = UserFile(api, {})
@@ -770,14 +770,12 @@ class TestUserFile(unittest.TestCase):
         api.get_file.return_value = r
         with self.assertRaises(RestCallException):
             ufile.download(download_dir)
-            api.get_file.assert_called_with(ufile, r.result, download_dir)
+        api.get_file.assert_called_with(ufile, resp.result, download_dir, callback=None)
         
         r.success = True
         r.result = "test"
-        ufile.download(download_dir)
-        self.assertTrue(api.get_file.called)
+        ufile.download(download_dir, callback=_callback)
+        api.get_file.assert_called_with(ufile, resp.result, download_dir, callback=_callback)
 
-        
-
-        
-            
+if __name__ == '__main__':
+    unittest.main()

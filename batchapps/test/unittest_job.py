@@ -389,6 +389,7 @@ class TestSubmittedJob(unittest.TestCase):
     def test_submittedjob_get_final_output(self):
         """Test _get_final_output"""
 
+        _callback = mock.Mock()
         resp_a = mock.create_autospec(Response)
         resp_a.success = False
         resp_a.result = RestCallException(None, "test", None)
@@ -422,20 +423,29 @@ class TestSubmittedJob(unittest.TestCase):
                                           42,
                                           None,
                                           True,
-                                          url='http://output')
+                                          url='http://output',
+                                          callback=None)
 
         self.assertEqual(output, resp_b)
+        output = job._get_final_output("", True, callback=_callback)
+        api.get_output.assert_called_with("",
+                                          42,
+                                          None,
+                                          True,
+                                          url='http://output',
+                                          callback=_callback)
 
     def test_submittedjob_get_final_preview(self):
         """Test _get_final_preview"""
 
+        _callback = mock.Mock()
         resp = mock.create_autospec(Response)
         api = mock.create_autospec(BatchAppsApi)
         api.get_output.return_value = resp
 
         job = SubmittedJob(api, None, None, None)
         output = job._get_final_preview("dir", "name", True)
-        api.get_output.assert_called_with("dir", 0, "name", True, url=None)
+        api.get_output.assert_called_with("dir", 0, "name", True, url=None, callback=None)
         self.assertEqual(output, resp)
 
         job = SubmittedJob(api,
@@ -443,17 +453,19 @@ class TestSubmittedJob(unittest.TestCase):
                            None,
                            None,
                            previewLink={'href':'http://thumb'})
-        output = job._get_final_preview("dir", "name", False)
+        output = job._get_final_preview("dir", "name", False, callback=_callback)
         api.get_output.assert_called_with("dir",
                                           0,
                                           "name",
                                           False,
-                                          url='http://thumb')
+                                          url='http://thumb',
+                                          callback=_callback)
         self.assertEqual(output, resp)
 
     def test_submittedjob_get_intermediate_output(self):
         """Test _get_intermediate_output"""
 
+        _callback = mock.Mock()
         resp_a = mock.create_autospec(Response)
         resp_a.success = False
         resp_a.result = RestCallException(None, "test", None)
@@ -487,9 +499,20 @@ class TestSubmittedJob(unittest.TestCase):
                                                42,
                                                True,
                                                url='http://output',
-                                               fname=None)
+                                               fname=None,
+                                               callback=None)
 
         self.assertEqual(output, resp_b)
+        output = job._get_intermediate_output({'link':'http://output'},
+                                              "dir",
+                                              True, callback=_callback)
+        api.get_output_file.assert_called_with("dir",
+                                               42,
+                                               True,
+                                               url='http://output',
+                                               fname=None,
+                                               callback=_callback)
+
 
     @mock.patch('batchapps.job.Task')
     def test_submittedjob_get_tasks(self, mock_task):
@@ -517,6 +540,7 @@ class TestSubmittedJob(unittest.TestCase):
     def test_submittedjob_get_output(self, mock_final, mock_int):
         """Test get_output"""
 
+        _callback = mock.Mock()
         resp = mock.create_autospec(Response)
         resp.success = False
         resp.result = RestCallException(None, "test", None)
@@ -535,7 +559,7 @@ class TestSubmittedJob(unittest.TestCase):
                            outputFileName="filename")
         with self.assertRaises(RestCallException):
             output = job.get_output("dir")
-        mock_final.assert_called_with("dir", False)
+        mock_final.assert_called_with("dir", False, callback=None)
         self.assertFalse(mock_int.called)
 
         resp.success = True
@@ -543,9 +567,9 @@ class TestSubmittedJob(unittest.TestCase):
         self.assertEqual(output, "dir\\filename")
 
         mock_final.called = False
-        output = job.get_output("dir", output={'name':'test'}, overwrite=True)
+        output = job.get_output("dir", output={'name':'test'}, overwrite=True, callback=_callback)
         self.assertFalse(mock_final.called)
-        mock_int.assert_called_with({'name':'test'}, "dir", True)
+        mock_int.assert_called_with({'name':'test'}, "dir", True, callback=_callback)
         self.assertEqual(output, "dir\\test")
 
     def test_submittedjob_list_all_outputs(self):
@@ -722,6 +746,7 @@ class TestTask(unittest.TestCase):
     def test_task_get_files(self):
         """Test _get_file"""
 
+        _callback = mock.Mock()
         resp = mock.create_autospec(Response)
         resp.success = False
         resp.result = RestCallException(None, "test", None)
@@ -742,23 +767,26 @@ class TestTask(unittest.TestCase):
                                                42,
                                                False,
                                                fname=None,
-                                               url=None)
+                                               url=None,
+                                               callback=None)
         api.props_output_file.called = False
 
         task._get_file({'type':'TaskPreview',
                         'link':'http://',
-                        'name':'file.txt'}, "dir", True)
+                        'name':'file.txt'}, "dir", True, callback=_callback)
         self.assertFalse(api.props_output_file.called)
         api.get_output_file.assert_called_with("dir",
                                                None,
                                                True,
                                                fname="file.txt",
-                                               url="http://")
+                                               url="http://",
+                                               callback=_callback)
 
     @mock.patch.object(Task, '_get_file')
     def test_task_get_thumbnail(self, mock_get):
         """Test get_thumbnail"""
 
+        _callback = mock.Mock()
         resp = mock.create_autospec(Response)
         resp.success = False
         resp.result = RestCallException(None, "test", None)
@@ -780,15 +808,15 @@ class TestTask(unittest.TestCase):
                                    overwrite=False)
         mock_get.assert_called_with({'name':'name',
                                      'type':'TaskPreview',
-                                     'link':None}, "dir", False)
+                                     'link':None}, "dir", False, callback=None)
         self.assertEqual(thumb, "dir\\name")
 
         task = Task(api, None, outputs=[{'kind':'TaskPreview',
                                          'name':'thumb.png'}])
-        thumb = task.get_thumbnail(download_dir="dir", overwrite=False)
+        thumb = task.get_thumbnail(download_dir="dir", overwrite=False, callback=_callback)
         mock_get.assert_called_with({'name':'thumb.png',
                                      'type':'TaskPreview',
-                                     'link':None}, "dir", False)
+                                     'link':None}, "dir", False, callback=_callback)
         self.assertEqual(thumb, "dir\\thumb.png")
 
         thumb = task.get_thumbnail(download_dir="dir",
@@ -796,7 +824,7 @@ class TestTask(unittest.TestCase):
                                    overwrite=False)
         mock_get.assert_called_with({'name':'name',
                                      'type':'TaskPreview',
-                                     'link':None}, "dir", False)
+                                     'link':None}, "dir", False, callback=None)
         self.assertEqual(thumb, "dir\\name")
 
     def test_task_list_outputs(self):
@@ -821,6 +849,7 @@ class TestTask(unittest.TestCase):
     def test_task_get_output(self, mock_get):
         """Test get_output"""
 
+        _callback = mock.Mock()
         resp = mock.create_autospec(Response)
         resp.success = False
         resp.result = RestCallException(None, "test", None)
@@ -832,11 +861,11 @@ class TestTask(unittest.TestCase):
             task.get_output(None, None)
         resp.success = True
         output = task.get_output({}, "dir")
-        mock_get.assert_called_with({}, "dir", False)
+        mock_get.assert_called_with({}, "dir", False, callback=None)
         self.assertEqual(output, "dir\\")
 
-        output = task.get_output({'name':'test.txt'}, "dir", overwrite=True)
-        mock_get.assert_called_with({'name':'test.txt'}, "dir", True)
+        output = task.get_output({'name':'test.txt'}, "dir", overwrite=True, callback=_callback)
+        mock_get.assert_called_with({'name':'test.txt'}, "dir", True, callback=_callback)
         self.assertEqual(output, "dir\\test.txt")
 
     def test_task_cancel(self):
@@ -860,3 +889,6 @@ class TestTask(unittest.TestCase):
         resp.success = True
         cancelled = task.cancel()
         self.assertTrue(cancelled)
+
+if __name__ == '__main__':
+    unittest.main()

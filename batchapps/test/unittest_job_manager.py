@@ -157,6 +157,7 @@ class TestJobManager(unittest.TestCase):
     def test_jobmgr_submit(self, mock_api, mock_creds, mock_cfg):
         """Test submit"""
 
+        _callback = mock.Mock()
         job = mock.create_autospec(JobSubmission)
         job.name = "test"
         job.source = "test"
@@ -165,11 +166,11 @@ class TestJobManager(unittest.TestCase):
         mgr = JobManager(mock_creds, cfg=mock_cfg)
         mgr.submit(job)
         self.assertTrue(job.submit.called)
-        job.required_files.upload.assert_called_with(threads=None)
+        job.required_files.upload.assert_called_with(threads=None, callback=None)
 
-        mgr.submit(job, upload_threads=10)
+        mgr.submit(job, upload_threads=10, callback=_callback)
         self.assertTrue(job.submit.called)
-        job.required_files.upload.assert_called_with(threads=10)
+        job.required_files.upload.assert_called_with(threads=10, callback=_callback)
 
         with self.assertRaises(TypeError):
             mgr.submit("test")
@@ -177,3 +178,6 @@ class TestJobManager(unittest.TestCase):
         job.required_files.upload.return_value = ["oops"]
         with self.assertRaises(Exception):
             mgr.submit(job)
+
+if __name__ == '__main__':
+    unittest.main()
