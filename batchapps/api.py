@@ -438,7 +438,7 @@ class BatchAppsApi(object):
                    otype='output',
                    url=None,
                    callback=None,
-                   block=1024):
+                   block=4096):
         """
         Gets the content of the job output or its thumbnail.
         Either ``url``, or both ``job_id`` and ``otype`` must be set.
@@ -462,10 +462,10 @@ class BatchAppsApi(object):
               supplied, ``job_id`` and ``otype`` will not be used.
               The default is None.
             - callback (func): A function to be called to report download progress.
-              The function takes three parameters: the percent downloaded (float), the 
+              The function must take three arguments: the percent downloaded (float), the 
               bytes downloaded (float), and the total bytes to be downloaded (float).
             - block (int): The amount of data downloaded in each block - determines 
-              the frequency with which the callback is called. Default is 1024.
+              the frequency with which the callback is called. Default is 4096.
 
         :Returns:
             - :class:`.Response` with the GET response, however this is not
@@ -627,7 +627,7 @@ class BatchAppsApi(object):
                         fname=None,
                         url=None,
                         callback=None,
-                        block=1024):
+                        block=4096):
         """
         Gets the content of a file created in a job.
         Either ``url``, or both ``job_id`` and ``fname`` must be set.
@@ -648,10 +648,10 @@ class BatchAppsApi(object):
             - url (str): The URL directly to the file to be downloaded.
               The default is None.
             - callback (func): A function to be called to report download progress.
-              The function takes three parameters: the percent downloaded (float), the 
+              The function must take three arguments: the percent downloaded (float), the 
               bytes downloaded (float), and the total bytes to be downloaded (float).
             - block (int): The amount of data downloaded in each block - determines 
-              the frequency with which the callback is called. Default is 1024.
+              the frequency with which the callback is called. Default is 4096.
 
         :Returns:
             - :class:`.Response` with the GET response, however this is not
@@ -1024,7 +1024,7 @@ class BatchAppsApi(object):
 
 
     def get_file(self, userfile, size, download_dir, overwrite=False,
-                 callback=None, block=1024):
+                 callback=None, block=4096):
         """Gets the content of a file previously uploaded by the user.
 
         :Args:
@@ -1040,10 +1040,10 @@ class BatchAppsApi(object):
             - overwrite (bool): Whether to overwrite a destination file if it
               already exists. The default is ``False``.
             - callback (func): A function to be called to report download progress.
-              The function takes three parameters: the percent downloaded (float), the 
+              The function must take three arguments: the percent downloaded (float), the 
               bytes downloaded (float), and the total bytes to be downloaded (float).
             - block (int): The amount of data downloaded in each block - determines 
-              the frequency with which the callback is called. Default is 1024.
+              the frequency with which the callback is called. Default is 4096.
 
         :Returns:
             - :class:`.Response` with the GET response, however this is not
@@ -1113,7 +1113,7 @@ class BatchAppsApi(object):
         else:
             return Response(True, head_resp)
 
-    def send_file(self, userfile, callback=None, block=1024):
+    def send_file(self, userfile, callback=None, block=4096):
         """Uploads a user file for use in a job.
 
         :Args:
@@ -1123,10 +1123,10 @@ class BatchAppsApi(object):
 
         :Kwargs:
             - callback (func): A function to be called to report upload progress.
-              The function takes three parameters: the percent uploaded (float), the 
+              The function must take three arguments: the percent uploaded (float), the 
               bytes uploaded (float), and the total bytes to be uploaded (float).
             - block (int): The amount of data uploaded in each block - determines 
-              the frequency with which the callback is called. Default is 1024.
+              the frequency with which the callback is called. Default is 4096.
 
         :Returns:
             - :class:`.Response` with the PUT response, however this is not

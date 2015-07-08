@@ -417,7 +417,7 @@ class TestFileCollection(unittest.TestCase):
 
         col._collection = [1, 2, 3, 4]
         failed = col.upload(force=True)
-        mock_upload.assert_any_call(1, callback=None, block=1024)
+        mock_upload.assert_any_call(1, callback=None, block=4096)
         self.assertEqual(mock_upload.call_count, 4)
 
         self.assertEqual(failed, [("f", "Error!"),
@@ -585,13 +585,13 @@ class TestUserFile(unittest.TestCase):
         """Test __len__"""
 
         api = mock.create_autospec(batchapps.api.BatchAppsApi)
-        mock_size.return_value = 1024
+        mock_size.return_value = 4096
         u_file = UserFile(api, {})
         u_file.path = "c:\\test"
         self.assertEqual(len(u_file), 0)
 
         u_file._exists = True
-        self.assertEqual(len(u_file), 1024)
+        self.assertEqual(len(u_file), 4096)
 
     def test_userfile_checksum(self):
         """Test get_checksum"""
@@ -691,7 +691,7 @@ class TestUserFile(unittest.TestCase):
         ufile = UserFile(api, {})
         self.assertIsNone(ufile.upload())
         self.assertEqual(ufile.upload(force=True), resp)
-        api.send_file.assert_called_once_with(ufile, callback=None, block=1024)
+        api.send_file.assert_called_once_with(ufile, callback=None, block=4096)
 
         mock_isup.return_value = None
         self.assertEqual(ufile.upload(), resp)
@@ -770,7 +770,7 @@ class TestUserFile(unittest.TestCase):
         api.get_file.return_value = r
         with self.assertRaises(RestCallException):
             ufile.download(download_dir)
-        api.get_file.assert_called_with(ufile, resp.result, download_dir, callback=None, block=1024)
+        api.get_file.assert_called_with(ufile, resp.result, download_dir, callback=None, block=4096)
         
         r.success = True
         r.result = "test"

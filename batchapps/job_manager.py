@@ -182,7 +182,7 @@ class JobManager(object):
         """
         return JobSubmission(self._client, str(name), **jobdetails)
 
-    def submit(self, submitjob, upload_threads=None, callback=None, block=1024):
+    def submit(self, submitjob, upload_threads=None, callback=None, block=4096):
         """Submit a job, and upload all its assets
 
         :Args:
@@ -192,10 +192,10 @@ class JobManager(object):
             - upload_threads (int): Maximum number of concurrent asset uploads.
               The default is 1.
             - callback (func): A function to be called to report upload progress.
-              The function takes three parameters: the percent uploaded (float), the 
+              The function must take three arguments: the percent uploaded (float), the 
               bytes uploaded (float), and the total bytes to be uploaded (float).
             - block (int): The amount of data uploaded in each block - determines 
-              the frequency with which the callback is called. Default is 1024.
+              the frequency with which the callback is called. Default is 4096.
 
         :Returns:
             - A job submission response dictionary in the format:

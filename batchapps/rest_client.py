@@ -78,8 +78,8 @@ def _call(auth, *args, **kwargs):
         except Exception as exp:
             raise RestCallException(
                 type(exp),
-                "An {type} error occurred: {error}".format(type=type(exp),
-                                                           error=str(exp)),
+                "An {type} error occurred: {error}".format(
+                    type=type(exp), error=str(exp)),
                 exp)
 
     except (requests.RequestException,
@@ -256,7 +256,7 @@ def post(auth, url, headers, message=None):
                                 exp)
 
 
-def put(auth, url, headers, userfile, params, block_size=1024, callback=None, *args):
+def put(auth, url, headers, userfile, params, block_size=4096, callback=None, *args):
     """
     Call PUT.
     This call is only used to upload files.
@@ -271,9 +271,9 @@ def put(auth, url, headers, userfile, params, block_size=1024, callback=None, *a
 
     :Kwargs:
         - block_size (int): The amount of data uploaded in each block - determines 
-          the frequency with which the callback is called. Default is 1024.
+          the frequency with which the callback is called. Default is 4096.
         - callback (func): A function to be called to report upload progress.
-          The function takes three parameters: the percent uploaded (float), the 
+          The function must take three arguments: the percent uploaded (float), the 
           bytes uploaded (float), and the total bytes to be uploaded (float).
 
     :Returns:
@@ -335,7 +335,7 @@ def put(auth, url, headers, userfile, params, block_size=1024, callback=None, *a
 def download(auth, url, headers, output_path, size, overwrite,
              f_name=None,
              ext=None,
-             block_size=1024,
+             block_size=4096,
              callback=None):
     """
     Call GET for a file stream.
@@ -356,10 +356,10 @@ def download(auth, url, headers, output_path, size, overwrite,
         - ext (str): Used to specify a file extension if one is not already
           included in the URL. The default is ``None``.
         - block_size (int): Used to vary the upload chunk size.
-          The default is 1024 bytes. Determines the frequency with which the
+          The default is 4096 bytes. Determines the frequency with which the
           callback is called.
         - callback (func): A function to be called to report download progress.
-          The function takes three parameters: the percent downloaded (float), the 
+          The function must take three arguments: the percent downloaded (float), the 
           bytes downloaded (float), and the total bytes to be downloaded (float).
 
     :Returns:

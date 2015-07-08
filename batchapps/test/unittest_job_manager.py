@@ -166,7 +166,7 @@ class TestJobManager(unittest.TestCase):
         mgr = JobManager(mock_creds, cfg=mock_cfg)
         mgr.submit(job)
         self.assertTrue(job.submit.called)
-        job.required_files.upload.assert_called_with(threads=None, callback=None, block=1024)
+        job.required_files.upload.assert_called_with(threads=None, callback=None, block=4096)
 
         mgr.submit(job, upload_threads=10, callback=_callback, block=11111)
         self.assertTrue(job.submit.called)

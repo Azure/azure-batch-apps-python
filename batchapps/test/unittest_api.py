@@ -352,7 +352,7 @@ class TestBatchAppsApi(unittest.TestCase):
                                          500,
                                          False,
                                          f_name="output.zip",
-                                         block_size=1024,
+                                         block_size=4096,
                                          callback=None)
         self.assertTrue(val.success)
 
@@ -389,7 +389,7 @@ class TestBatchAppsApi(unittest.TestCase):
                                          500,
                                          False,
                                          f_name="output.zip",
-                                         block_size=1024,
+                                         block_size=4096,
                                          callback=None)
         self.assertTrue(val.success)
 
@@ -515,7 +515,7 @@ class TestBatchAppsApi(unittest.TestCase):
                                          500,
                                          False,
                                          f_name=None,
-                                         block_size=1024,
+                                         block_size=4096,
                                          callback=None)
         self.assertTrue(val.success)
 
@@ -772,7 +772,7 @@ class TestBatchAppsApi(unittest.TestCase):
                                          "c:\\dir",
                                          500,
                                          overwrite=True,
-                                         block_size=1024,
+                                         block_size=4096,
                                          callback=None)
 
         mock_download.side_effect = RestCallException(None, "test", None)
@@ -844,7 +844,7 @@ class TestBatchAppsApi(unittest.TestCase):
                                     self.headers,
                                     test_file,
                                     spec,
-                                    block_size=1024,
+                                    block_size=4096,
                                     callback=None)
         self.assertTrue(val.success)
         test_file.create_query_specifier.side_effect = FileMissingException("no file")
