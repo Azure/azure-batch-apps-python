@@ -555,7 +555,7 @@ class SubmittedJob(object):
         self._log.debug("Extracted job submission data: {0}".format(formatted))
         return formatted
 
-    def _get_final_output(self, download_dir, overwrite, callback=None):
+    def _get_final_output(self, download_dir, overwrite, callback=None, block=1024):
         """Internal method to download jobs final output.
 
         :Args:
@@ -565,9 +565,11 @@ class SubmittedJob(object):
               exists.
 
         :Kwargs:
-            - callback (func): A function to be called to report upload progress.
-              The function takes a single parameter, the percent uploaded as a
-              float.
+            - callback (func): A function to be called to report download progress.
+              The function takes three parameters: the percent downloaded (float), the 
+              bytes downloaded (float), and the total bytes to be downloaded (float).
+            - block (int): The amount of data downloaded in each block - determines 
+              the frequency with which the callback is called. Default is 1024.
 
         :Returns:
             - :class:`.Response` object returned directly from
@@ -594,9 +596,10 @@ class SubmittedJob(object):
                                     self.output_filename,
                                     overwrite,
                                     url=self.output_url,
-                                    callback=callback)
+                                    callback=callback,
+                                    block=block)
 
-    def _get_final_preview(self, download_dir, filename, overwrite, callback=None):
+    def _get_final_preview(self, download_dir, filename, overwrite, callback=None, block=1024):
         """Internal method to download jobs final thumbnail.
         We don't bother to check file size for download feedback, as it's
         assumed to be very small.
@@ -609,9 +612,11 @@ class SubmittedJob(object):
               exists.
 
         :Kwargs:
-            - callback (func): A function to be called to report upload progress.
-              The function takes a single parameter, the percent uploaded as a
-              float.
+            - callback (func): A function to be called to report download progress.
+              The function takes three parameters: the percent downloaded (float), the 
+              bytes downloaded (float), and the total bytes to be downloaded (float).
+            - block (int): The amount of data downloaded in each block - determines 
+              the frequency with which the callback is called. Default is 1024.
 
         :Returns:
             - :class:`.Response` object returned directly from
@@ -622,9 +627,10 @@ class SubmittedJob(object):
                                     filename,
                                     overwrite,
                                     url=self.thumb_url,
-                                    callback=callback)
+                                    callback=callback,
+                                    block=block)
 
-    def _get_intermediate_output(self, output, download_dir, overwrite, callback=None):
+    def _get_intermediate_output(self, output, download_dir, overwrite, callback=None, block=1024):
         """Internal method to download any file from the job output.
 
         :Args:
@@ -636,9 +642,11 @@ class SubmittedJob(object):
               exists.
 
         :Kwargs:
-            - callback (func): A function to be called to report upload progress.
-              The function takes a single parameter, the percent uploaded as a
-              float.
+            - callback (func): A function to be called to report download progress.
+              The function takes three parameters: the percent downloaded (float), the 
+              bytes downloaded (float), and the total bytes to be downloaded (float).
+            - block (int): The amount of data downloaded in each block - determines 
+              the frequency with which the callback is called. Default is 1024.
         
 
         :Returns:
@@ -667,7 +675,8 @@ class SubmittedJob(object):
                                          overwrite,
                                          fname=output.get('name'),
                                          url=output.get('link'),
-                                         callback=callback)
+                                         callback=callback,
+                                         block=block)
 
     def get_tasks(self):
         """
@@ -696,7 +705,7 @@ class SubmittedJob(object):
         else:
             raise resp.result
 
-    def get_output(self, download_dir, output=None, overwrite=False, callback=None):
+    def get_output(self, download_dir, output=None, overwrite=False, callback=None, block=1024):
         """
         Download a job output file.
         This could be the jobs final output, or if specified, any intermediate
@@ -712,8 +721,10 @@ class SubmittedJob(object):
               will be downloaded, otherwise the job's final output will be
               downloaded.
             - callback (func): A function to be called to report download progress.
-              The function takes a single parameter, the percent downloaded as a
-              float.
+              The function takes three parameters: the percent downloaded (float), the 
+              bytes downloaded (float), and the total bytes to be downloaded (float).
+            - block (int): The amount of data downloaded in each block - determines 
+              the frequency with which the callback is called. Default is 1024.
 
         :Returns:
             - The full path to the downloaded file (str).
@@ -729,11 +740,13 @@ class SubmittedJob(object):
             download = self._get_intermediate_output(output,
                                                      download_dir,
                                                      overwrite,
-                                                     callback=callback)
+                                                     callback=callback,
+                                                     block=block)
 
         elif self.output_url and self.output_filename:
             name = self.output_filename
-            download = self._get_final_output(download_dir, overwrite, callback=callback)
+            download = self._get_final_output(download_dir, overwrite,
+                                              callback=callback, block=block)
 
         else:
             raise FileDownloadException(
@@ -974,7 +987,7 @@ class Task(object):
                 'type': _output.get('kind')
                 })
 
-    def _get_file(self, output, download_dir, overwrite, callback=None):
+    def _get_file(self, output, download_dir, overwrite, callback=None, block=1024):
         """Internal method to download a task output.
 
         :Args:
@@ -987,8 +1000,10 @@ class Task(object):
 
         :Kwargs:
             - callback (func): A function to be called to report download progress.
-              The function takes a single parameter, the percent downloaded as a
-              float.
+              The function takes three parameters: the percent downloaded (float), the 
+              bytes downloaded (float), and the total bytes to be downloaded (float).
+            - block (int): The amount of data downloaded in each block - determines 
+              the frequency with which the callback is called. Default is 1024.
 
         :Returns:
             - :class:`.Response` object returned directly from
@@ -1011,7 +1026,8 @@ class Task(object):
                                          overwrite,
                                          fname=output.get('name'),
                                          url=output.get('link'),
-                                         callback=callback)
+                                         callback=callback,
+                                         block=block)
 
     def get_thumbnail(self, download_dir=None, filename=None, overwrite=True, callback=None):
         """
@@ -1027,9 +1043,9 @@ class Task(object):
               randomly generated filename will be used.
             - overwrite (bool): Whether an existing file will be overwritten.
               The default is ``True``.
-            - callback (func): A function to be called to report upload progress.
-              The function takes a single parameter, the percent uploaded as a
-              float.
+            - callback (func): A function to be called to report download progress.
+              The function takes three parameters: the percent downloaded (float), the 
+              bytes downloaded (float), and the total bytes to be downloaded (float).
 
         :Returns:
             - The full path to the downloaded file (str).
@@ -1093,7 +1109,7 @@ class Task(object):
         else:
             raise resp.result
 
-    def get_output(self, output, download_dir, overwrite=False, callback=None):
+    def get_output(self, output, download_dir, overwrite=False, callback=None, block=1024):
         """Download a task output file.
 
         :Args:
@@ -1106,8 +1122,10 @@ class Task(object):
             - overwrite (bool): Whether to overwrite an existing file.
               The default is ``False``.
             - callback (func): A function to be called to report download progress.
-              The function takes a single parameter, the percent downloaded as a
-              float.
+              The function takes three parameters: the percent downloaded (float), the 
+              bytes downloaded (float), and the total bytes to be downloaded (float).
+            - block (int): The amount of data downloaded in each block - determines 
+              the frequency with which the callback is called. Default is 1024.
 
         :Returns:
             - The full path to the downloaded file (str).
@@ -1115,7 +1133,7 @@ class Task(object):
         :Raises:
             - :exc:`.RestCallException` if an error occurred during the request.
         """
-        download = self._get_file(output, download_dir, overwrite, callback=callback)
+        download = self._get_file(output, download_dir, overwrite, callback=callback, block=block)
         if download.success:
             return os.path.join(download_dir, output.get('name', ''))
         else:

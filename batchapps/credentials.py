@@ -409,6 +409,7 @@ class Credentials(object):
 
         self._log = logging.getLogger('batch_apps')
         self._id = str(client_id)
+        self._cfg = config
 
         if not hasattr(config, "aad_config"):
             raise InvalidConfigException(
@@ -418,12 +419,12 @@ class Credentials(object):
             self._log.debug("No token supplied, attempting to "
                             "retrieve previous session.")
 
-            self.cfg = config.aad_config(unattended=False)
+            self.auth = config.aad_config(unattended=False)
             token = self.get_stored_auth()
 
         else:
             unattended = 'refresh_token' not in token
-            self.cfg = config.aad_config(unattended=unattended)
+            self.auth = config.aad_config(unattended=unattended)
 
         self.token = token
 
@@ -444,7 +445,7 @@ class Credentials(object):
             - :class:`.AuthenticationException` if the token is invalid
               or expired.
         """
-        resource = _https(self.cfg['resource']) #DEP
+        resource = _https(self.auth['resource']) #DEP
         countdown = float(self.token['expires_at']) - time.time()
 
         self.token['expires_in'] = countdown
@@ -453,8 +454,8 @@ class Credentials(object):
         try:
             if 'refresh_token' in self.token:
 
-                refresh = _https(self.cfg['root'], self.cfg['tenant'],
-                         self.cfg['token_uri'])
+                refresh = _https(self.auth['root'], self.auth['tenant'],
+                         self.auth['token_uri'])
 
                 new_session = requests_oauthlib.OAuth2Session(
                     self._id,
@@ -480,6 +481,26 @@ class Credentials(object):
             if CA_CERT and VERIFY is True:
                 new_session.verify = CA_CERT
             return new_session
+
+    def refresh_session(self):
+        """Refresh unattended token
+        
+        :Returns:
+            - An authenticated :class:`requests_oauthlib.OAuth2Session` if
+              refreshed, else `None`.
+
+        """
+        unattended = 'refresh_token' not in self.token
+        if unattended:
+            try:
+                creds = AzureOAuth.get_unattended_session(self._cfg)
+                self.token = creds.token
+                return self.get_session()
+
+            except (AuthenticationException, InvalidConfigException) as exp:
+                self._log.warning("Failed to refresh unattended token: {0}".format(exp))
+
+        return None
 
     def get_stored_auth(self):
         """Retrieve a previously stored access token for refreshing

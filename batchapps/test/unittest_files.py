@@ -417,7 +417,7 @@ class TestFileCollection(unittest.TestCase):
 
         col._collection = [1, 2, 3, 4]
         failed = col.upload(force=True)
-        mock_upload.assert_any_call(1, callback=None)
+        mock_upload.assert_any_call(1, callback=None, block=1024)
         self.assertEqual(mock_upload.call_count, 4)
 
         self.assertEqual(failed, [("f", "Error!"),
@@ -428,8 +428,8 @@ class TestFileCollection(unittest.TestCase):
         mock_upload.call_count = 0
         resp.success = True
         mock_upload.return_value = (True, "f", "All good!")
-        failed = col.upload(force=True, threads=None, callback=_callback)
-        mock_upload.assert_any_call(1, callback=_callback)
+        failed = col.upload(force=True, threads=None, callback=_callback, block=1)
+        mock_upload.assert_any_call(1, callback=_callback, block=1)
         self.assertEqual(mock_upload.call_count, 4)
         self.assertEqual(failed, [])
 
@@ -691,12 +691,12 @@ class TestUserFile(unittest.TestCase):
         ufile = UserFile(api, {})
         self.assertIsNone(ufile.upload())
         self.assertEqual(ufile.upload(force=True), resp)
-        api.send_file.assert_called_once_with(ufile, callback=None)
+        api.send_file.assert_called_once_with(ufile, callback=None, block=1024)
 
         mock_isup.return_value = None
         self.assertEqual(ufile.upload(), resp)
-        self.assertEqual(ufile.upload(force=True, callback=_callback), resp)
-        api.send_file.assert_called_with(ufile, callback=_callback)
+        self.assertEqual(ufile.upload(force=True, callback=_callback, block=1), resp)
+        api.send_file.assert_called_with(ufile, callback=_callback, block=1)
 
     @mock.patch('batchapps.files.UserFile')
     @mock.patch.object(UserFile, 'create_query_specifier')
@@ -770,12 +770,12 @@ class TestUserFile(unittest.TestCase):
         api.get_file.return_value = r
         with self.assertRaises(RestCallException):
             ufile.download(download_dir)
-        api.get_file.assert_called_with(ufile, resp.result, download_dir, callback=None)
+        api.get_file.assert_called_with(ufile, resp.result, download_dir, callback=None, block=1024)
         
         r.success = True
         r.result = "test"
-        ufile.download(download_dir, callback=_callback)
-        api.get_file.assert_called_with(ufile, resp.result, download_dir, callback=_callback)
+        ufile.download(download_dir, callback=_callback, block=1)
+        api.get_file.assert_called_with(ufile, resp.result, download_dir, callback=_callback, block=1)
 
 if __name__ == '__main__':
     unittest.main()

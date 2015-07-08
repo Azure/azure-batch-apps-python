@@ -333,3 +333,5 @@ class TestFileManager(unittest.TestCase):
         mock_file.assert_any_call(mgr._client, "testFile")
         mock_file.assert_any_call(mgr._client, None)
  
+if __name__ == '__main__':
+    unittest.main()

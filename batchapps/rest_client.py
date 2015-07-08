@@ -63,8 +63,24 @@ def _call(auth, *args, **kwargs):
 
     except (oauth2.rfc6749.errors.InvalidGrantError,
             oauth2.rfc6749.errors.TokenExpiredError) as exp:
-        raise SessionExpiredException("Please log in again. "
-                                      "{0}".format(str(exp)))
+
+        LOG.info("Token expired. Attempting to refresh and continue.")
+        refreshed_session  = auth.refresh_session()
+        if not refreshed_session:
+            raise SessionExpiredException("Please log in again. "
+                                          "{0}".format(str(exp)))
+
+        try:
+            conn_adptr = requests.adapters.HTTPAdapter(max_retries=RETRIES)
+            refreshed_session.mount('https://', conn_adptr)
+            resp = refreshed_session.request(*args, **kwargs)
+
+        except Exception as exp:
+            raise RestCallException(
+                type(exp),
+                "An {type} error occurred: {error}".format(type=type(exp),
+                                                           error=str(exp)),
+                exp)
 
     except (requests.RequestException,
             oauth2.rfc6749.errors.OAuth2Error) as exp:
@@ -75,48 +91,47 @@ def _call(auth, *args, **kwargs):
                                                        error=str(exp)),
             exp)
 
+    LOG.debug("Request response received, status:{0}, " #headers:{1}, 
+                "encoding:{1}, content:{2}".format( #, request_headers:{4}
+                    resp.status_code,
+                    #resp.headers,
+                    resp.encoding,
+                    resp.content[0:100]))
+                    #resp.request.headers))
+
+    if resp.status_code == 200 or resp.status_code == 202:
+        LOG.info(
+            "Successful REST call with status: {0}".format(
+                resp.status_code))
+
+        return resp
+
+    elif resp.status_code == 400:
+        msg = ("Invalid API request. Some of the supplied data is "
+                "incorrect or malformed.\nStatus {0}.\nServer: {1}".format(
+                    resp.status_code,
+                    resp.text))
+
+        raise RestCallException(ValueError, msg, resp)
+
+    elif resp.status_code == 401:
+        msg = ("Authentication for this call failed, "
+                "please check your credentials")
+        raise RestCallException(AuthenticationException, msg, resp)
+
+    elif resp.status_code == 403:
+        msg = "API call non-applicable.\nServer: {0}".format(resp.text)
+        raise  RestCallException(None, msg, resp, silent=True)
+
+    elif resp.status_code == 404:
+        msg = ("Invalid endpoint or API call. Failed with status {0}.\n"
+                "URL: {1}".format(resp.status_code, resp.url))
+        raise RestCallException(OSError, msg, resp)
+
     else:
-        LOG.debug("Request response received, status:{0}, " #headers:{1}, 
-                  "encoding:{1}, content:{2}".format( #, request_headers:{4}
-                      resp.status_code,
-                      #resp.headers,
-                      resp.encoding,
-                      resp.content[0:100]))
-                      #resp.request.headers))
-
-        if resp.status_code == 200 or resp.status_code == 202:
-            LOG.info(
-                "Successful REST call with status: {0}".format(
-                    resp.status_code))
-
-            return resp
-
-        elif resp.status_code == 400:
-            msg = ("Invalid API request. Some of the supplied data is "
-                   "incorrect or malformed.\nStatus {0}.\nServer: {1}".format(
-                       resp.status_code,
-                       resp.text))
-
-            raise RestCallException(ValueError, msg, resp)
-
-        elif resp.status_code == 401:
-            msg = ("Authentication for this call failed, "
-                   "please check your credentials")
-            raise RestCallException(AuthenticationException, msg, resp)
-
-        elif resp.status_code == 403:
-            msg = "API call non-applicable.\nServer: {0}".format(resp.text)
-            raise  RestCallException(None, msg, resp, silent=True)
-
-        elif resp.status_code == 404:
-            msg = ("Invalid endpoint or API call. Failed with status {0}.\n"
-                   "URL: {1}".format(resp.status_code, resp.url))
-            raise RestCallException(OSError, msg, resp)
-
-        else:
-            msg = "Call failed with status: {status}".format(
-                status=resp.status_code)
-            raise RestCallException(ValueError, msg, resp)
+        msg = "Call failed with status: {status}".format(
+            status=resp.status_code)
+        raise RestCallException(ValueError, msg, resp)
 
 def get(auth, url, headers, params=None):
     """
@@ -241,7 +256,7 @@ def post(auth, url, headers, message=None):
                                 exp)
 
 
-def put(auth, url, headers, userfile, params, callback=None, *args):
+def put(auth, url, headers, userfile, params, block_size=1024, callback=None, *args):
     """
     Call PUT.
     This call is only used to upload files.
@@ -255,9 +270,11 @@ def put(auth, url, headers, userfile, params, callback=None, *args):
         - params (dict): The file path and timestamp parameters.
 
     :Kwargs:
+        - block_size (int): The amount of data uploaded in each block - determines 
+          the frequency with which the callback is called. Default is 1024.
         - callback (func): A function to be called to report upload progress.
-          The function takes a single parameter, the percent uploaded as a
-          float.
+          The function takes three parameters: the percent uploaded (float), the 
+          bytes uploaded (float), and the total bytes to be uploaded (float).
 
     :Returns:
         - The raw server response.
@@ -266,14 +283,14 @@ def put(auth, url, headers, userfile, params, callback=None, *args):
         - :exc:`.RestCallException` if the call failed or returned a
           non-200 status.
     """
-    def upload_gen(userfile, file_object, callback, chunk=1024):
+    def upload_gen(userfile, file_object, callback, chunk=block_size):
         length = float(len(userfile))
         data_uploaded = float(0)
         use_callback = hasattr(callback, "__call__")
                     
         while True:
             if use_callback:
-                callback(float(data_uploaded/length*100))
+                callback(float(data_uploaded/length*100), data_uploaded, length)
             data = file_object.read(chunk)
             if not data:
                 break
@@ -287,10 +304,11 @@ def put(auth, url, headers, userfile, params, callback=None, *args):
         put_headers["Content-Type"] = "application/octet-stream"
 
         LOG.debug("Put call URL: {0}, headers: {1}, "
-                  "file: {2}, parameters: {3}".format(url,
-                                                      put_headers,
-                                                      userfile,
-                                                      params))
+                  "file: {2}, parameters: {3}, block_size: {4}".format(url,
+                                                                put_headers,
+                                                                userfile,
+                                                                params,
+                                                                block_size))
 
         with open(userfile.path, 'rb') as file_data:
             response = _call(auth,
@@ -338,10 +356,11 @@ def download(auth, url, headers, output_path, size, overwrite,
         - ext (str): Used to specify a file extension if one is not already
           included in the URL. The default is ``None``.
         - block_size (int): Used to vary the upload chunk size.
-          The default is 1024 bytes.
+          The default is 1024 bytes. Determines the frequency with which the
+          callback is called.
         - callback (func): A function to be called to report download progress.
-          The function takes a single parameter, the percent downloaded as a
-          float.
+          The function takes three parameters: the percent downloaded (float), the 
+          bytes downloaded (float), and the total bytes to be downloaded (float).
 
     :Returns:
         - The raw server response.
@@ -360,11 +379,12 @@ def download(auth, url, headers, output_path, size, overwrite,
         return True
 
     LOG.debug("Get call URL: {0}, headers: {1}, file: "
-              "{2}, size: {3}, overwrite: {4}".format(url,
-                                                      headers,
-                                                      downloadfile,
-                                                      size,
-                                                      overwrite))
+              "{2}, size: {3}, overwrite: {4}, block_size: {5}".format(url,
+                                                                headers,
+                                                                downloadfile,
+                                                                size,
+                                                                overwrite,
+                                                                block_size))
 
     LOG.info("Starting download to {0}".format(downloadfile))
 
@@ -379,14 +399,14 @@ def download(auth, url, headers, output_path, size, overwrite,
 
             for block in response.iter_content(block_size):
                 if not block:
-                    LOG.warning("Download complete")
+                    LOG.info("Download complete")
                     break
 
                 handle.write(block)
 
                 if size > 0 and use_callback:
                     data_downloaded += len(block)
-                    callback(float(data_downloaded/size*100))
+                    callback(float(data_downloaded/size*100), data_downloaded, float(size))
 
             return response
 

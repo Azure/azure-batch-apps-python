@@ -166,11 +166,11 @@ class TestJobManager(unittest.TestCase):
         mgr = JobManager(mock_creds, cfg=mock_cfg)
         mgr.submit(job)
         self.assertTrue(job.submit.called)
-        job.required_files.upload.assert_called_with(threads=None, callback=None)
+        job.required_files.upload.assert_called_with(threads=None, callback=None, block=1024)
 
-        mgr.submit(job, upload_threads=10, callback=_callback)
+        mgr.submit(job, upload_threads=10, callback=_callback, block=11111)
         self.assertTrue(job.submit.called)
-        job.required_files.upload.assert_called_with(threads=10, callback=_callback)
+        job.required_files.upload.assert_called_with(threads=10, callback=_callback, block=11111)
 
         with self.assertRaises(TypeError):
             mgr.submit("test")

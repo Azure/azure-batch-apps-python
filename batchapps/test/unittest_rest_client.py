@@ -90,8 +90,15 @@ class TestRestClient(unittest.TestCase):
                 rest_client._call(auth, "a", "b", c="c")
 
         session.request.side_effect = oauth2.rfc6749.errors.InvalidGrantError("Boom!")
+        auth.refresh_session.return_value = None
         with self.assertRaises(SessionExpiredException):
             rest_client._call(auth, "a", "b", c="c")
+
+        auth.refresh_session.return_value = session
+        with self.assertRaises(RestCallException):
+            rest_client._call(auth, "a", "b", c="c")
+            auth.refresh_session.assert_called_with()
+            session.request.assert_called_with("a", "b", c="c")
 
 
     @mock.patch.object(rest_client, '_call')
@@ -197,9 +204,11 @@ class TestRestClient(unittest.TestCase):
         u_file.name = "test.jpg"
         u_file.path = "testfile"
 
-        def _callback(progress):
+        def _callback(progress, data, total):
             self.assertEqual(progress, 0.0)
             self.assertIsInstance(progress, float)
+            self.assertIsInstance(data, int)
+            self.assertIsInstance(total, int)
 
         with self.assertRaises(RestCallException):
             rest_client.put(auth,
@@ -219,7 +228,8 @@ class TestRestClient(unittest.TestCase):
                               {"Content-Type": "application/json"},
                               u_file,
                               {'timestamp':'a', 'originalFilePath':'b'},
-                              callback=_callback)
+                              callback=_callback,
+                              block_size=1111)
         mock_open.assert_called_with("testfile", 'rb')
         mock_call.assert_called_with(auth, 'PUT', "http://test//test.jpg",
                                      data=mock.ANY,
@@ -251,9 +261,11 @@ class TestRestClient(unittest.TestCase):
     def test_rest_client_download(self, mock_open, mock_call, mock_path):
         """Test download"""
 
-        def _callback(progress):
+        def _callback(progress, data, total):
             self.assertEqual(progress, 0.0)
             self.assertIsInstance(progress, float)
+            self.assertIsInstance(data, int)
+            self.assertIsInstance(total, int)
 
         auth = mock.create_autospec(Credentials)
         mock_path.return_value = True
@@ -263,6 +275,7 @@ class TestRestClient(unittest.TestCase):
                                    "c:\\test",
                                    10,
                                    False,
+                                   block_size=12345,
                                    callback=_callback)
 
         self.assertFalse(mock_call.called)

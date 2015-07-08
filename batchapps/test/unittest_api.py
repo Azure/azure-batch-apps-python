@@ -352,6 +352,7 @@ class TestBatchAppsApi(unittest.TestCase):
                                          500,
                                          False,
                                          f_name="output.zip",
+                                         block_size=1024,
                                          callback=None)
         self.assertTrue(val.success)
 
@@ -361,7 +362,8 @@ class TestBatchAppsApi(unittest.TestCase):
                               False,
                               url="http://url",
                               job_id="test_id",
-                              callback=_callback)
+                              callback=_callback,
+                              block=1)
 
         mock_download.assert_called_with(mock_creds,
                                          "http://url",
@@ -370,6 +372,7 @@ class TestBatchAppsApi(unittest.TestCase):
                                          500,
                                          False,
                                          f_name="output.zip",
+                                         block_size=1,
                                          callback=_callback)
         self.assertTrue(val.success)
 
@@ -386,6 +389,7 @@ class TestBatchAppsApi(unittest.TestCase):
                                          500,
                                          False,
                                          f_name="output.zip",
+                                         block_size=1024,
                                          callback=None)
         self.assertTrue(val.success)
 
@@ -511,6 +515,7 @@ class TestBatchAppsApi(unittest.TestCase):
                                          500,
                                          False,
                                          f_name=None,
+                                         block_size=1024,
                                          callback=None)
         self.assertTrue(val.success)
 
@@ -519,7 +524,8 @@ class TestBatchAppsApi(unittest.TestCase):
                                    False,
                                    url="http://url",
                                    job_id="test_id",
-                                   callback=_callback)
+                                   callback=_callback,
+                                   block=1)
 
         mock_download.assert_called_with(mock_creds,
                                          "http://url",
@@ -528,6 +534,7 @@ class TestBatchAppsApi(unittest.TestCase):
                                          500,
                                          False,
                                          f_name=None,
+                                         block_size=1,
                                          callback=_callback)
         self.assertTrue(val.success)
 
@@ -765,10 +772,11 @@ class TestBatchAppsApi(unittest.TestCase):
                                          "c:\\dir",
                                          500,
                                          overwrite=True,
+                                         block_size=1024,
                                          callback=None)
 
         mock_download.side_effect = RestCallException(None, "test", None)
-        val = _api.get_file(test_file, 500, "c:\\dir", True, callback=_callback)
+        val = _api.get_file(test_file, 500, "c:\\dir", True, callback=_callback, block=1)
         self.assertFalse(val.success)
         mock_download.assert_called_with(mock_creds,
                                          "http://test",
@@ -776,6 +784,7 @@ class TestBatchAppsApi(unittest.TestCase):
                                          "c:\\dir",
                                          500,
                                          overwrite=True,
+                                         block_size=1,
                                          callback=_callback)
 
     @mock.patch.object(api.rest_client, 'head')
@@ -835,6 +844,7 @@ class TestBatchAppsApi(unittest.TestCase):
                                     self.headers,
                                     test_file,
                                     spec,
+                                    block_size=1024,
                                     callback=None)
         self.assertTrue(val.success)
         test_file.create_query_specifier.side_effect = FileMissingException("no file")
@@ -844,13 +854,14 @@ class TestBatchAppsApi(unittest.TestCase):
 
         test_file.create_query_specifier.side_effect = None
         mock_put.side_effect = RestCallException(None, "test", None)
-        val = _api.send_file(test_file, callback=_callback)
+        val = _api.send_file(test_file, callback=_callback, block=1)
         self.assertFalse(val.success)
         mock_put.assert_called_with(mock_creds,
                                     "https://test.com",
                                     self.headers,
                                     test_file,
                                     spec,
+                                    block_size=1,
                                     callback=_callback)
 
     @mock.patch.object(api.rest_client, 'post')

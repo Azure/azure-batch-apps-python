@@ -381,7 +381,7 @@ class TestCredentials(unittest.TestCase):
 
         creds = mock.create_autospec(Credentials)
         creds._id = 'abc'
-        creds.cfg = {'root':'1/',
+        creds.auth = {'root':'1/',
                      'unattended_key':'3',
                      'token_uri':'/auth',
                      'resource':'https://test',
@@ -405,3 +405,25 @@ class TestCredentials(unittest.TestCase):
         mock_requests.OAuth2Session.assert_called_with('abc',
                                                        token=creds.token)
 
+    @mock.patch('batchapps.credentials.AzureOAuth')
+    @mock.patch('batchapps.credentials.requests_oauthlib')
+    def test_credentials_refresh_session(self, mock_req, mock_oauth):
+
+        creds = mock.create_autospec(Credentials)
+        creds._id = 'abc'
+        creds.auth = {'root':'1/',
+                     'unattended_key':'3',
+                     'token_uri':'/auth',
+                     'resource':'https://test',
+                     'tenant':'common',
+                     'client_id':'abc'}
+        creds.token = {'expires_at':'1',
+                       'expires_in':'2',
+                       'refresh_token':"test"}
+        creds._log = logging.getLogger()
+
+        Credentials.refresh_session(creds)
+
+
+if __name__ == '__main__':
+    unittest.main()

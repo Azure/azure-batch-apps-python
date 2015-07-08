@@ -425,16 +425,18 @@ class TestSubmittedJob(unittest.TestCase):
                                           None,
                                           True,
                                           url='http://output',
-                                          callback=None)
+                                          callback=None,
+                                          block=1024)
 
         self.assertEqual(output, resp_b)
-        output = job._get_final_output("", True, callback=_callback)
+        output = job._get_final_output("", True, callback=_callback, block=111)
         api.get_output.assert_called_with("",
                                           42,
                                           None,
                                           True,
                                           url='http://output',
-                                          callback=_callback)
+                                          callback=_callback,
+                                          block=111)
 
     def test_submittedjob_get_final_preview(self):
         """Test _get_final_preview"""
@@ -446,7 +448,7 @@ class TestSubmittedJob(unittest.TestCase):
 
         job = SubmittedJob(api, None, None, None)
         output = job._get_final_preview("dir", "name", True)
-        api.get_output.assert_called_with("dir", 0, "name", True, url=None, callback=None)
+        api.get_output.assert_called_with("dir", 0, "name", True, url=None, callback=None, block=1024)
         self.assertEqual(output, resp)
 
         job = SubmittedJob(api,
@@ -454,13 +456,14 @@ class TestSubmittedJob(unittest.TestCase):
                            None,
                            None,
                            previewLink={'href':'http://thumb'})
-        output = job._get_final_preview("dir", "name", False, callback=_callback)
+        output = job._get_final_preview("dir", "name", False, callback=_callback, block=111)
         api.get_output.assert_called_with("dir",
                                           0,
                                           "name",
                                           False,
                                           url='http://thumb',
-                                          callback=_callback)
+                                          callback=_callback,
+                                          block=111)
         self.assertEqual(output, resp)
 
     def test_submittedjob_get_intermediate_output(self):
@@ -501,18 +504,20 @@ class TestSubmittedJob(unittest.TestCase):
                                                True,
                                                url='http://output',
                                                fname=None,
-                                               callback=None)
+                                               callback=None,
+                                               block=1024)
 
         self.assertEqual(output, resp_b)
         output = job._get_intermediate_output({'link':'http://output'},
                                               "dir",
-                                              True, callback=_callback)
+                                              True, callback=_callback, block=1)
         api.get_output_file.assert_called_with("dir",
                                                42,
                                                True,
                                                url='http://output',
                                                fname=None,
-                                               callback=_callback)
+                                               callback=_callback,
+                                               block=1)
 
 
     @mock.patch('batchapps.job.Task')
@@ -560,7 +565,7 @@ class TestSubmittedJob(unittest.TestCase):
                            outputFileName="filename")
         with self.assertRaises(RestCallException):
             output = job.get_output("dir")
-        mock_final.assert_called_with("dir", False, callback=None)
+        mock_final.assert_called_with("dir", False, callback=None, block=1024)
         self.assertFalse(mock_int.called)
 
         resp.success = True
@@ -568,9 +573,9 @@ class TestSubmittedJob(unittest.TestCase):
         self.assertEqual(output, "dir\\filename")
 
         mock_final.called = False
-        output = job.get_output("dir", output={'name':'test'}, overwrite=True, callback=_callback)
+        output = job.get_output("dir", output={'name':'test'}, overwrite=True, callback=_callback, block=1)
         self.assertFalse(mock_final.called)
-        mock_int.assert_called_with({'name':'test'}, "dir", True, callback=_callback)
+        mock_int.assert_called_with({'name':'test'}, "dir", True, callback=_callback, block=1)
         self.assertEqual(output, "dir\\test")
 
     def test_submittedjob_list_all_outputs(self):
@@ -769,19 +774,21 @@ class TestTask(unittest.TestCase):
                                                False,
                                                fname=None,
                                                url=None,
-                                               callback=None)
+                                               callback=None,
+                                               block=1024)
         api.props_output_file.called = False
 
         task._get_file({'type':'TaskPreview',
                         'link':'http://',
-                        'name':'file.txt'}, "dir", True, callback=_callback)
+                        'name':'file.txt'}, "dir", True, callback=_callback, block=111)
         self.assertFalse(api.props_output_file.called)
         api.get_output_file.assert_called_with("dir",
                                                None,
                                                True,
                                                fname="file.txt",
                                                url="http://",
-                                               callback=_callback)
+                                               callback=_callback,
+                                               block=111)
 
     @mock.patch.object(Task, '_get_file')
     def test_task_get_thumbnail(self, mock_get):
@@ -862,11 +869,11 @@ class TestTask(unittest.TestCase):
             task.get_output(None, None)
         resp.success = True
         output = task.get_output({}, "dir")
-        mock_get.assert_called_with({}, "dir", False, callback=None)
+        mock_get.assert_called_with({}, "dir", False, callback=None, block=1024)
         self.assertEqual(output, "dir\\")
 
-        output = task.get_output({'name':'test.txt'}, "dir", overwrite=True, callback=_callback)
-        mock_get.assert_called_with({'name':'test.txt'}, "dir", True, callback=_callback)
+        output = task.get_output({'name':'test.txt'}, "dir", overwrite=True, callback=_callback, block=111)
+        mock_get.assert_called_with({'name':'test.txt'}, "dir", True, callback=_callback, block=111)
         self.assertEqual(output, "dir\\test.txt")
 
     def test_task_cancel(self):

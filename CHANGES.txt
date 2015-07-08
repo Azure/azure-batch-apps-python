@@ -1,5 +1,11 @@
+v0.5.1, 2015-07-09	- Added auto-refresh for unattended tokens
+					- Exposed configuration of block size to vary upload and download callback frequency
+					- Progress callbacks now take 3 arguments, the percent commplete (float), the bytes transferred (float),
+					  and the total bytes to be transferred (float).
+
 v0.5.0, 2015-07-01	- Removed 3 instance minimum for pool creation.
 					- Added progress callbacks from file upload and download.
+
 v0.4.0, 2015-05-11	- Added optional auth config validation flag.
 					- Added JobSubmission.settings attribute
 					- Fixed error in SessionExpiredException.

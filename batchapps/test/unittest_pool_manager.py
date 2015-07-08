@@ -172,3 +172,6 @@ class TestPoolManager(unittest.TestCase):
         mock_pool.side_effect = RestCallException(None, "test", None)
         with self.assertRaises(RestCallException):
             mgr.clear_pools()
+
+if __name__ == '__main__':
+    unittest.main()

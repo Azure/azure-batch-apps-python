@@ -177,7 +177,7 @@ class FileCollection(object):
             self._collection = [a for a in self._collection
                                 if a.name != filekey]
 
-    def _upload_forced(self, userfile, callback=None):
+    def _upload_forced(self, userfile, callback=None, block=1024):
         """Upload a single file in the collection, ignoring overwrite.
         Only used internally in :func:upload by the parallel subprocesses
 
@@ -187,8 +187,10 @@ class FileCollection(object):
 
         :Kwargs:
             - callback (func): A function to be called to report upload progress.
-              The function takes a single parameter, the percent uploaded as a
-              float.
+              The function takes three parameters: the percent uploaded (float), the 
+              bytes uploaded (float), and the total bytes to be uploaded (float).
+            - block (int): The amount of data uploaded in each block - determines 
+              the frequency with which the callback is called. Default is 1024.
 
         :Returns:
             - A tuple containing the result of the :func:`UserFile.upload` call,
@@ -196,7 +198,7 @@ class FileCollection(object):
               ``(bool success, userfile, string result)``
         """
         self._log.debug("About to upload file: {0}".format(userfile))
-        resp = userfile.upload(force=True, callback=callback)
+        resp = userfile.upload(force=True, callback=callback, block=1024)
 
         # TODO: Need to fix hanging when we try to return the result
         # object rather than just a string.
@@ -368,7 +370,7 @@ class FileCollection(object):
             raise TypeError("File to remove must be userfile object, "
                             "filename string, userfile index int or slice")
 
-    def upload(self, force=False, threads=None, callback=None):
+    def upload(self, force=False, threads=None, callback=None, block=1024):
         """Upload all files in a set, optionally in parallel
 
         :Kwargs:
@@ -378,8 +380,10 @@ class FileCollection(object):
             - threads (int): Maximum number of parallel uploads, default is 1
               (i.e. not parallel). Max threads is 10.
             - callback (func): A function to be called to report upload progress.
-              The function takes a single parameter, the percent uploaded as a
-              float.
+              The function takes three parameters: the percent uploaded (float), the 
+              bytes uploaded (float), and the total bytes to be uploaded (float).
+            - block (int): The amount of data uploaded in each block - determines 
+              the frequency with which the callback is called. Default is 1024.
 
         :Returns:
             - A list of tuples containing any files that failed to upload and
@@ -409,7 +413,7 @@ class FileCollection(object):
 
         if not threads or threads < 1: # No subprocessed uploads
             for _file in file_set:
-                result, userfile, error = self._upload_forced(_file, callback=callback)
+                result, userfile, error = self._upload_forced(_file, callback=callback, block=block)
                 if not result:
                     failed.append((userfile, error))
 
@@ -783,7 +787,7 @@ class UserFile(object):
         self._log.debug("File specification: {0}".format(file_spec))
         return file_spec
 
-    def upload(self, force=False, callback=None):
+    def upload(self, force=False, callback=None, block=1024):
         """Upload file.
 
         :Kwargs:
@@ -791,8 +795,10 @@ class UserFile(object):
               file has already been uploaded. Otherwise checks if file has
               been uploaded, and if so, skips. The default is ``False``.
             - callback (func): A function to be called to report upload progress.
-              The function takes a single parameter, the percent uploaded as a
-              float.
+              The function takes three parameters: the percent uploaded (float), the 
+              bytes uploaded (float), and the total bytes to be uploaded (float).
+            - block (int): The amount of data uploaded in each block - determines 
+              the frequency with which the callback is called. Default is 1024.
 
         :Returns:
             - Client :class:`.Response` object if upload was attempted.
@@ -809,7 +815,7 @@ class UserFile(object):
 
         if force or uploaded is None:
             self._log.info("Uploading file {0}".format(self.name))
-            return self._api.send_file(self, callback=callback)
+            return self._api.send_file(self, callback=callback, block=block)
 
         return None
 
@@ -840,7 +846,7 @@ class UserFile(object):
         else:
             raise resp.result
 
-    def download(self, download_dir, callback=None):
+    def download(self, download_dir, callback=None, block=1024):
         """Download file.
         
         :Args:
@@ -849,8 +855,10 @@ class UserFile(object):
 
         :Kwargs:
             - callback (func): A function to be called to report download progress.
-              The function takes a single parameter, the percent downloaded as a
-              float.
+              The function takes three parameters: the percent downloaded (float), the 
+              bytes downloaded (float), and the total bytes to be downloaded (float).
+            - block (int): The amount of data downloaded in each block - determines 
+              the frequency with which the callback is called. Default is 1024.
 
         :Raises:
             - :class:`.RestCallException` if an error occurred during the
@@ -880,7 +888,7 @@ class UserFile(object):
 
         else:
             size = resp.result
-            dl_file = self._api.get_file(self, size, download_dir, callback=callback)
+            dl_file = self._api.get_file(self, size, download_dir, callback=callback, block=block)
 
             if not dl_file.success:
 

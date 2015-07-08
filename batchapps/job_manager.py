@@ -182,7 +182,7 @@ class JobManager(object):
         """
         return JobSubmission(self._client, str(name), **jobdetails)
 
-    def submit(self, submitjob, upload_threads=None, callback=None):
+    def submit(self, submitjob, upload_threads=None, callback=None, block=1024):
         """Submit a job, and upload all its assets
 
         :Args:
@@ -192,8 +192,10 @@ class JobManager(object):
             - upload_threads (int): Maximum number of concurrent asset uploads.
               The default is 1.
             - callback (func): A function to be called to report upload progress.
-              The function takes a single parameter, the percent uploaded as a
-              float.
+              The function takes three parameters: the percent uploaded (float), the 
+              bytes uploaded (float), and the total bytes to be uploaded (float).
+            - block (int): The amount of data uploaded in each block - determines 
+              the frequency with which the callback is called. Default is 1024.
 
         :Returns:
             - A job submission response dictionary in the format:
@@ -217,7 +219,7 @@ class JobManager(object):
                               "Consider revising.")
 
         failed_uploads = submitjob.required_files.upload(
-            threads=upload_threads, callback=callback)
+            threads=upload_threads, callback=callback, block=block)
 
         if len(failed_uploads) > 0:
             raise Exception(

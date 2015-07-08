@@ -45,6 +45,9 @@ Release History
 
 For full summary of changes, see CHANGES.txt
 
+* 2015-07-09	- 0.5.1
+	- Added auto-refresh for unattended tokens
+	- Exposed configuration of block size to vary upload and download callback frequency
 * 2015-07-01	- 0.5.0
 	- Added progress callbacks for file upload and download
 	- Removed 3 instance minimum for pool creation
@@ -56,8 +59,8 @@ For full summary of changes, see CHANGES.txt
 * 2014-11-26	- 0.2.0	
 	- Changed file upload format
 	- Changed Authentication config format
-	- Changed terminology regarding application → jobtype
-	- Changed terminology regarding service principal → unattended account
+	- Changed terminology: application to jobtype
+	- Changed terminology: service principal to unattended account
 	- Added FileCollection.index method
 	- Added better handling for missing auth values in Configuration
 * 2014-11-03	- 0.1.1 

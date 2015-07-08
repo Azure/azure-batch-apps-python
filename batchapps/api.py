@@ -437,7 +437,8 @@ class BatchAppsApi(object):
                    job_id=None,
                    otype='output',
                    url=None,
-                   callback=None):
+                   callback=None,
+                   block=1024):
         """
         Gets the content of the job output or its thumbnail.
         Either ``url``, or both ``job_id`` and ``otype`` must be set.
@@ -461,8 +462,10 @@ class BatchAppsApi(object):
               supplied, ``job_id`` and ``otype`` will not be used.
               The default is None.
             - callback (func): A function to be called to report download progress.
-              The function takes a single parameter, the percent downloaded as a
-              float.
+              The function takes three parameters: the percent downloaded (float), the 
+              bytes downloaded (float), and the total bytes to be downloaded (float).
+            - block (int): The amount of data downloaded in each block - determines 
+              the frequency with which the callback is called. Default is 1024.
 
         :Returns:
             - :class:`.Response` with the GET response, however this is not
@@ -474,14 +477,15 @@ class BatchAppsApi(object):
         """
         self._log.debug(
             "get_output, download_dir={dd}, size={sz}, fname={fn}, "
-            "overwrite={ow}, job_id={ji}, url={ur}, otype={ot}".format(
+            "overwrite={ow}, job_id={ji}, url={ur}, otype={ot}, block={bl}".format(
                 dd=download_dir,
                 sz=size,
                 fn=fname,
                 ow=overwrite,
                 ji=job_id,
                 ur=url,
-                ot=otype))
+                ot=otype,
+                bl=block))
 
         if not url and job_id:
             if otype.lower() not in ['output', 'preview']:
@@ -510,6 +514,7 @@ class BatchAppsApi(object):
                                             size,
                                             overwrite,
                                             f_name=fname,
+                                            block_size=block,
                                             callback=callback)
 
         except RestCallException as exp:
@@ -621,7 +626,8 @@ class BatchAppsApi(object):
                         job_id=None,
                         fname=None,
                         url=None,
-                        callback=None):
+                        callback=None,
+                        block=1024):
         """
         Gets the content of a file created in a job.
         Either ``url``, or both ``job_id`` and ``fname`` must be set.
@@ -642,8 +648,10 @@ class BatchAppsApi(object):
             - url (str): The URL directly to the file to be downloaded.
               The default is None.
             - callback (func): A function to be called to report download progress.
-              The function takes a single parameter, the percent downloaded as a
-              float.
+              The function takes three parameters: the percent downloaded (float), the 
+              bytes downloaded (float), and the total bytes to be downloaded (float).
+            - block (int): The amount of data downloaded in each block - determines 
+              the frequency with which the callback is called. Default is 1024.
 
         :Returns:
             - :class:`.Response` with the GET response, however this is not
@@ -655,12 +663,13 @@ class BatchAppsApi(object):
         """
         self._log.debug("get_output_file, download_dir={dd}, size={sz}, "
                         "overwrite={ow}, job_id={ji}, fname={fn}, "
-                        "url={ur}".format(dd=download_dir,
+                        "url={ur}, block={bl}".format(dd=download_dir,
                                           sz=size,
                                           ow=overwrite,
                                           ji=job_id,
                                           fn=fname,
-                                          ur=url))
+                                          ur=url,
+                                          bl=block))
 
         name = fname if fname else None
 
@@ -683,6 +692,7 @@ class BatchAppsApi(object):
                                             download_dir,
                                             size, overwrite,
                                             f_name=name,
+                                            block_size=block,
                                             callback=callback)
 
         except RestCallException as exp:
@@ -1013,7 +1023,8 @@ class BatchAppsApi(object):
         return Response(True, resp['files'])
 
 
-    def get_file(self, userfile, size, download_dir, overwrite=False, callback=None):
+    def get_file(self, userfile, size, download_dir, overwrite=False,
+                 callback=None, block=1024):
         """Gets the content of a file previously uploaded by the user.
 
         :Args:
@@ -1029,8 +1040,10 @@ class BatchAppsApi(object):
             - overwrite (bool): Whether to overwrite a destination file if it
               already exists. The default is ``False``.
             - callback (func): A function to be called to report download progress.
-              The function takes a single parameter, the percent downloaded as a
-              float.
+              The function takes three parameters: the percent downloaded (float), the 
+              bytes downloaded (float), and the total bytes to be downloaded (float).
+            - block (int): The amount of data downloaded in each block - determines 
+              the frequency with which the callback is called. Default is 1024.
 
         :Returns:
             - :class:`.Response` with the GET response, however this is not
@@ -1044,10 +1057,11 @@ class BatchAppsApi(object):
                                                      None))
 
         self._log.debug("get_file, file={0}, size={1}, "
-                        "download_dir={2}, overwrite={3}".format(userfile,
-                                                                 size,
-                                                                 download_dir,
-                                                                 overwrite))
+                        "download_dir={2}, overwrite={3}, block={4}".format(userfile,
+                                                                            size,
+                                                                            download_dir,
+                                                                            overwrite,
+                                                                            block))
         url = userfile.url
         self._log.debug("Get file url: {0}".format(url))
         try:
@@ -1057,6 +1071,7 @@ class BatchAppsApi(object):
                                             download_dir,
                                             size,
                                             overwrite=overwrite,
+                                            block_size=block,
                                             callback=callback)
 
         except RestCallException as exp:
@@ -1098,7 +1113,7 @@ class BatchAppsApi(object):
         else:
             return Response(True, head_resp)
 
-    def send_file(self, userfile, callback=None):
+    def send_file(self, userfile, callback=None, block=1024):
         """Uploads a user file for use in a job.
 
         :Args:
@@ -1108,8 +1123,10 @@ class BatchAppsApi(object):
 
         :Kwargs:
             - callback (func): A function to be called to report upload progress.
-              The function takes a single parameter, the percent uploaded as a
-              float.
+              The function takes three parameters: the percent uploaded (float), the 
+              bytes uploaded (float), and the total bytes to be uploaded (float).
+            - block (int): The amount of data uploaded in each block - determines 
+              the frequency with which the callback is called. Default is 1024.
 
         :Returns:
             - :class:`.Response` with the PUT response, however this is not
@@ -1140,6 +1157,7 @@ class BatchAppsApi(object):
                                         self.headers,
                                         userfile,
                                         params,
+                                        block_size=block,
                                         callback=callback)
 
         except (RestCallException, FileMissingException) as exp:
