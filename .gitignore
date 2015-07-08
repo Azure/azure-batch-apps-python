@@ -218,3 +218,4 @@ BatchApplications.Client/MANIFEST
 MANIFEST
 pylintrc
 *.sln
+publish.bat
