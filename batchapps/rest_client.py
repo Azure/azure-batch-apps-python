@@ -156,7 +156,7 @@ def get(auth, url, headers, params=None):
         - :exc:`.RestCallException` is the call failed,
           or returned a non-200 status.
     """
-    LOG.debug("Get call URL: {0}, params: {1}".format(url, params))
+    LOG.debug("GET call URL: {0}, params: {1}".format(url, params))
 
     try:
         response = _call(auth, 'GET', url, headers=headers, params=params)
@@ -195,7 +195,7 @@ def head(auth, url, headers, filename=""):
     """
     try:
         url = url.format(name=url_from_filename(filename))
-        LOG.debug("Head call URL: {0}".format(url))
+        LOG.debug("HEAD call URL: {0}".format(url))
 
         response = _call(auth, 'HEAD', url, headers=headers)
         return int(response.headers["content-length"])
@@ -239,7 +239,7 @@ def post(auth, url, headers, message=None):
         if message:
             message = json.dumps(message)
 
-        LOG.debug("Post call URL: {0}, message: {1}".format(url, message))
+        LOG.debug("POST call URL: {0}, message: {1}".format(url, message))
 
         response = _call(auth, 'POST', url, headers=headers, data=message)
         return json.loads(response.text)
@@ -305,7 +305,7 @@ def put(auth, url, headers, userfile, params, block_size=4096, callback=None, *a
         put_headers = dict(headers)
         put_headers["Content-Type"] = "application/octet-stream"
 
-        LOG.debug("Put call URL: {0}, callback: {1}, "
+        LOG.debug("PUT call URL: {0}, callback: {1}, "
                   "file: {2}, parameters: {3}, block_size: {4}".format(url,
                                                                 callback,
                                                                 userfile,
@@ -380,7 +380,7 @@ def download(auth, url, headers, output_path, size, overwrite,
 
         return True
 
-    LOG.debug("Get call URL: {0}, callback: {1}, file: "
+    LOG.debug("GET call URL: {0}, callback: {1}, file: "
               "{2}, size: {3}, overwrite: {4}, block_size: {5}".format(url,
                                                                 callback,
                                                                 downloadfile,
@@ -444,7 +444,7 @@ def delete(auth, url, headers):
           non-200 status.
     """
     try:
-        LOG.debug("Delete call URL: {0}".format(url))
+        LOG.debug("DELETE call URL: {0}".format(url))
         response = _call(auth, 'DELETE', url, headers=headers)
         return response
 
