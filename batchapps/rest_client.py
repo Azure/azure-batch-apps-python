@@ -40,11 +40,54 @@ from oauthlib import oauth2
 
 import json
 import os
+import sys
 
 import logging
 
 LOG = logging.getLogger('batch_apps')
 RETRIES = 3
+
+
+def _check_code(response):
+
+    LOG.debug("Request response received, status:{0}, "
+                "encoding:{1}".format(
+                    response.status_code,
+                    response.encoding))
+
+    if response.status_code == 200 or response.status_code == 202:
+        LOG.info(
+            "Successful REST call with status: {0}".format(
+                response.status_code))
+
+        return response
+
+    elif response.status_code == 400:
+        msg = ("Invalid API request. Some of the supplied data is "
+                "incorrect or malformed.\nStatus {0}.\nServer: {1}".format(
+                    response.status_code,
+                    response.text))
+
+        raise RestCallException(ValueError, msg, response)
+
+    elif response.status_code == 401:
+        msg = ("Authentication for this call failed, "
+                "please check your credentials")
+        raise RestCallException(AuthenticationException, msg, response)
+
+    elif response.status_code == 403:
+        msg = "API call non-applicable.\nServer: {0}".format(response.text)
+        raise  RestCallException(None, msg, response, silent=True)
+
+    elif response.status_code == 404:
+        msg = ("Invalid endpoint or API call. Failed with status {0}.\n"
+                "URL: {1}".format(response.status_code, response.url))
+        raise RestCallException(OSError, msg, response)
+
+    else:
+        msg = "Call failed with status: {status}".format(
+            status=response.status_code)
+        raise RestCallException(ValueError, msg, response)
 
 def _call(auth, *args, **kwargs):
     """Internal method to open Requests session."""
@@ -59,7 +102,8 @@ def _call(auth, *args, **kwargs):
         LOG.debug(
             "Opened requests session with max retries: {0}".format(RETRIES))
 
-        resp = conn_session.request(*args, **kwargs)
+        response = conn_session.request(*args, **kwargs)
+        return _check_code(response)
 
     except (oauth2.rfc6749.errors.InvalidGrantError,
             oauth2.rfc6749.errors.TokenExpiredError) as exp:
@@ -73,7 +117,8 @@ def _call(auth, *args, **kwargs):
         try:
             conn_adptr = requests.adapters.HTTPAdapter(max_retries=RETRIES)
             refreshed_session.mount('https://', conn_adptr)
-            resp = refreshed_session.request(*args, **kwargs)
+            response = refreshed_session.request(*args, **kwargs)
+            return _check_code(response)
 
         except Exception as exp:
             raise RestCallException(
@@ -90,48 +135,6 @@ def _call(auth, *args, **kwargs):
             "An {type} error occurred: {error}".format(type=type(exp),
                                                        error=str(exp)),
             exp)
-
-    LOG.debug("Request response received, status:{0}, " #headers:{1}, 
-                "encoding:{1}, content:{2}".format( #, request_headers:{4}
-                    resp.status_code,
-                    #resp.headers,
-                    resp.encoding,
-                    resp.content[0:100]))
-                    #resp.request.headers))
-
-    if resp.status_code == 200 or resp.status_code == 202:
-        LOG.info(
-            "Successful REST call with status: {0}".format(
-                resp.status_code))
-
-        return resp
-
-    elif resp.status_code == 400:
-        msg = ("Invalid API request. Some of the supplied data is "
-                "incorrect or malformed.\nStatus {0}.\nServer: {1}".format(
-                    resp.status_code,
-                    resp.text))
-
-        raise RestCallException(ValueError, msg, resp)
-
-    elif resp.status_code == 401:
-        msg = ("Authentication for this call failed, "
-                "please check your credentials")
-        raise RestCallException(AuthenticationException, msg, resp)
-
-    elif resp.status_code == 403:
-        msg = "API call non-applicable.\nServer: {0}".format(resp.text)
-        raise  RestCallException(None, msg, resp, silent=True)
-
-    elif resp.status_code == 404:
-        msg = ("Invalid endpoint or API call. Failed with status {0}.\n"
-                "URL: {1}".format(resp.status_code, resp.url))
-        raise RestCallException(OSError, msg, resp)
-
-    else:
-        msg = "Call failed with status: {status}".format(
-            status=resp.status_code)
-        raise RestCallException(ValueError, msg, resp)
 
 def get(auth, url, headers, params=None):
     """
@@ -153,8 +156,7 @@ def get(auth, url, headers, params=None):
         - :exc:`.RestCallException` is the call failed,
           or returned a non-200 status.
     """
-    LOG.debug("Get call URL: {0}, headers: {1}, params: "
-              "{2}".format(url, headers, params))
+    LOG.debug("Get call URL: {0}, params: {1}".format(url, params))
 
     try:
         response = _call(auth, 'GET', url, headers=headers, params=params)
@@ -193,7 +195,8 @@ def head(auth, url, headers, filename=""):
     """
     try:
         url = url.format(name=url_from_filename(filename))
-        LOG.debug("Head call URL: {0}, headers: {1}".format(url, headers))
+        LOG.debug("Head call URL: {0}".format(url))
+
         response = _call(auth, 'HEAD', url, headers=headers)
         return int(response.headers["content-length"])
 
@@ -236,8 +239,7 @@ def post(auth, url, headers, message=None):
         if message:
             message = json.dumps(message)
 
-        LOG.debug("Post call URL: {0}, headers: {1}, message: "
-                  "{2}".format(url, headers, message))
+        LOG.debug("Post call URL: {0}, message: {1}".format(url, message))
 
         response = _call(auth, 'POST', url, headers=headers, data=message)
         return json.loads(response.text)
@@ -303,9 +305,9 @@ def put(auth, url, headers, userfile, params, block_size=4096, callback=None, *a
         put_headers = dict(headers)
         put_headers["Content-Type"] = "application/octet-stream"
 
-        LOG.debug("Put call URL: {0}, headers: {1}, "
+        LOG.debug("Put call URL: {0}, callback: {1}, "
                   "file: {2}, parameters: {3}, block_size: {4}".format(url,
-                                                                put_headers,
+                                                                callback,
                                                                 userfile,
                                                                 params,
                                                                 block_size))
@@ -378,9 +380,9 @@ def download(auth, url, headers, output_path, size, overwrite,
 
         return True
 
-    LOG.debug("Get call URL: {0}, headers: {1}, file: "
+    LOG.debug("Get call URL: {0}, callback: {1}, file: "
               "{2}, size: {3}, overwrite: {4}, block_size: {5}".format(url,
-                                                                headers,
+                                                                callback,
                                                                 downloadfile,
                                                                 size,
                                                                 overwrite,
