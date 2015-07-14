@@ -1,3 +1,4 @@
+v0.5.2, 2015-07-15	- Fixed bug in download streaming
 v0.5.1, 2015-07-09	- Added auto-refresh for unattended tokens
 					- Exposed configuration of block size to vary upload and download callback frequency
 					- Progress callbacks now take 3 arguments, the percent commplete (float), the bytes transferred (float),

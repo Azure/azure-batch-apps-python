@@ -1,5 +1,5 @@
 
-The Azure Batch Apps Python Client ver. 0.5.1 (azure-batch-apps-python)
+The Azure Batch Apps Python Client ver. 0.5.2 (azure-batch-apps-python)
 
 Copyright (c) Microsoft Corporation
 All rights reserved. 

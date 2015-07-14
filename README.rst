@@ -45,6 +45,8 @@ Release History
 
 For full summary of changes, see CHANGES.txt
 
+* 2015-07-15	- 0.5.2
+	- Fixed bug in download streaming
 * 2015-07-09	- 0.5.1
 	- Added auto-refresh for unattended tokens
 	- Exposed configuration of block size to vary upload and download callback frequency
